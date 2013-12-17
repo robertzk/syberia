@@ -1,3 +1,3 @@
 .onLoad <- function(...) {
-  load_uninstalled_github_packages()
+  load_github_packages(.github_packages)
 }
