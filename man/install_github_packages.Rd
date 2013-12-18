@@ -1,0 +1,23 @@
+\name{install_github_packages}
+\alias{install_github_packages}
+\title{Install packages from github}
+\usage{
+install_github_packages(pkgs)
+}
+\arguments{
+  \item{pkgs}{a list of packages that get passed as
+  arguments into devtools::install_github}
+}
+\description{
+Install packages from github
+}
+\examples{
+\dontrun{
+install_github_packages(list(list('Ramd', 'robertzk'),
+  list('s3mpi', 'robertzk', 'rconference')))
+}
+}
+\seealso{
+\code{\link{load_github_packages}}
+}
+

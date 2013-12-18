@@ -1,11 +1,17 @@
 Package: syberia
-Title: 
-Description: 
+Type: Package
+Title: Syberia
 Version: 0.1
+Description: Syberia provides an opinionated unified framework for
+    fast iteration on classifier development and deployment. It is 
+    founded on convention over configuration and aims to solve the
+    problems of classifier-specific data preparation and
+    classifier-specific modeling parameters.
 Authors@R: c(person("Robert", "Krzyzanowski",
     email = "technoguyrob@gmail.com", role = c("aut", "cre")))
 Depends:
-    R (>= 3.0.2),
+    R (>= 3.0.2)
+Imports:
     psych,
     multicore,
     splines,
@@ -23,5 +29,8 @@ Depends:
     caret,
     digest,
     hash
+Suggests:
+    glm,
+    testthat
 License: MIT
 LazyData: true

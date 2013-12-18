@@ -1,23 +1,34 @@
 \name{load_github_packages}
 \alias{load_github_packages}
-\title{Load packages from github as specified in the .github_packages
-variable found in config.r.}
+\title{Load packages from github}
 \usage{
-load_github_packages(pkgs, silent = FALSE)
+load_github_packages(pkgs, install = TRUE, silent = FALSE)
 }
 \arguments{
   \item{pkgs}{a list of packages that get passed as
-  arguments into devtools::install_github}
+  arguments into devtools::install_github, or just a list
+  or vector of names if \code{install = FALSE}}
 
-  \item{silent}{determines whether to trigger an error if a
-  package is not found.}
+  \item{install}{a logical. Will fetch any required
+  packages from github and install locally if necessary.}
+
+  \item{silent}{a logical. Determines whether to trigger an
+  error if a package is not found.}
 }
 \value{
 a vector of logicals corresponding to whether the packages
 were
 }
 \description{
-Load packages from github as specified in the
-.github_packages variable found in config.r.
+Load packages from github
+}
+\examples{
+\dontrun{
+load_github_packages(list(list('Ramd', 'robertzk'), list('bigrquery', 'hadley')))
+load_github_packages(c('Ramd', 'bigrquery'), install = FALSE)
+}
+}
+\seealso{
+\code{\link{install_github_packages}}
 }
 

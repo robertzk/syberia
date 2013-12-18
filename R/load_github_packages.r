@@ -1,18 +1,28 @@
-#' Load packages from github as specified in the .github_packages
-#' variable found in config.r. 
+#' Load packages from github
 #'
 #' @param pkgs a list of packages that get passed as arguments into
-#'    devtools::install_github
-#' @param silent determines whether to trigger an error if a package is
-#'    not found.
+#'    devtools::install_github, or just a list or vector of names if
+#'    \code{install = FALSE}
+#' @param install a logical. Will fetch any required packages from github
+#'    and install locally if necessary.
+#' @param silent a logical. Determines whether to trigger an error if a package
+#'    is not found.
 #' @return a vector of logicals corresponding to whether the packages were
+#' @seealso \code{\link{install_github_packages}}
 #' @export
-load_github_packages <- function(pkgs, silent = FALSE) {
+#' @examples
+#' \dontrun{
+#' load_github_packages(list(list('Ramd', 'robertzk'), list('bigrquery', 'hadley')))
+#' load_github_packages(c('Ramd', 'bigrquery'), install = FALSE)
+#' }
+load_github_packages <- function(pkgs, install = TRUE, silent = FALSE) {
   package_names <-
     vapply(pkgs, function(pkg) pkg[[1]], character(1))
-  uninstalled_packages <-
-    pkgs[vapply(package_names, Negate(package_exists), logical(1))]
-  install_github_packages(uninstalled_packages)
+  if (install) {
+    uninstalled_packages <-
+      pkgs[vapply(package_names, Negate(package_exists), logical(1))]
+    install_github_packages(uninstalled_packages)
+  }
 
   vapply(package_names, function(pkg) {
     loaded <- suppressWarnings(require(pkg, character.only = TRUE))
@@ -22,10 +32,21 @@ load_github_packages <- function(pkgs, silent = FALSE) {
   }, logical(1))
 }
 
+#' Install packages from github
+#'
+#' @param pkgs a list of packages that get passed as arguments into
+#'    devtools::install_github
+#' @seealso \code{\link{load_github_packages}}
+#' @export
+#' @examples
+#' \dontrun{
+#' install_github_packages(list(list('Ramd', 'robertzk'),
+#'   list('s3mpi', 'robertzk', 'rconference')))
+#' }
 install_github_packages <- function(pkgs) {
-  lapply(pkgs, function(pkg) {
+  for(pkg in pkgs) {
     pkg <- as.list(pkg)
-    do.call("install_github", pkg,
-            envir = as.environment('package:devtools'))
-  })
+    suppressMessages(do.call("install_github", pkg,
+      envir = as.environment('package:devtools')))
+  }
 }
