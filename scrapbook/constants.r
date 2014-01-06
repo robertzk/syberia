@@ -1,5 +1,5 @@
 # TODO: Make these dynamic
-dd <- read.csv("~/avant-credit-model/data/modeling_query_results_10_09_13_loan_purpose.csv")
+raw_data <- read.csv("~/avant-credit-model/data/modeling_query_results_10_09_13_loan_purpose.csv")
 
 bad_variables <- c( #'customer_id',
   'transunion_credit_report_id', 'transunion_credit_report_id.1',  'transunion_credit_report_id.2', 'transunion_credit_report_id.3',
@@ -35,5 +35,3 @@ do_not_discretize <- -c(1L, 2L, 3L, 4L, 5L, 6L, 7L, 303L)
 discretized_columns <- do_not_discretize
 
 library(mungebits)
-library(mungebitsTransformations)
-library(stringr)

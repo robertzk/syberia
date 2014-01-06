@@ -12,23 +12,7 @@ Authors@R: c(person("Robert", "Krzyzanowski",
 Depends:
     R (>= 3.0.2)
 Imports:
-    psych,
-    multicore,
-    splines,
-    aod,
-    Hmisc,
-    plyr,
-    discretization,
-    arules,
-    e1071,
-    stringr,
-    reshape2,
-    glmulti,
-    leaps,
-    ROCR,
-    caret,
-    digest,
-    hash
+    mungebits
 Suggests:
     glm,
     testthat
