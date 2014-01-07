@@ -10,9 +10,10 @@ munge_procedure <- list(
  #,"Computing income ratio"        = c( multi_column_transformation(function(income, median_income) 13 * income / median_income), c('income', 'median_income'), 'income_ratio')
   ,"Ordering by loan id"           = list( list(orderer, NULL),         'loan_id'    )
   ,"Discretizing columns"          = list( discretizer,     discretized_columns, granularity = 4, lower_count_bound = 15)
+  ,"Remove identifying columns"    = list( drop_variables,  c("loan_id", "customer_id", "state", "source", "product_name", "loan_purpose"))
 )
 
-processed_train_data <- munge(raw_data, munge_procedure)
+# processed_train_data <- munge(raw_data, munge_procedure)
 # raw_predict_data <- raw_data[1:2, ]
 # processed_predict_data <- munge(raw_predict_data, processed_train_data)
 # raw_predict_data[, 20:30]
