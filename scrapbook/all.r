@@ -9,7 +9,7 @@ model <- list(
     ,"Parsing dates"                 = list( date_parser,     date_cols    )
     ,"Making loan purpose lowercase" = list( column_transformation(tolower), 'loan_purpose' )
     ,"Ordering by loan id"           = list( list(orderer, NULL),         'loan_id'    )
-    , save
+   #, save
     ,"Setting loan purpose specials" = list( value_replacer,  'loan_purpose',  list(list('moving', 'other'), list('', NA_character_)))
     ,"Replacing score '999' value"   = list( value_replacer,  'score',         list(list(999, NA_integer_)))
     ,"Dropping single-valued vars"   = list( drop_single_value_variables   )
@@ -23,7 +23,7 @@ model <- list(
      "gbm"
    , distribution        = 'bernoulli'
    , number_of_trees     = 100
-   , shrinkage_factor    = 0.001
+   , shrinkage_factor    = 0.025
    , depth               = 4
    , min_observations    = 6
    , train_fraction      = 1
@@ -37,7 +37,7 @@ model <- list(
 
   export = list(
     adapter = 's3',
-    file = 'models/#{version}'
+    file = 'models/2.0.1'
   )
 )
 

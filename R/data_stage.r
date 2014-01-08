@@ -25,14 +25,14 @@ data_stage <- function(modelenv, munge_procedure) {
   }
 
   # Now okay to run munging procedure
-  modelenv$data <- munge(data, munge_procedure)
+  modelenv$data <- munge(modelenv$data, munge_procedure)
   if (length(removed_steps) > 0)
     attr(modelenv$data, 'mungepieces')[removed_steps] <- NULL
   NULL
 }
 
 is_save_trigger <- function(mungestep) {
-  (is.character(mungestep) && tolower(mungestep) == 'save' ||
+  (is.character(mungestep) && tolower(mungestep) == 'save') ||
   (is.function(mungestep) && body(mungestep) == body(save))
 }
 

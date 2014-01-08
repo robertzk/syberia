@@ -9,16 +9,22 @@
 #' @export
 model_stage <- function(modelenv, model_parameters) {
   stopifnot(is.character(model_parameters[[1]]))
-  if (!exists(pp(model_fn <- 'tundra_#{model_parameters[[1]]'))
+  if (!exists(model_fn <- pp('tundra_#{model_parameters[[1]]}')))
     stop("Missing tundra container for keyword '", model_parameters[[1]], "'")
 
   model_parameters[[1]] <- NULL
+
   # Instantiate tundra container for model
+  
   modelenv$model_stage$model <-
-    get(model_fn)(model_parameters, attr(modelenv$data, 'mungepieces'))
+    get(model_fn)(list(), model_parameters)
 
   # Train the model
   modelenv$model_stage$model$train(modelenv$data)
+
+  # Manually skip munge procedure since it was already done
+  modelenv$model_stage$model$munge_procedure <- attr(modelenv$data, 'mungepieces')
+
   NULL
 }
 

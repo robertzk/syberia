@@ -1,0 +1,17 @@
+\name{data_stage}
+\alias{data_stage}
+\title{Data stage for syberia models}
+\usage{
+data_stage(modelenv, munge_procedure)
+}
+\arguments{
+  \item{modelenv}{an environment. The persistent modeling
+  environment.}
+
+  \item{munge_procedure}{a list. A list of mungepiece
+  arguments, first preprocessed then passed to munge.}
+}
+\description{
+TODO: Document this more
+}
+
