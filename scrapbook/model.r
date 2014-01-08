@@ -9,7 +9,7 @@ gbm_args <- list(
  , bag_fraction        = 0.5
  , cv                  = TRUE
  , cv_folds            = 10
- , n.cores             = 6
+ , number_of_cores     = 6
  , perf_method         = 'cv'
  , prediction_type     = 'response'
 )
