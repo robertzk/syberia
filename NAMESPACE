@@ -1,4 +1,7 @@
+export(build_model)
 export(data_stage)
+export(export_stage)
+export(import_stage)
 export(install_github_packages)
 export(load_github_packages)
 export(model_stage)

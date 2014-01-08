@@ -24,6 +24,7 @@ data_stage <- function(modelenv, munge_procedure) {
 
   }
 
+  munge_procedure <<- munge_procedure
   # Now okay to run munging procedure
   modelenv$data <- munge(modelenv$data, munge_procedure)
   if (length(removed_steps) > 0)
