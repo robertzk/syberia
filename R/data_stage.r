@@ -2,6 +2,7 @@
 #'
 #' TODO: Document this more
 #' 
+#' @param modelenv an environment. The persistent modeling environment.
 #' @param munge_procedure a list. A list of mungepiece arguments,
 #'    first preprocessed then passed to munge.
 #' @export
