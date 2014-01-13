@@ -7,7 +7,13 @@
 import_stage <- function(modelenv, import_options) {
   stopifnot('file' %in% names(import_options))
 
-  modelenv$data <- read.csv(import_options$file)
+  import_options$adapter <- import_options$adapter %||% 'file'
+  if (import_options$adapter == 's3') {
+    require(s3mpi)
+    modelenv$data <- s3read(import_options$file)
+  } else {
+    modelenv$data <- read.csv(import_options$file)
+  }
   modelenv$import_stage$file <- import_options$file
   NULL
 }
