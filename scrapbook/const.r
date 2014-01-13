@@ -12,7 +12,7 @@ list(
     'credit_report_id.6', 'mbb_has_application_aba_record', 'mbb_max_app_aba_default_differential',
     "count_jointcontractural_type_3m", "count_jointcontractural_type_3m.1",
     "updated_at", "updated_at.1", "updated_at.2", "last_inquiry_date",
-    "updated_at.3", "last_loan_date", "bad_loan_date"
+    "updated_at.3", "last_loan_date", "bad_loan_date", "zip"
   )
 
   , date_cols = c("mbb_time_since_most_recent_seen", "mbb_time_since_app_aba_seen",
@@ -29,5 +29,5 @@ list(
     )
 
   #  c("source", "loan_id", "dep_var", "state", "zip","clarity_report_id", "customer_id" ,"loan_purpose", "product_name")
-  , discretized_columns <- -c(1L, 2L, 3L, 4L, 5L, 6L, 7L, 303L)
+  , discretized_columns = -c(1L, 2L, 3L, 4L, 5L, 6L, 7L, 303L)
 )

@@ -16,8 +16,11 @@ list(
     ,"Dropping single-valued vars"   = list( drop_single_value_variables   )
     ,"Imputing means"                = list( imputer,         const$imputed_cols )
    #,"Computing income ratio"        = c( multi_column_transformation(function(income, median_income) 13 * income / median_income), c('income', 'median_income'), 'income_ratio')
-    ,"Discretizing columns"          = list( discretizer,     const$discretized_columns, granularity = 4, lower_count_bound = 15)
+    ,"Discretizing columns"          = list( discretizer,     const$discretized_columns, granularity = 4, lower_count_bound = 1)
     ,"Remove identifying columns"    = list( drop_variables,  c("loan_id", "customer_id", "state", "source", "product_name", "loan_purpose"))
+    ,"Sure independence screening"   = list( sure_independence_screen, is.factor )
+    , record("partial_data")
+    , list(function(d) stop())
   ),
 
   model = list(
