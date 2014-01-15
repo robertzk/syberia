@@ -29,7 +29,6 @@ data_stage <- function(modelenv, munge_procedure) {
   modelenv$data <- munge(modelenv$data, munge_procedure)
   if (length(removed_steps) > 0)
     attr(modelenv$data, 'mungepieces')[removed_steps] <- NULL
-  pd <<- modelenv$data; stop('wtf')
   NULL
 }
 
