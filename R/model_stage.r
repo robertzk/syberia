@@ -8,10 +8,11 @@
 #'    (e.g., glm, gbm, etc.)
 #' @export
 model_stage <- function(modelenv, model_parameters) {
-  stopifnot(is.character(model_parameters[[1]]))
+  stopifnot(length(model_parameters) > 0 && is.character(model_parameters[[1]]))
   if (!exists(model_fn <- pp('tundra_#{model_parameters[[1]]}')))
     stop("Missing tundra container for keyword '", model_parameters[[1]], "'")
 
+  # Remove the model keyword (e.g., "gbm", "glm", etc.)
   model_parameters[[1]] <- NULL
 
   # Instantiate tundra container for model
