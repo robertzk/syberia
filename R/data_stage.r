@@ -7,6 +7,8 @@
 #'    first preprocessed then passed to munge.
 #' @export
 data_stage <- function(modelenv, munge_procedure) {
+  cat("Beginning data stage...\n")
+  
   # preprocess_munge_procedure(munge_procedure)
   removed_steps <- c()
   for (i in seq_along(munge_procedure)) {
@@ -34,6 +36,7 @@ data_stage <- function(modelenv, munge_procedure) {
   # modelenv$data <- munge(modelenv$data, munge_procedure)
   if (length(removed_steps) > 0)
     attr(modelenv$data, 'mungepieces')[removed_steps] <- NULL
+  cat("Done with data stage...\n")
   NULL
 }
 
