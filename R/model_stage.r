@@ -25,6 +25,7 @@ model_stage <- function(modelenv, model_parameters) {
 
   # Manually skip munge procedure since it was already done
   modelenv$model_stage$model$munge_procedure <- attr(modelenv$data, 'mungepieces')
+  out_model <<- modelenv$model_stage$model
 
   NULL
 }
