@@ -23,7 +23,7 @@ model_stage <- function(modelenv, model_parameters) {
     get(model_fn)(list(), model_parameters)
 
   # Train the model
-  modelenv$model_stage$model$train(modelenv$data)
+  modelenv$model_stage$model$train(modelenv$data, verbose = TRUE)
 
   # Manually skip munge procedure since it was already done
   modelenv$model_stage$model$munge_procedure <- attr(modelenv$data, 'mungepieces')
