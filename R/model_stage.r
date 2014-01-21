@@ -27,7 +27,6 @@ model_stage <- function(modelenv, model_parameters) {
 
   # Manually skip munge procedure since it was already done
   modelenv$model_stage$model$munge_procedure <- attr(modelenv$data, 'mungepieces')
-  browser()
   assign('out_model', modelenv$model_stage$model, envir = globalenv())
   
   cat("Done with model stage...\n")
