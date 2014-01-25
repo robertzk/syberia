@@ -37,7 +37,7 @@ model <- list(
 
   export = list(
     adapter = 's3',
-    file = 'models/2.0.1'
+    file = 'models/'
   )
 )
 

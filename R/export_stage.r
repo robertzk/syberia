@@ -7,5 +7,10 @@
 #'    depending on the adapter. (default is file adapter)
 #' @export
 export_stage <- function(modelenv, export_options) {
-    
+  if (export_options$adapter == 's3') {
+    require(s3mpi)
+    stopifnot('file' %in% names(export_options))
+    capture.output(s3store(modelenv$model_stage$model, export_options$file))
+    NULL
+  }
 }

@@ -1,18 +1,22 @@
 #' Build a model using a data source from scratch.
-#' @param path a string identifying the path where the model files reside.
-build_model <- function(path = ".") {
-  # parse source
-  old_dir <- getwd()
-  setwd(path)
-  on.exit(setwd(old_dir))
-
-  # fetch_data_from_source()
-  source_options <- source("source.r")$value
-
-  # prepare_data()
-  preparation_procedure <- source("data.r")$value
+#' @param key a string or list. If the former, there must be a
+#'   file with name \code{model_stages} followed by \code{.r} so that syberia
+#'   can read the model configurations.
+#' @export
+build_model <- function(key = get_cache('last_model') %||% getOption('syberia.default_model')) {
+  # TODO: Add path mechanism
   
-  iris2 <- do.call(munge, append(list(dataframe), preparation_procedure))
-  browser()
+  model_stages <- 
+    if (is.character(key)) {
+      if (FALSE == (src_file <- normalized_filename(key)))
+        stop(pp("No file for model '#{key}'"))
+      source(src_file)$value
+    }
+    else if (is.list(key)) key
+    else stop("Invalid model_stages argument")
+
+  set_cache(key, 'last_model')
+  stage_runner(model_stages)
 }
+
 
