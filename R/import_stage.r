@@ -19,7 +19,7 @@ import_stage <- function(modelenv, import_options) {
     require(s3mpi)
     modelenv$data <- s3read(import_options$file)
   } else {
-    modelenv$data <- read.csv(import_options$file)
+    modelenv$data <- read.csv(import_options$file, stringsAsFactors = FALSE)
   }
   modelenv$import_stage$file <- import_options$file
   NULL
