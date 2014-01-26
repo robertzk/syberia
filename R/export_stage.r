@@ -12,5 +12,8 @@ export_stage <- function(modelenv, export_options) {
     stopifnot('file' %in% names(export_options))
     capture.output(s3store(modelenv$model_stage$model, export_options$file))
     NULL
+  } else {
+    stopifnot('file' %in% names(export_options))
+    saveRDS(modelenv$model_stage$model, export_options$file)
   }
 }
