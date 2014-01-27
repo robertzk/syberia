@@ -7,6 +7,7 @@
 #'    depending on the adapter. (default is file adapter)
 #' @export
 export_stage <- function(modelenv, export_options) {
+  export_options$adapter <- export_options$adapter %||% 'file'
   if (export_options$adapter == 's3') {
     require(s3mpi)
     stopifnot('file' %in% names(export_options))
