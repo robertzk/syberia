@@ -17,4 +17,10 @@ export_stage <- function(modelenv, export_options) {
     stopifnot('file' %in% names(export_options))
     saveRDS(modelenv$model_stage$model, export_options$file)
   }
+
+  if ('copy' %in% names(export_options$copy)) {
+    stopifnot(is.character(export_options$copy))
+    assign(export_options$copy, modelenv$model_stage$model, globalenv())
+  }
+  NULL
 }
