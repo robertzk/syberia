@@ -8,8 +8,6 @@
 #'    (e.g., glm, gbm, etc.)
 #' @export
 model_stage <- function(modelenv, model_parameters) {
-  cat("Beginning model stage...\n")
-  
   stopifnot(length(model_parameters) > 0 && is.character(model_parameters[[1]]))
   if (!exists(model_fn <- pp('tundra_#{model_parameters[[1]]}')))
     stop("Missing tundra container for keyword '", model_parameters[[1]], "'")
@@ -29,7 +27,6 @@ model_stage <- function(modelenv, model_parameters) {
   modelenv$model_stage$model$munge_procedure <- attr(modelenv$data, 'mungepieces')
   assign('out_model', modelenv$model_stage$model, envir = globalenv())
   
-  cat("Done with model stage...\n")
   NULL
 }
 

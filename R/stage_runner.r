@@ -16,7 +16,9 @@ stage_runner <- function(stages) {
     # TODO: Check for is.function ?
 
     modelenv[[stage_var]] <- list()
+    cat(pp("Beginning #{pp(testthat:::colourise(stage_name, 'green'), ' stage')}...\n"))
     get(stage_var)(modelenv, stages[[stage_name]])
+    cat(pp("Done with #{pp(testthat:::colourise(stage_name, 'blue'), ' stage')}...\n"))
   }
 }
 

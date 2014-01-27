@@ -7,13 +7,11 @@
 #'    first preprocessed then passed to munge.
 #' @export
 data_stage <- function(modelenv, munge_procedure) {
-  cat("Beginning data stage...\n")
-  
   # preprocess_munge_procedure(munge_procedure)
   removed_steps <- c()
   for (i in seq_along(munge_procedure)) {
     # Check if we are storing the munging performed so far back into the file
-    if (is_save_trigger(munge_procedure[[i]])) {
+    if (FALSE && is_save_trigger(munge_procedure[[i]])) {
       # TODO: If this was already done, remove previous munge operations
       # and this one so we "fast forward". Not sure yet how this should be
       # detected.
@@ -38,7 +36,6 @@ data_stage <- function(modelenv, munge_procedure) {
   if (length(removed_steps) > 0)
     attr(modelenv$data, 'mungepieces')[removed_steps] <- NULL
     
-  cat("Done with data stage...\n")
   NULL
 }
 

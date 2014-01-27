@@ -9,11 +9,10 @@ trigger <- function(fn) {
 #' Record dataframe in a global variable for debugging
 #' @export
 record <- function(varname, envir = globalenv()) {
-  list(function(dataframe) {
+  trigger(function(dataframe) {
     assign(varname, dataframe, envir = envir)
   })
 }
-record <- trigger(record)
 
 
 is.trigger <- function(x) inherits(x, 'syberiaTrigger')
