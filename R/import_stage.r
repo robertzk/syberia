@@ -15,6 +15,7 @@ import_stage <- function(modelenv, import_options) {
     return(NULL)
   }
 
+  import_options$adapter = import_options$adapter %||% 'file'
   if (import_options$adapter == 's3') {
     require(s3mpi)
     modelenv$data <- s3read(import_options$file)
