@@ -2,7 +2,7 @@
 
 # Wrap S3 class for type detection
 trigger <- function(fn) {
-  class(fn) <- c('syberiaTrigger', class(fn))
+  class(fn) <- c('syberiaTrigger', 'trigger', class(fn))
   fn
 }
 
