@@ -15,4 +15,4 @@ record <- function(varname, envir = globalenv()) {
 }
 
 
-is.trigger <- function(x) inherits(x, 'syberiaTrigger')
+is.trigger <- function(x) inherits(x, 'trigger')
