@@ -8,6 +8,12 @@
 #' @export
 export_stage <- function(modelenv, export_options) {
   export_options$adapter <- export_options$adapter %||% 'file'
+  
+  if ('copy' %in% names(export_options)) {
+    stopifnot(is.character(export_options$copy))
+    assign(export_options$copy, modelenv$model_stage$model, globalenv())
+  }
+  
   if (export_options$adapter == 's3') {
     require(s3mpi)
     stopifnot('file' %in% names(export_options))
@@ -18,9 +24,5 @@ export_stage <- function(modelenv, export_options) {
     saveRDS(modelenv$model_stage$model, export_options$file)
   }
 
-  if ('copy' %in% names(export_options)) {
-    stopifnot(is.character(export_options$copy))
-    assign(export_options$copy, modelenv$model_stage$model, globalenv())
-  }
   NULL
 }
