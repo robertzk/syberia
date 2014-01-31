@@ -4,6 +4,13 @@
 \usage{
 record(varname, envir = globalenv())
 }
+\arguments{
+  \item{varname}{a character vector. The name of the global
+  variable to assign the dataframe to.}
+
+  \item{envir}{an environment. The place where to put the
+  dataframe.  By default, this is \code{globalenv()}.}
+}
 \description{
 Record dataframe in a global variable for debugging
 }

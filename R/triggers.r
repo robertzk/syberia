@@ -7,6 +7,10 @@ trigger <- function(fn) {
 }
 
 #' Record dataframe in a global variable for debugging
+#' @param varname a character vector. The name of the global variable
+#'    to assign the dataframe to.
+#' @param envir an environment. The place where to put the dataframe.
+#'    By default, this is \code{globalenv()}.
 #' @export
 record <- function(varname, envir = globalenv()) {
   trigger(function(dataframe) {
