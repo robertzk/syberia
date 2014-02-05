@@ -11,7 +11,8 @@ export_stage <- function(modelenv, export_options) {
   
   if ('copy' %in% names(export_options)) {
     stopifnot(is.character(export_options$copy))
-    assign(export_options$copy, modelenv$model_stage$model, globalenv())
+    assign(export_options$copy, modelenv$model_stage$model, globalenv())  
+    #copy is assigned to the global environment which is a local copy of the trained model
   }
   
   if (export_options$adapter == 's3') {
