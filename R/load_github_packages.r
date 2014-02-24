@@ -21,7 +21,7 @@ load_github_packages <- function(pkgs, install = TRUE, silent = FALSE) {
 
   suppressMessages(suppressWarnings(require(utils)))
   apply_method <-
-    if ('pbapply' %in% utils::installed.packages()) {
+    if ('pbapply' %in% utils::installed.packages() && !identical(silent, FALSE)) {
       suppressMessages(suppressWarnings(require(pbapply)))
       pblapply
     } else lapply
