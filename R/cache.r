@@ -9,7 +9,7 @@ cache <- function() {
       else .cache[[key]]
     },
     getNames = function() names(.cache),
-    set = function(value, key = NULL) { # should instantiate NULL because get is returning type list()
+    set = function(value, key = NULL) {
       if (is.null(key)) .cache <<- value
       else .cache[[key]] <<- value
     }
