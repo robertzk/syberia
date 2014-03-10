@@ -1,5 +1,5 @@
 library(stringr)
-
+# TODO: should have some sort of error handling for non-numeric inputs
 numeric_to_factor <- function(num, levs, na.to.missing = TRUE) {
   if (length(levs) == 0) stop('Zero levels provided')
   if (length(num) > 1)
