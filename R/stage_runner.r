@@ -9,7 +9,7 @@ stage_runner <- function(stages) {
     stop("All model steps must be named (e.g., import, data, model, ...).")
 
   modelenv <- new.env()
-  for (stage_name in stages){
+  for (stage_name in names(stages)){
     stage_var <- pp('#{stage_name}_stage')
     if (!exists(stage_var))
       stop("No such stage '", stage_name, "'")

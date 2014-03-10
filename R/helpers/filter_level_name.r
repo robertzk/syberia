@@ -1,9 +1,10 @@
-#' Cleans up each level name
+#' Help determine whether a concatenated level name in a 
+#' regression summary comes from a specific variable.
 #'
-#' @param level_name character. name of the current level
-#' @param correct_varname character. what the varname should be
-#' @param vars list. list of variables
-#' @param level_names list. list of the levels
+#' @param level_name character. Name of the current level
+#' @param correct_varname character. What the variable name should be
+#' @param vars list. A list of the input variables
+#' @param level_names list. A list of the names of the levels
 
 filter_level_name <- function(level_name, correct_varname, vars, level_names) {
   for(varname in vars) {
