@@ -1,4 +1,4 @@
-context("cache functions testing")
+context("cache functions")
 require(syberia)
 
 test_that("it sets and gets the correct name with base case", {

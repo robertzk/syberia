@@ -1,4 +1,4 @@
-context("helpers functions testing")
+context("helper functions")
 require(syberia)
 
 # generate_formula

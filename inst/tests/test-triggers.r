@@ -1,4 +1,4 @@
-context("triggers functions testing")
+context("triggers functions")
 require(syberia)
 
 test_that("it checks for the base case", {
