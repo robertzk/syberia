@@ -36,22 +36,23 @@ import_stage <- function(modelenv, import_options) {
 #' @param modelenv an environment. The current modeling environment.
 #' @param import_options a list. Nested list, one adapter per list entry.
 build_import_stagerunner <- function(modelenv, import_options) {
-  lapply(import_options, function(single_options) {
+  stageRunner$new(modelenv, lapply(import_options, function(single_options) {
     stage <- function(modelenv, opts) {
       # Only run if data isn't already loaded
       if (!'data' %in% ls(modelenv)) {
         attempt <- tryCatch(fn(modelenv, opts), error = function(e) FALSE)
       }
     }
-    environment(stage)$fn <- 
-  })
+    environment(stage)$fn <- import_adapter(single_options$adapter)
+    stage
+  }))
 }
 
 #' Fetch an import adapter.
 #'
 #' @param adapter character. Only supported so far are 's3' and 'file'.
 #'    The default is 'file'.
-#' 
+#' @param opts list. The options that get passed to the import adapter.
 import_adapter <- function(adapter = 'file', opts) {
   stopifnot(is.character(adapter))
   adapter <- tolower(adapter)
