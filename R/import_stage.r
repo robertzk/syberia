@@ -13,21 +13,6 @@ import_stage <- function(modelenv, import_options) {
   }
 
   build_import_stagerunner(modelenv, import_options)
-
-  if (is.character(import_options$skip) &&
-      exists(tmp <- import_options$skip)) {
-    modelenv$data <- get(tmp)
-    modelenv$import_stage$file <- import_options$file
-    return(NULL)
-  }
-
-  if (import_options$adapter == 's3') {
-    require(s3mpi)
-    modelenv$data <- s3read(import_options$file)
-  } else {
-    modelenv$data <- read.csv(import_options$file, stringsAsFactors = FALSE)
-  }
-  modelenv$import_stage$file <- import_options$file
   NULL
 }
 
@@ -36,14 +21,17 @@ import_stage <- function(modelenv, import_options) {
 #' @param modelenv an environment. The current modeling environment.
 #' @param import_options a list. Nested list, one adapter per list entry.
 build_import_stagerunner <- function(modelenv, import_options) {
-  stageRunner$new(modelenv, lapply(import_options, function(single_options) {
-    stage <- function(modelenv, opts) {
+  stageRunner$new(modelenv, lapply(seq_along(import_options), function(index) {
+    stage <- function(modelenv) {
       # Only run if data isn't already loaded
       if (!'data' %in% ls(modelenv)) {
-        attempt <- tryCatch(fn(modelenv, opts), error = function(e) FALSE)
+        attempt <- suppressWarnings(suppressMessages(
+          tryCatch(fn(modelenv, opts), error = function(e) FALSE)))
       }
     }
-    environment(stage)$fn <- import_adapter(single_options$adapter)
+    adapter <- names(import_options)[index]
+    environment(stage)$fn <- import_adapter(adapter)
+    environment(stage)$opts <- import_options[[index]]
     stage
   }))
 }
@@ -59,11 +47,14 @@ import_adapter <- function(adapter = 'file', opts) {
   if (adapter == 's3') {
     function(modelenv, opts) {
       require(s3mpi)
+      if (is.character(opts)) opts <- list(file = opts)
       stopifnot(is.character(opts$file))
       modelenv$data <- s3read(opts$file)
     }
   } else {
     function(modelenv, opts) {
+      if (is.character(opts)) opts <- list(file = opts)
+      stopifnot(is.character(opts$file))
       modelenv$data <- read.csv(opts$file, stringsAsFactors = FALSE)
     }
   }
