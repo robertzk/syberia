@@ -12,8 +12,7 @@ import_stage <- function(modelenv, import_options) {
       structure(list(import_options), .Names = import_options$adapter)
   }
 
-  build_import_stagerunner(modelenv, import_options)$run()
-  NULL
+  build_import_stagerunner(modelenv, import_options)
 }
 
 #' Build a stagerunner for importing data with backup sources.

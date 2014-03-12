@@ -53,7 +53,7 @@ test_that('it runs an example import stage correctly', {
   file <- tempfile()
   write.csv(iris, file, row.names = FALSE)
   filename <- file.path(file)
-  import_stage(modelenv, list(file = filename))
+  import_stage(modelenv, list(file = filename))$run()
   modelenv$data[[5]] <- factor(modelenv$data[[5]],
     levels = levels(iris[[5]]), labels = levels(iris[[5]]))
   expect_identical(modelenv$data, iris)
