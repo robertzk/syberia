@@ -41,7 +41,7 @@ build_import_stagerunner <- function(modelenv, import_options) {
     modelenv$import_stage$variable_summaries <-
       statsUtils::variable_summaries(modelenv$data) 
   }
-  stageRunner$new(modelenv, )
+  stageRunner$new(modelenv, stages)
 }
 
 #' Fetch an import adapter.
