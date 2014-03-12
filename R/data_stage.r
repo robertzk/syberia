@@ -13,8 +13,6 @@ data_stage <- function(modelenv, munge_procedure) {
   # TODO: save trigger
 
   modelenv$data <- munge(modelenv$data, munge_procedure)
-  # Now okay to run munging procedure
-  # modelenv$data <- munge(modelenv$data, munge_procedure)
   if (length(removed_steps) > 0)
     attr(modelenv$data, 'mungepieces')[removed_steps] <- NULL
     

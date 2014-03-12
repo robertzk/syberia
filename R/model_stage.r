@@ -20,6 +20,9 @@ model_stage <- function(modelenv, model_parameters) {
   summaries <- lapply(summaries,
     function(vars) intersect(names(vars), colnames(modelenv$data))
   )
+  # TODO: Remove unimportant variables so they do not trigger
+  # velocity check. For this, we need a model-agnostic variable
+  # importance measure. Maybe add a hack for GBM first.
 
   # Instantiate tundra container for model
   modelenv$model_stage$model <-
