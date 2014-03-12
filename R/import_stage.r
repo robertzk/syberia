@@ -12,7 +12,7 @@ import_stage <- function(modelenv, import_options) {
       structure(list(import_options), .Names = import_options$adapter)
   }
 
-  build_import_stagerunner(modelenv, import_options)
+  build_import_stagerunner(modelenv, import_options)$run()
   NULL
 }
 
@@ -63,7 +63,8 @@ import_adapter <- function(adapter = 'file', opts) {
     function(modelenv, opts) {
       if (is.character(opts)) opts <- list(file = opts)
       stopifnot(is.character(opts$file))
-      modelenv$data <- read.csv(opts$file, stringsAsFactors = FALSE)
+      modelenv$data <- read.csv(opts$file %||% opts$filename %||% opts$name %||% opts$path,
+                                stringsAsFactors = FALSE)
     }
   }
 }
