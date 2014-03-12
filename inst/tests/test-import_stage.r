@@ -40,7 +40,8 @@ test_that('it skips data sources it can\'t load from', {
   sr <- build_import_stagerunner(modelenv,
     list(source1 = list(file = 'nonexistent'), source2 = list(file = correct_filename)))
   # Quick and dirty, replace read.csv in front of its eyes
-  lapply(1:2, function(ix) environment(environment(sr$stages[[ix]])$fn)$read.csv <<- read.csv)
+  lapply(seq_len(length(sr$stages) - 1),
+         function(ix) environment(environment(sr$stages[[ix]])$fn)$read.csv <<- read.csv)
   sr$run()
   expect_identical(modelenv$data, iris)
 })
