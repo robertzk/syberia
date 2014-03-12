@@ -52,6 +52,8 @@ build_import_stagerunner <- function(modelenv, import_options) {
 import_adapter <- function(adapter = 'file', opts) {
   stopifnot(is.character(adapter))
   adapter <- tolower(adapter)
+  # TODO: Given the similarities, if most future adapters are similarly,
+  # maybe generate these using an adapter_template
   if (adapter == 's3') {
     function(modelenv, opts) {
       require(s3mpi)
