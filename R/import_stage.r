@@ -21,7 +21,7 @@ import_stage <- function(modelenv, import_options) {
 #' @param modelenv an environment. The current modeling environment.
 #' @param import_options a list. Nested list, one adapter per list entry.
 build_import_stagerunner <- function(modelenv, import_options) {
-  stageRunner$new(modelenv, lapply(seq_along(import_options), function(index) {
+  stages <- lapply(seq_along(import_options), function(index) {
     stage <- function(modelenv) {
       # Only run if data isn't already loaded
       if (!'data' %in% ls(modelenv)) {
@@ -33,7 +33,15 @@ build_import_stagerunner <- function(modelenv, import_options) {
     environment(stage)$fn <- import_adapter(adapter)
     environment(stage)$opts <- import_options[[index]]
     stage
-  }))
+  })
+
+  stages[[length(stages) + 1]] <- function(modelenv) {
+    if (!'data' %in% ls(modelenv))
+      stop("Failed to load data from all data sources")
+    modelenv$import_stage$variable_summaries <-
+      statsUtils::variable_summaries(modelenv$data) 
+  }
+  stageRunner$new(modelenv, )
 }
 
 #' Fetch an import adapter.
