@@ -56,15 +56,16 @@ import_adapter <- function(adapter = 'file', opts) {
     function(modelenv, opts) {
       require(s3mpi)
       if (is.character(opts)) opts <- list(file = opts)
-      stopifnot(is.character(opts$file))
-      modelenv$data <- s3read(opts$file)
+      filename <- opts$file %||% opts$filename %||% opts$name %||% opts$path
+      stopifnot(is.character(filename))
+      modelenv$data <- s3read(filename)
     }
   } else {
     function(modelenv, opts) {
       if (is.character(opts)) opts <- list(file = opts)
-      stopifnot(is.character(opts$file))
-      modelenv$data <- read.csv(opts$file %||% opts$filename %||% opts$name %||% opts$path,
-                                stringsAsFactors = FALSE)
+      filename <- opts$file %||% opts$filename %||% opts$name %||% opts$path
+      stopifnot(is.character(filename))
+      modelenv$data <- read.csv(filename, stringsAsFactors = FALSE)
     }
   }
 }
