@@ -59,6 +59,7 @@ import_adapter <- function(adapter = 'file', opts) {
       filename <- opts$file %||% opts$filename %||% opts$name %||% opts$path
       stopifnot(is.character(filename))
       modelenv$data <- s3read(filename)
+      modelenv$import_stage$file <- filename
     }
   } else {
     function(modelenv, opts) {
@@ -66,6 +67,7 @@ import_adapter <- function(adapter = 'file', opts) {
       filename <- opts$file %||% opts$filename %||% opts$name %||% opts$path
       stopifnot(is.character(filename))
       modelenv$data <- read.csv(filename, stringsAsFactors = FALSE)
+      modelenv$import_stage$file <- filename
     }
   }
 }
