@@ -15,14 +15,19 @@ model_stage <- function(modelenv, model_parameters) {
   # Remove the model keyword (e.g., "gbm", "glm", etc.)
   model_parameters[[1]] <- NULL
 
+  # Track variable summaries
+  summaries <- modelenv$import_stage$variable_summaries
+  summaries <- lapply(summaries,
+    function(vars) intersect(names(vars), colnames(modelenv$data))
+  )
+
   # Instantiate tundra container for model
-  
   modelenv$model_stage$model <-
-    get(model_fn)(list(), model_parameters)
+    get(model_fn)(list(), model_parameters, list(variable_summaries = summaries))
 
   # Train the model
   modelenv$model_stage$model$train(modelenv$data, verbose = TRUE)
-
+  
   # Manually skip munge procedure since it was already done
   modelenv$model_stage$model$munge_procedure <-
     attr(modelenv$data, 'mungepieces') %||% list()
