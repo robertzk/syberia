@@ -24,7 +24,8 @@ model_stage <- function(modelenv, model_parameters) {
   modelenv$model_stage$model$train(modelenv$data, verbose = TRUE)
 
   # Manually skip munge procedure since it was already done
-  modelenv$model_stage$model$munge_procedure <- attr(modelenv$data, 'mungepieces')
+  modelenv$model_stage$model$munge_procedure <-
+    attr(modelenv$data, 'mungepieces') %||% list()
   assign('out_model', modelenv$model_stage$model, envir = globalenv())
   
   NULL
