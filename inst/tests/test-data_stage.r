@@ -9,3 +9,4 @@ test_that("it turns a munge_procedure into a stagerunner", {
 })
 
 # TODO: Test triggers!
+
