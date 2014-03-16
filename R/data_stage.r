@@ -12,10 +12,10 @@ data_stage <- function(modelenv, munge_procedure) {
   # TODO: sameAs/importFrom and butWith/except triggers
   # TODO: save trigger
 
-  modelenv$data <- munge(modelenv$data, munge_procedure)
-  if (length(removed_steps) > 0)
-    attr(modelenv$data, 'mungepieces')[removed_steps] <- NULL
+  stagerunner <- munge(modelenv, munge_procedure, stagerunner = TRUE)
+  #if (length(removed_steps) > 0)
+  # attr(modelenv$data, 'mungepieces')[removed_steps] <- NULL
     
-  NULL
+  stagerunner
 }
 
