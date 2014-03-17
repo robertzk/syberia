@@ -7,6 +7,6 @@
   if (exists('run', envir = .GlobalEnv, inherits = FALSE))
     rm('run', envir = .GlobalEnv)
 
-  makeActiveBinding('run', function() run_model .GlobalEnv)
+  makeActiveBinding('run', function() run_model, .GlobalEnv)
 }
 

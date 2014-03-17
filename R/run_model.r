@@ -4,7 +4,8 @@
 #'   file with name \code{model_stages} followed by \code{.r} so that syberia
 #'   can read the model configurations.
 #' @export
-run_model <- function(key = get_cache('last_model') %||% getOption('syberia.default_model')) {
+run_model <- function(key = get_cache('last_model') %||% getOption('syberia.default_model'),
+                      ..., verbose = TRUE) {
   # TODO: Add path mechanism
   
   model_stages <- 
@@ -14,10 +15,12 @@ run_model <- function(key = get_cache('last_model') %||% getOption('syberia.defa
       source(src_file)$value
     }
     else if (is.list(key)) key
-    else stop("Invalid model_stages argument")
+    else stop("Invalid model key")
 
   set_cache(key, 'last_model')
-  construct_stage_runner(model_stages)
+  stagerunner <- construct_stage_runner(model_stages)
+  stagerunner
+  # stagerunner$run(..., verbose = verbose)
 }
 
 

@@ -66,7 +66,7 @@ build_export_stagerunner <- function(modelenv, export_options, meta_options = li
     }), stages)
   }
 
-  stageRunner$new(modelenv, stages)
+  stageRunner$new(modelenv, stages, remember = TRUE)
 }
 
 #' Fetch an export adapter.

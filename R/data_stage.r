@@ -12,7 +12,8 @@ data_stage <- function(modelenv, munge_procedure) {
   # TODO: sameAs/importFrom and butWith/except triggers
   # TODO: save trigger
 
-  stagerunner <- munge(modelenv, munge_procedure, stagerunner = TRUE)
+  stagerunner <- munge(modelenv, munge_procedure,
+                       stagerunner = list(remember = TRUE))
   #if (length(removed_steps) > 0)
   # attr(modelenv$data, 'mungepieces')[removed_steps] <- NULL
     

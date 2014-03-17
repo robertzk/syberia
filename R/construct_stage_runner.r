@@ -19,16 +19,16 @@ construct_stage_runner <- function(stages) {
     stop("All model steps must be named (e.g., import, data, model, ...).")
 
   modelenv <- new.env()
-  stages <- lapply(names(stages), function(stage_name) {
+  stages <- structure(lapply(names(stages), function(stage_name) {
     stage_var <- paste0(stage_name, '_stage')
     if (!exists(stage_var)) stop("No such stage '", stage_name, "'")
     stage <- get(stage_var)
     stopifnot(is.function(stage))
     
     stage(modelenv, stages[[stage_name]])
-  })
+  }), .Names = names(stages))
 
-  stageRunner$new(modelenv, stages)
+  stageRunner$new(modelenv, stages, remember = TRUE)
 }
 
 
