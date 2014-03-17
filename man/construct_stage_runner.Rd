@@ -1,0 +1,25 @@
+\name{construct_stage_runner}
+\alias{construct_stage_runner}
+\title{Return a stageRunner object that parametrizes a list of stages.}
+\usage{
+construct_stage_runner(stages)
+}
+\arguments{
+  \item{stages}{a list of lists. Each sublist is the
+  argument to its named stage.}
+}
+\value{
+stageRunner parametrizing the given stages
+}
+\description{
+Each stage is first fed through a function that converts it
+to a stageRunner or a function. For example, list(import =
+X, ...) gets converted by, amongst other things, looking
+for a variable import_stage and passing in X.
+}
+\details{
+This kind of procedure allows one to define new stage types
+dynamically, and "reach in" and execute only sub-parts of
+stages by using stageRunner effectively.
+}
+

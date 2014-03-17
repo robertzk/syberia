@@ -2,11 +2,14 @@
 \alias{install_github_packages}
 \title{Install packages from github}
 \usage{
-install_github_packages(pkgs)
+install_github_packages(pkgs, apply_method = lapply)
 }
 \arguments{
   \item{pkgs}{a list of packages that get passed as
   arguments into devtools::install_github}
+
+  \item{apply_method}{a function. Useful for custom
+  progress decorators. The default is \code{lapply}.}
 }
 \description{
 Install packages from github
