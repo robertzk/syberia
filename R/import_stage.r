@@ -5,14 +5,23 @@
 #'    depending on the adapter. (default is file adapter)
 #' @export
 import_stage <- function(modelenv, import_options) {
+  build_import_stagerunner(modelenv, normalize_import_options(import_options))
+}
+
+#' Normalize import options by converting a single option into a
+#' list of one if necessary.
+#'
+#' @param import_options list. A list of import sources.
+#' @return a normalized list of import options
+normalize_import_options <- function(import_options) {
   # By default, try loading from only one adapter
   if (!all(vapply(import_options, is.list, logical(1)))) {
+    if (is.character(import_options)) import_options <- list(file = import_options)
     import_options$adapter <- import_options$adapter %||% 'file'
     import_options <-
       structure(list(import_options), .Names = import_options$adapter)
   }
-
-  build_import_stagerunner(modelenv, import_options)
+  import_options
 }
 
 #' Build a stagerunner for importing data with backup sources.
@@ -28,9 +37,10 @@ build_import_stagerunner <- function(modelenv, import_options) {
           tryCatch(fn(modelenv, opts), error = function(e) FALSE)))
       }
     }
-    adapter <- names(import_options)[index]
+    opts <- normalize_import_options(import_options[[index]])[[1]]
+    adapter <- names(import_options)[index] %||% opts$adapter
     environment(stage)$fn <- import_adapter(adapter)
-    environment(stage)$opts <- import_options[[index]]
+    environment(stage)$opts <- opts
     stage
   })
 
@@ -48,7 +58,7 @@ build_import_stagerunner <- function(modelenv, import_options) {
 #' @param adapter character. Only supported so far are 's3' and 'file'.
 #'    The default is 'file'.
 #' @param opts list. The options that get passed to the import adapter.
-import_adapter <- function(adapter = 'file', opts) {
+import_adapter <- function(adapter = 'file') {
   stopifnot(is.character(adapter))
   adapter <- tolower(adapter)
   # TODO: Given the similarities, if most future adapters are similarly,
