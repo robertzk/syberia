@@ -57,7 +57,6 @@ build_import_stagerunner <- function(modelenv, import_options) {
 #'
 #' @param adapter character. Only supported so far are 's3' and 'file'.
 #'    The default is 'file'.
-#' @param opts list. The options that get passed to the import adapter.
 import_adapter <- function(adapter = 'file') {
   stopifnot(is.character(adapter))
   adapter <- tolower(adapter)

@@ -1,0 +1,18 @@
+\name{normalize_import_options}
+\alias{normalize_import_options}
+\title{Normalize import options by converting a single option into a
+list of one if necessary.}
+\usage{
+normalize_import_options(import_options)
+}
+\arguments{
+  \item{import_options}{list. A list of import sources.}
+}
+\value{
+a normalized list of import options
+}
+\description{
+Normalize import options by converting a single option into
+a list of one if necessary.
+}
+

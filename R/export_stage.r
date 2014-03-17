@@ -44,7 +44,8 @@ normalize_export_options <- function(export_options) {
 #' Build a stagerunner for exporting data with backup sources.
 #'
 #' @param modelenv an environment. The current modeling environment.
-#' @param export a list. Nested list, one adapter per list entry.
+#' @param export_options list.
+#' @param meta_options list.
 build_export_stagerunner <- function(modelenv, export_options, meta_options = list()) {
   stages <- lapply(seq_along(export_options), function(index) {
     stage <- function(modelenv) {
@@ -73,7 +74,6 @@ build_export_stagerunner <- function(modelenv, export_options, meta_options = li
 #'
 #' @param adapter character. Only supported so far are 's3' and 'file'.
 #'    The default is 'file'.
-#' @param opts list. The options that get passed to the export adapter.
 export_adapter <- function(adapter = 'file') {
   stopifnot(is.character(adapter))
   adapter <- tolower(adapter)

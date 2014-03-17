@@ -1,0 +1,18 @@
+\name{normalize_export_options}
+\alias{normalize_export_options}
+\title{Normalize export options by converting a single option into a
+list of one if necessary.}
+\usage{
+normalize_export_options(export_options)
+}
+\arguments{
+  \item{export_options}{list. A list of export sources.}
+}
+\value{
+a normalized list of export options
+}
+\description{
+Normalize export options by converting a single option into
+a list of one if necessary.
+}
+
