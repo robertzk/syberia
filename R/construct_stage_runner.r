@@ -14,6 +14,8 @@
 #' @return stageRunner parametrizing the given stages
 #' @export
 construct_stage_runner <- function(stages) {
+  if (is.stagerunner(stages)) return(stages)
+
   stopifnot(is.list(stages))
   if ("" %in% names(stages) || is.null(names(stages)))
     stop("All model steps must be named (e.g., import, data, model, ...).")

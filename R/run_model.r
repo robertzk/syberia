@@ -9,18 +9,22 @@ run_model <- function(key = get_cache('last_model') %||% getOption('syberia.defa
   # TODO: Add path mechanism
   
   model_stages <- 
-    if (is.character(key)) {
+    if (missing(key) && is.stagerunner(tmp <- active_runner())) tmp
+    else if (is.character(key)) {
       if (FALSE == (src_file <- normalized_filename(key)))
         stop(pp("No file for model '#{key}'"))
       source(src_file)$value
     }
     else if (is.list(key)) key
+    else if (is.stagerunner(key)) key
     else stop("Invalid model key")
 
   set_cache(key, 'last_model')
-  stagerunner <- construct_stage_runner(model_stages)
-  stagerunner
-  # stagerunner$run(..., verbose = verbose)
-}
 
+  stagerunner <- construct_stage_runner(model_stages)
+  set_cache(stagerunner, 'last_stagerunner')
+  out <- tryCatch(stagerunner$run(..., verbose = verbose),
+           error = function(e) NULL)
+  if (is.null(out)) invisible(stagerunner) else out
+}
 
