@@ -4,7 +4,8 @@
 #'   file with name \code{model_stages} followed by \code{.r} so that syberia
 #'   can read the model configurations.
 #' @export
-run_model <- function(key = get_cache('last_model') %||% getOption('syberia.default_model'),
+run_model <- function(key = get_cache('last_model') %||%
+                      getOption('syberia.default_model'),
                       ..., verbose = TRUE) {
   # TODO: Add path mechanism
   
@@ -24,7 +25,9 @@ run_model <- function(key = get_cache('last_model') %||% getOption('syberia.defa
   stagerunner <- construct_stage_runner(model_stages)
   set_cache(stagerunner, 'last_stagerunner')
   out <- tryCatch(stagerunner$run(..., verbose = verbose),
-           error = function(e) NULL)
-  if (is.null(out)) invisible(stagerunner) else out
+           error = function(e) e)
+  if (inherits(out, 'simpleError') && grepl('Cannot run', out$message))
+    stop(out$message)
+  else if (is.null(out)) invisible(stagerunner) else out
 }
 
