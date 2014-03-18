@@ -9,6 +9,10 @@
 export_stage <- function(modelenv, export_options) {
   reserved_words <- c('copy')
 
+  meta_options <- export_options[reserved_words]
+  if (!is.null(tmpnames <- names(export_options)))
+    export_options <- export_options[setdiff(tmpnames, reserved_words)]
+  
   # By default, try writing to only one adapter
   if (!all(vapply(export_options, is.list, logical(1)))) {
     export_options$adapter <- export_options$adapter %||% 'file'
@@ -16,10 +20,6 @@ export_stage <- function(modelenv, export_options) {
       structure(list(export_options), .Names = export_options$adapter)
   }
 
-  meta_options <- export_options[reserved_words]
-  if (!is.null(tmpnames <- names(export_options)))
-    export_options <- export_options[setdiff(tmpnames, reserved_words)]
-  
   build_export_stagerunner(modelenv,
     normalize_export_options(export_options), meta_options)
 }
