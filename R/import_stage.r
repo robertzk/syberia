@@ -45,7 +45,7 @@ build_import_stagerunner <- function(modelenv, import_options) {
     stage
   })
   names(stages) <-
-    paste0("Importing from ",
+    paste0("Import from ",
       vapply(stages, function(stage) environment(stage)$adapter, character(1)))
 
   stages[[length(stages) + 1]] <- function(modelenv) {
@@ -54,7 +54,7 @@ build_import_stagerunner <- function(modelenv, import_options) {
     modelenv$import_stage$variable_summaries <-
       statsUtils::variable_summaries(modelenv$data) 
   }
-  names(stages)[length(stages)] <- "Verify data was loaded" 
+  names(stages)[length(stages)] <- "(Internal) Verify data was loaded" 
   stageRunner$new(modelenv, stages, remember = TRUE)
 }
 

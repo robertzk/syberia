@@ -55,11 +55,15 @@ build_export_stagerunner <- function(modelenv, export_options, meta_options = li
     adapter <- names(export_options)[index] %||% opts$adapter 
     environment(stage)$fn <- export_adapter(adapter)
     environment(stage)$opts <- opts
+    environment(stage)$adapter <- adapter
     stage
   })
+  names(stages) <-
+    paste0("Export to ",
+      vapply(stages, function(stage) environment(stage)$adapter, character(1)))
 
   if ('copy' %in% names(meta_options)) {
-    stages <- append(list(function(modelenv) {
+    stages <- append(list("(Internal) Copy model to a global variable" = function(modelenv) {
       stopifnot(is.character(meta_options$copy))
       assign(meta_options$copy, modelenv$model_stage$model, globalenv())  
       #copy is assigned to the global environment which is a local copy of the trained model
