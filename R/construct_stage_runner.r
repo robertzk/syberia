@@ -30,6 +30,11 @@ construct_stage_runner <- function(stages) {
     stage(modelenv, stages[[stage_name]])
   }), .Names = names(stages))
 
+  # Label stages appropriately
+  names(stages) <- paste(vapply(stages, function(stage)
+    if (is.stagerunner(stage)) "Begin" else "Run", character(1)),
+    names(stages), "stage")
+
   stageRunner$new(modelenv, stages, remember = TRUE)
 }
 

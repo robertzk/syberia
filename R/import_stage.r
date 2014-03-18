@@ -41,8 +41,12 @@ build_import_stagerunner <- function(modelenv, import_options) {
     adapter <- names(import_options)[index] %||% opts$adapter
     environment(stage)$fn <- import_adapter(adapter)
     environment(stage)$opts <- opts
+    environment(stage)$adapter <- adapter
     stage
   })
+  names(stages) <-
+    paste0("Importing from ",
+      vapply(stages, function(stage) environment(stage)$adapter, character(1)))
 
   stages[[length(stages) + 1]] <- function(modelenv) {
     if (!'data' %in% ls(modelenv))
@@ -50,6 +54,7 @@ build_import_stagerunner <- function(modelenv, import_options) {
     modelenv$import_stage$variable_summaries <-
       statsUtils::variable_summaries(modelenv$data) 
   }
+  names(stages)[length(stages)] <- "Verify data was loaded" 
   stageRunner$new(modelenv, stages, remember = TRUE)
 }
 
