@@ -26,8 +26,8 @@ run_model <- function(key = get_cache('last_model') %||%
   set_cache(stagerunner, 'last_stagerunner')
   out <- tryCatch(stagerunner$run(..., verbose = verbose),
            error = function(e) e)
-  if (inherits(out, 'simpleError') && grepl('Cannot run', out$message))
+  if (inherits(out, 'simpleError'))
     stop(out$message)
-  else if (is.null(out)) invisible(stagerunner) else out
+  else out
 }
 
