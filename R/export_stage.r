@@ -60,7 +60,7 @@ build_export_stagerunner <- function(modelenv, export_options, meta_options = li
   })
   names(stages) <-
     vapply(stages, function(stage)
-                     paste0("Export to", environment(stage)$adapter),
+                     paste0("Export to ", environment(stage)$adapter),
            character(1))
 
   if ('copy' %in% names(meta_options)) {

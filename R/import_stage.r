@@ -57,7 +57,7 @@ build_import_stagerunner <- function(modelenv, import_options, meta_options = li
   })
   names(stages) <-
     vapply(stages, function(stage)
-                     paste0("Import to", environment(stage)$adapter),
+                     paste0("Import from ", environment(stage)$adapter),
            character(1))
 
   stages[[length(stages) + 1]] <- function(modelenv) {

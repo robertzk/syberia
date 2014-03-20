@@ -31,14 +31,25 @@ test_that('it correctly builds a stagerunner for one data source', {
 context('export_stage')
 
 test_that('it runs an example export stage correctly', {
-  # TODO: fill this in
+  somefile <- tempfile()
+  filename <- file.path(somefile)
+  modelenv <- new.env()
+  some_model_data <- list("this is the model", 5)
+  modelenv$model_stage <- list(model = some_model_data)
+  export_stage(modelenv, list(file = filename))$run()
+  expect_identical(readRDS(filename), some_model_data)
+  unlink(somefile)
 })
 
 test_that('it runs an example export stage with a copy correctly', {
-  modelenv <- new.env()
-  mock_globalenv <- new.env(); mock_globalenv$cached_data <- iris
-  sr <- import_stage(modelenv, list(file = 'nonexistent', skip = 'cached_data'))
+  somefile <- tempfile()
+  filename <- file.path(somefile)
+  modelenv <- new.env(); mock_globalenv <- new.env()
+  some_model_data <- list("this is the model", 5)
+  modelenv$model_stage <- list(model = some_model_data)
+  sr <- export_stage(modelenv, list(file = filename, copy = 'global_copy_of_model'))
   environment(sr$stages[[1]])$globalenv <- function() mock_globalenv
   sr$run()
-  expect_identical(modelenv$data, iris)
+  expect_identical(mock_globalenv$global_copy_of_model, some_model_data)
+  unlink(somefile)
 })
