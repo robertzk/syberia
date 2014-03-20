@@ -34,3 +34,11 @@ test_that('it runs an example export stage correctly', {
   # TODO: fill this in
 })
 
+test_that('it runs an example export stage with a copy correctly', {
+  modelenv <- new.env()
+  mock_globalenv <- new.env(); mock_globalenv$cached_data <- iris
+  sr <- import_stage(modelenv, list(file = 'nonexistent', skip = 'cached_data'))
+  environment(sr$stages[[1]])$globalenv <- function() mock_globalenv
+  sr$run()
+  expect_identical(modelenv$data, iris)
+})

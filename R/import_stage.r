@@ -5,7 +5,14 @@
 #'    depending on the adapter. (default is file adapter)
 #' @export
 import_stage <- function(modelenv, import_options) {
-  build_import_stagerunner(modelenv, normalize_import_options(import_options))
+  reserved_words <- c('skip')
+
+  meta_options <- import_options[reserved_words]
+  if (!is.null(tmpnames <- names(import_options)))
+    import_options <- import_options[setdiff(tmpnames, reserved_words)]
+  
+  build_import_stagerunner(modelenv,
+    normalize_import_options(import_options), meta_options)
 }
 
 #' Normalize import options by converting a single option into a
@@ -27,8 +34,12 @@ normalize_import_options <- function(import_options) {
 #' Build a stagerunner for importing data with backup sources.
 #'
 #' @param modelenv an environment. The current modeling environment.
-#' @param import_options a list. Nested list, one adapter per list entry.
-build_import_stagerunner <- function(modelenv, import_options) {
+#' @param import_options list. Nested list, one adapter per list entry.
+#' @param meta_options list. Any additional special arguments. Currently,
+#'    only \code{skip} is a supported value. If this key is in the list,
+#'    then its value will be used to try to load the data from a global
+#'    variable with that name.
+build_import_stagerunner <- function(modelenv, import_options, meta_options = list()) {
   stages <- lapply(seq_along(import_options), function(index) {
     stage <- function(modelenv) {
       # Only run if data isn't already loaded
@@ -45,8 +56,9 @@ build_import_stagerunner <- function(modelenv, import_options) {
     stage
   })
   names(stages) <-
-    paste0("Import from ",
-      vapply(stages, function(stage) environment(stage)$adapter, character(1)))
+    vapply(stages, function(stage)
+                     paste0("Import to", environment(stage)$adapter),
+           character(1))
 
   stages[[length(stages) + 1]] <- function(modelenv) {
     if (!'data' %in% ls(modelenv))
@@ -55,6 +67,15 @@ build_import_stagerunner <- function(modelenv, import_options) {
       statsUtils::variable_summaries(modelenv$data) 
   }
   names(stages)[length(stages)] <- "(Internal) Verify data was loaded" 
+
+  if ('skip' %in% names(meta_options)) {
+    stages <- append(list("(Internal) Import model from a global variable" = function(modelenv) {
+      stopifnot(is.character(meta_options$skip))
+      modelenv$data <- get(meta_options$skip, envir = globalenv())
+      #copy is assigned to the global environment which is a local copy of the trained model
+    }), stages)
+  }
+
   stageRunner$new(modelenv, stages, remember = TRUE)
 }
 

@@ -2,14 +2,20 @@
 \alias{build_import_stagerunner}
 \title{Build a stagerunner for importing data with backup sources.}
 \usage{
-build_import_stagerunner(modelenv, import_options)
+build_import_stagerunner(modelenv, import_options, meta_options)
 }
 \arguments{
   \item{modelenv}{an environment. The current modeling
   environment.}
 
-  \item{import_options}{a list. Nested list, one adapter
-  per list entry.}
+  \item{import_options}{list. Nested list, one adapter per
+  list entry.}
+
+  \item{meta_options}{list. Any additional special
+  arguments. Currently, only \code{skip} is a supported
+  value. If this key is in the list, then its value will be
+  used to try to load the data from a global variable with
+  that name.}
 }
 \description{
 Build a stagerunner for importing data with backup sources.
