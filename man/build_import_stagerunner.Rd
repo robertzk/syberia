@@ -2,7 +2,7 @@
 \alias{build_import_stagerunner}
 \title{Build a stagerunner for importing data with backup sources.}
 \usage{
-build_import_stagerunner(modelenv, import_options, meta_options)
+build_import_stagerunner(modelenv, import_options, meta_options = list())
 }
 \arguments{
   \item{modelenv}{an environment. The current modeling
