@@ -53,3 +53,4 @@ test_that('it runs an example export stage with a copy correctly', {
   expect_identical(mock_globalenv$global_copy_of_model, some_model_data)
   unlink(somefile)
 })
+
