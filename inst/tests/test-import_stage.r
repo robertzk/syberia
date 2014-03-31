@@ -22,7 +22,7 @@ test_that('it correctly builds a stagerunner for one data source', {
   modelenv <- new.env()
   sr <- build_import_stagerunner(modelenv, list(file = correct_filename))
   # Quick and dirty, replace read.csv in front of its eyes
-  environment(environment(sr$stages[[1]])$fn)$read.csv <- read.csv
+  environment(environment(sr$stages[[1]]$fn)$fn)$read.csv <- read.csv
   sr$run()
   expect_identical(modelenv$data, iris)
 })
@@ -44,7 +44,7 @@ test_that('it skips data sources it can\'t load from', {
     
   # Quick and dirty, replace read.csv in front of its eyes
   lapply(seq_len(length(sr$stages) - 1),
-         function(ix) environment(environment(sr$stages[[ix]])$fn)$read.csv <<- read.csv)
+         function(ix) environment(environment(sr$stages[[ix]]$fn)$fn)$read.csv <<- read.csv)
   sr$run()
   expect_identical(modelenv$data, iris)
 })
@@ -67,7 +67,7 @@ test_that('it runs an example import stage with a skip correctly', {
   modelenv <- new.env()
   mock_globalenv <- new.env(); mock_globalenv$cached_data <- iris
   sr <- import_stage(modelenv, list(file = 'nonexistent', skip = 'cached_data'))
-  environment(sr$stages[[1]])$globalenv <- function() mock_globalenv
+  environment(sr$stages[[1]]$fn)$globalenv <- function() mock_globalenv
   sr$run()
   expect_identical(modelenv$data, iris)
 })
