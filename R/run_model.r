@@ -20,6 +20,11 @@ run_model <- function(key = get_cache('last_model') %||%
     else if (is.stagerunner(key)) key
     else stop("Invalid model key")
 
+  # Coalesce the stagerunner if file updated
+  if (is.character(key) && is.character(tmp <- get_cache('last_model')) && key == tmp) {
+    
+  }
+
   set_cache(key, 'last_model')
 
   stagerunner <- construct_stage_runner(model_stages)
