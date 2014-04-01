@@ -1,6 +1,6 @@
-get_registry_key <- function(key, registry_dir) {
-  filename <- sanitize_registry_key(key, registry_dir)
-  (readRDS(filename)) # do not use default invisibility
+get_registry_key <- function(key, registry_dir, soft = TRUE) {
+  filename <- sanitize_registry_key(key, registry_dir, soft = soft)
+  if (is.null(filename)) NULL else (readRDS(filename)) # do not use default invisibility
 }
 
 set_registry_key <- function(key, value, registry_dir) {
@@ -10,17 +10,18 @@ set_registry_key <- function(key, value, registry_dir) {
   key
 }
 
-sanitize_registry_key <- function(key, registry_dir, read = TRUE) {
+sanitize_registry_key <- function(key, registry_dir, read = TRUE, soft = FALSE) {
   if (grepl('..', key, fixed = TRUE))
     stop('Syberia registry keys cannot contain two consecutive dots')
 
   if (read) {
-    if (!file.exists(filename <- file.path(registry_dir, key)))
-      stop('There is no Syberia registry item with key "', key, '"')
-    else if (file.info(filename)$isdir)
+    if (!file.exists(filename <- file.path(registry_dir, key))) {
+      if (soft) NULL
+      else stop('There is no Syberia registry item with key "', key, '"')
+    } else if (file.info(filename)$isdir)
       stop('There is no Syberia registry item with "', key, '", ',
            'because this key points to a directory.')
-    filename
+    else filename
   } else {
     if ((dir <- dirname(key)) != '.') {
       tryCatch(dir.create(file.path(registry_dir, dir), recursive = TRUE),
