@@ -12,7 +12,8 @@ Authors@R: c(person("Robert", "Krzyzanowski",
 Depends:
     R (>= 3.0.1)
 Imports:
-    devtools
+    devtools,
+    stringr
 Suggests:
     glm,
     testthat,
