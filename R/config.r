@@ -5,6 +5,6 @@
   list('stagerunner', 'robertzk')
   list('mungebitsTransformations', 'robertzk'),
   list('mungebits', 'robertzk'),
-  list('tundra', 'robertzk'),
+  list('tundra', 'robertzk')
 )
 
