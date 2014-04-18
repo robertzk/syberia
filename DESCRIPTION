@@ -10,10 +10,11 @@ Description: Syberia provides an opinionated unified framework for
 Authors@R: c(person("Robert", "Krzyzanowski",
     email = "technoguyrob@gmail.com", role = c("aut", "cre")))
 Depends:
-    R (>= 3.0.1)
+    R (>= 3.0.0)
 Imports:
     devtools,
     memoise
+    stringr
 Suggests:
     glm,
     testthat,
