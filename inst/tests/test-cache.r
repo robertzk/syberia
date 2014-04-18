@@ -39,3 +39,4 @@ test_that("it returns a list", {
   scache <- cache()
   expect_true(is.list(scache$get()))
 })
+

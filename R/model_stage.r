@@ -15,20 +15,27 @@ model_stage <- function(modelenv, model_parameters) {
   # Remove the model keyword (e.g., "gbm", "glm", etc.)
   model_parameters[[1]] <- NULL
 
-  # Instantiate tundra container for model
-  
-  modelenv$model_stage$model <-
-    get(model_fn)(list(), model_parameters)
+  function(modelenv) {
+    # Track variable summaries
+    summaries <- modelenv$import_stage$variable_summaries
+    summaries <- lapply(summaries,
+      function(vars) vars[intersect(names(vars), colnames(modelenv$data))]
+    )
+    # TODO: Remove unimportant variables so they do not trigger
+    # velocity check. For this, we need a model-agnostic variable
+    # importance measure. Maybe add a hack for GBM first.
 
-  # Train the model
-  modelenv$model_stage$model$train(modelenv$data, verbose = TRUE)
+    # Instantiate tundra container for model
+    modelenv$model_stage$model <-
+      get(model_fn)(list(), model_parameters, list(variable_summaries = summaries))
 
-  # Manually skip munge procedure since it was already done
-  modelenv$model_stage$model$munge_procedure <-
-    attr(modelenv$data, 'mungepieces') %||% list()
-  assign('out_model', modelenv$model_stage$model, envir = globalenv())
-  
-  NULL
+    # Train the model
+    modelenv$model_stage$model$train(modelenv$data, verbose = TRUE)
+    
+    # Manually skip munge procedure since it was already done
+    modelenv$model_stage$model$munge_procedure <-
+      attr(modelenv$data, 'mungepieces') %||% list()
+  }
 }
 
 

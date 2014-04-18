@@ -1,7 +1,7 @@
 Package: syberia
 Type: Package
 Title: Syberia
-Version: 0.2.0
+Version: 0.3.1
 Description: Syberia provides an opinionated unified framework for
     fast iteration on classifier development and deployment. It is
     founded on convention over configuration and aims to solve the
@@ -13,6 +13,7 @@ Depends:
     R (>= 3.0.0)
 Imports:
     devtools,
+    memoise
     stringr
 Suggests:
     glm,

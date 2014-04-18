@@ -4,7 +4,9 @@
 
   load_github_packages(.github_packages, silent = silent)
 
-  if (exists('run', envir = .GlobalEnv, inherits = FALSE)) rm('run', envir = .GlobalEnv)
-  makeActiveBinding('run', function() build_model, .GlobalEnv)
+  if (exists('run', envir = .GlobalEnv, inherits = FALSE))
+    rm('run', envir = .GlobalEnv)
+
+  makeActiveBinding('run', function() run_model, .GlobalEnv)
 }
 
