@@ -6,5 +6,5 @@
 #'
 #' @name syberia
 #' @docType package
-#' @import devtools stringr mungebitsTransformations tundra
+#' @import devtools stringr mungebitsTransformations tundra stagerunner frost
 NULL

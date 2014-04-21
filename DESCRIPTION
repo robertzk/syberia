@@ -15,7 +15,9 @@ Imports:
     devtools,
     memoise,
     stringr,
-    mungebits
+    mungebits,
+    stagerunner,
+    frost
 Suggests:
     glm,
     testthat,
