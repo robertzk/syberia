@@ -13,7 +13,13 @@ data_stage <- function(modelenv, munge_procedure) {
   # TODO: save trigger
 
   stagerunner <- munge(modelenv, munge_procedure,
-                       stagerunner = list(remember = TRUE))
+    stagerunner = list(remember = TRUE),
+    train_flag = TRUE # This refers to us not wanting to set the mungebits
+                      # as "trained" when running this stageRunner, since we
+                      # would like to be able to run them multiple times -- 
+                      # the stageRunner used in the main syberia model run is
+                      # only used for training.
+  ) 
     
   stagerunner
 }
