@@ -6,4 +6,5 @@
 #'
 #' @name syberia
 #' @docType package
+#' @import devtools stringr mungebitsTransformations tundra
 NULL

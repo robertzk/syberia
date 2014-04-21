@@ -13,8 +13,9 @@ Depends:
     R (>= 3.0.0)
 Imports:
     devtools,
-    memoise
-    stringr
+    memoise,
+    stringr,
+    mungebits
 Suggests:
     glm,
     testthat,
