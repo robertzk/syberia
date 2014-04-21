@@ -71,6 +71,7 @@ build_import_stagerunner <- function(modelenv, import_options, meta_options = li
   if ('skip' %in% names(meta_options)) {
     stages <- append(list("(Internal) Import model from a global variable" = function(modelenv) {
       stopifnot(is.character(meta_options$skip))
+      if (!exists(meta_options$skip, envir = globalenv(), inherits = FALSE)) return()
       modelenv$data <- get(meta_options$skip, envir = globalenv())
       #copy is assigned to the global environment which is a local copy of the trained model
     }), stages)
