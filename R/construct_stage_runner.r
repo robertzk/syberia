@@ -31,10 +31,10 @@ construct_stage_runner <- function(stages) {
     if (arity == 2) stage(modelenv, stages[[stage_name]])
     else if (arity == 1) {
       # If the stage only takes one argument, Syberia adopts the convention
-      # that if the argument contains the string 'opt', then the options get
-      # passed, otherwise the modeling environment does. This allows for
-      # flexibility with the stage definitions.
-      if (identical(TRUE, grepl('opt', names(formals(stage)), fixed = TRUE)))
+      # that if the argument contains the string 'opt' or 'par', then the
+      # options get passed, otherwise the modeling environment does.
+      # This allows for flexibility with the stage definitions.
+      if (identical(TRUE, grepl('opt|par', names(formals(stage)))))
         stage(stages[[stage_name]])
       else stage(modelenv)
     } else stop("A syberia stage needs to accept either 1 or 2 parameters")
