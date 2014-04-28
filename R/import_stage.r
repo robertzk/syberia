@@ -1,18 +1,16 @@
 #' Import data stage for Syberia model process.
 #'
-#' @param modelenv an environment. The current modeling environment.
 #' @param import_options a list. The available import options. Will differ
 #'    depending on the adapter. (default is file adapter)
 #' @export
-import_stage <- function(modelenv, import_options) {
+import_stage <- function(import_options) {
   reserved_words <- c('skip')
 
   meta_options <- import_options[reserved_words]
   if (!is.null(tmpnames <- names(import_options)))
     import_options <- import_options[setdiff(tmpnames, reserved_words)]
   
-  build_import_stagerunner(modelenv,
-    normalize_import_options(import_options), meta_options)
+  build_import_stagerunner(normalize_import_options(import_options), meta_options)
 }
 
 #' Normalize import options by converting a single option into a
@@ -33,13 +31,12 @@ normalize_import_options <- function(import_options) {
 
 #' Build a stagerunner for importing data with backup sources.
 #'
-#' @param modelenv an environment. The current modeling environment.
 #' @param import_options list. Nested list, one adapter per list entry.
 #' @param meta_options list. Any additional special arguments. Currently,
 #'    only \code{skip} is a supported value. If this key is in the list,
 #'    then its value will be used to try to load the data from a global
 #'    variable with that name.
-build_import_stagerunner <- function(modelenv, import_options, meta_options = list()) {
+build_import_stagerunner <- function(import_options, meta_options = list()) {
   stages <- lapply(seq_along(import_options), function(index) {
     stage <- function(modelenv) {
       # Only run if data isn't already loaded
@@ -77,7 +74,7 @@ build_import_stagerunner <- function(modelenv, import_options, meta_options = li
     }), stages)
   }
 
-  stageRunner$new(modelenv, stages, remember = TRUE)
+  stages
 }
 
 #' Fetch an import adapter.

@@ -12,7 +12,7 @@ context('build_import_stagerunner')
 
 test_that('it returns a stageRunner', {
   modelenv <- new.env()
-  sr <- build_import_stagerunner(modelenv, list())
+  sr <- stageRunner$new(modelenv, build_import_stagerunner(list()), remember = TRUE)
   expect_is(sr, 'stageRunner')
 })
 
@@ -20,7 +20,8 @@ test_that('it correctly builds a stagerunner for one data source', {
   correct_filename <- file.path(tempfile())
   read.csv <- function(filename, ...) if (filename == correct_filename) iris
   modelenv <- new.env()
-  sr <- build_import_stagerunner(modelenv, list(file = correct_filename))
+  sr <- stageRunner$new(modelenv, build_import_stagerunner(list(file = correct_filename)),
+                        remember = TRUE)
   # Quick and dirty, replace read.csv in front of its eyes
   environment(environment(sr$stages[[1]]$fn)$fn)$read.csv <- read.csv
   sr$run()
@@ -29,7 +30,7 @@ test_that('it correctly builds a stagerunner for one data source', {
 
 test_that('it correctly checks whether no data source loaded correctly', {
   modelenv <- new.env()
-  sr <- build_import_stagerunner(modelenv, list())
+  sr <- stageRunner$new(modelenv, build_import_stagerunner(modelenv, list()), remember = TRUE)
   expect_error(sr$run(), 'Failed to load data from all data sources')
 })
 
@@ -40,7 +41,7 @@ test_that('it skips data sources it can\'t load from', {
   opts <- normalize_import_options(
     list(source1 = list(file = 'nonexistent'), source2 = list(file = correct_filename))
   )
-  sr <- build_import_stagerunner(modelenv, opts)
+  sr <- stageRunner$new(modelenv, build_import_stagerunner(opts), remember = TRUE)
     
   # Quick and dirty, replace read.csv in front of its eyes
   lapply(seq_len(length(sr$stages) - 1),
@@ -56,7 +57,7 @@ test_that('it runs an example import stage correctly', {
   file <- tempfile()
   write.csv(iris, file, row.names = FALSE)
   filename <- file.path(file)
-  import_stage(modelenv, list(file = filename))$run()
+  stageRunner$new(modelenv, import_stage(list(file = filename)), remember = TRUE)$run()
   modelenv$data[[5]] <- factor(modelenv$data[[5]],
     levels = levels(iris[[5]]), labels = levels(iris[[5]]))
   expect_identical(modelenv$data, iris)
@@ -66,7 +67,8 @@ test_that('it runs an example import stage correctly', {
 test_that('it runs an example import stage with a skip correctly', {
   modelenv <- new.env()
   mock_globalenv <- new.env(); mock_globalenv$cached_data <- iris
-  sr <- import_stage(modelenv, list(file = 'nonexistent', skip = 'cached_data'))
+  sr <- stageRunner$new(modelenv,
+    import_stage(list(file = 'nonexistent', skip = 'cached_data')), remember = TRUE)
   environment(sr$stages[[1]]$fn)$globalenv <- function() mock_globalenv
   sr$run()
   expect_identical(modelenv$data, iris)
