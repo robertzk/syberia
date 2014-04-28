@@ -37,7 +37,8 @@ construct_stage_runner <- function(stages) {
       if (identical(TRUE, grepl('opt|par', names(formals(stage)))))
         stage(stages[[stage_name]])
       else stage(modelenv)
-    } else stop("A syberia stage needs to accept either 1 or 2 parameters")
+    } else if (arity == 0) stage()
+    else stop("A syberia stage needs to accept either 1 or 2 parameters")
   }), .Names = names(stages))
 
   # Label stages appropriately
