@@ -27,7 +27,17 @@ construct_stage_runner <- function(stages) {
     stage <- get(stage_var)
     stopifnot(is.function(stage))
     
-    stage(modelenv, stages[[stage_name]])
+    arity <- length(formals(stage))
+    if (arity > 1) stage(modelenv, stages[[stage_name]])
+    else if (arity == 1) {
+      # If the stage only takes one argument, Syberia adopts the convention
+      # that if the argument contains the string 'opt' or 'par', then the
+      # options get passed, otherwise the modeling environment does.
+      # This allows for flexibility with the stage definitions.
+      if (identical(TRUE, grepl('opt|par', names(formals(stage)))))
+        stage(stages[[stage_name]])
+      else stage(modelenv)
+    } else stage()
   }), .Names = names(stages))
 
   # Label stages appropriately
