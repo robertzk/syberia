@@ -14,8 +14,18 @@ run_model <- function(key = get_cache('last_model') %||%
     #if (missing(key) && is.stagerunner(tmp <- active_runner())) tmp
     #if (missing(key)) get_cache('last_model')
     if (is.character(key)) {
-      if (FALSE == (src_file <- normalized_filename(key)))
-        stop(pp("No file for model '#{key}'"))
+      if (FALSE == (src_file <- normalized_filename(key))) {
+        root <- tryCatch(syberia_root(key), error = function(e) NULL)
+        if (is.null(root))  root <- syberia_root() # Try to use default root
+        models <- syberia_models(root = root)
+        awesome_regex <- gsub('([]./\\*+()])', '\\\\\\1', key)
+        awesome_regex <- gsub('([^\\])', '\\1.*', awesome_regex) # turn this into ctrl+p
+        if (!is.na(ix <- grep(key, models)[1]))
+          src_file <- file.path(root, 'models', models[ix])
+        if (is.null(src_file) || identical(src_file, FALSE))
+          stop(pp("No file for model '#{key}'"))
+      } else syberia_root(src_file) # Cache syberia root
+      message("Loading model: ", src_file)
       source(src_file)$value
     }
     else if (is.list(key)) key
@@ -48,6 +58,7 @@ run_model <- function(key = get_cache('last_model') %||%
     stagerunner <- construct_stage_runner(model_stages)
   }
 
+  message("Running model: ", src_file)
   out <- tryCatch(stagerunner$run(..., verbose = verbose),
            error = function(e) e)
   set_cache(stagerunner, 'last_stagerunner')
