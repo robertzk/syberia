@@ -12,6 +12,7 @@
 #' normalize_filename('test.r') # just returns test.r
 #' }
 normalized_filename <- function(filename) {
+  # TODO: Extend to regular expressions
   if (file.exists(filename)) filename
   else if (file.exists(tmp <- pp("#{filename}.r"))) tmp
   else if (file.exists(tmp <- pp("#{filename}.R"))) tmp

@@ -2,12 +2,9 @@
 \alias{build_import_stagerunner}
 \title{Build a stagerunner for importing data with backup sources.}
 \usage{
-build_import_stagerunner(modelenv, import_options, meta_options = list())
+build_import_stagerunner(import_options, meta_options = list())
 }
 \arguments{
-  \item{modelenv}{an environment. The current modeling
-  environment.}
-
   \item{import_options}{list. Nested list, one adapter per
   list entry.}
 

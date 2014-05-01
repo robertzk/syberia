@@ -17,7 +17,8 @@ Imports:
     stringr,
     mungebits,
     stagerunner,
-    frost
+    frost,
+    syberiaStructure
 Suggests:
     glm,
     testthat,
