@@ -26,6 +26,8 @@ run_model <- function(key = get_cache('last_model') %||%
     else if (is.stagerunner(key)) key
     else stop("Invalid model key")
   
+  if (is.null(root)) root <- syberia_root()
+
   if (is.null(src_file))
     src_file <- normalized_filename(get_cache('last_model'))
 
@@ -34,7 +36,7 @@ run_model <- function(key = get_cache('last_model') %||%
   if (missing(key) && is.character(key) &&
       is.character(tmp <- get_cache('last_model')) && key == tmp) {
     if (!is.null(old_timestamp <- get_registry_key(
-        'cached_model_modified_timestamp', root))) {
+        'cached_model_modified_timestamp', get_registry_dir(root)))) {
       new_timestamp <- file.info(src_file)$mtime
       if (new_timestamp > old_timestamp) coalesce_stagerunner <- TRUE
     }
@@ -43,7 +45,7 @@ run_model <- function(key = get_cache('last_model') %||%
   set_cache(key, 'last_model')
   if (!is.null(src_file))
     set_registry_key('cached_model_modified_timestamp',
-                     file.info(src_file)$mtime, root)
+                     file.info(src_file)$mtime, get_registry_dir(root))
 
   if (coalesce_stagerunner) {
     stagerunner <- construct_stage_runner(model_stages)
