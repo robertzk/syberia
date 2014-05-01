@@ -26,10 +26,9 @@ run_model <- function(key = get_cache('last_model') %||%
     else if (is.stagerunner(key)) key
     else stop("Invalid model key")
   
-  if (is.null(root)) root <- syberia_root()
-
   if (is.null(src_file))
     src_file <- normalized_filename(get_cache('last_model'))
+  if (is.null(root)) root <- syberia_root(src_file)
 
   # Coalesce the stagerunner if model file updated
   coalesce_stagerunner <- FALSE
@@ -53,6 +52,15 @@ run_model <- function(key = get_cache('last_model') %||%
   } else if (!missing(key) || !is.stagerunner(stagerunner <- get_cache('last_stagerunner'))) {
     stagerunner <- construct_stage_runner(model_stages)
   }
+
+  # TODO: Figure out how to integrate tests into this. We need something like:
+  # tests_file <- gsub('^[^/]+', 'test', src_file)
+  # if (file.exists(tests_file)) {
+  #   tests <- source(tests_file)$value
+  #   testrunner <- stageRunner$new(new.env(), tests)
+  #   testrunner$transform(function(fn) function(after) fn(cached_env, after))
+  #   stagerunner$overlay(testrunner)
+  # }
 
   message("Running model: ", src_file)
   out <- tryCatch(stagerunner$run(..., verbose = verbose),
