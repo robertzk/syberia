@@ -58,7 +58,7 @@ run_model <- function(key = get_cache('last_model') %||%
   # if (file.exists(tests_file)) {
   #   tests <- source(tests_file)$value
   #   testrunner <- stageRunner$new(new.env(), tests)
-  #   testrunner$transform(function(fn) function(after) fn(cached_env, after))
+  #   testrunner$transform(function(fn) { force(fn); function(after) fn(cached_env, after) })
   #   stagerunner$overlay(testrunner)
   # }
 
