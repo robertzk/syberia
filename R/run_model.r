@@ -10,6 +10,7 @@ run_model <- function(key = get_cache('last_model') %||%
   # TODO: Add path mechanism
   
   src_file <- NULL
+  root <- NULL
   model_stages <- 
     #if (missing(key) && is.stagerunner(tmp <- active_runner())) tmp
     #if (missing(key)) get_cache('last_model')
@@ -17,16 +18,12 @@ run_model <- function(key = get_cache('last_model') %||%
       if (FALSE == (src_file <- normalized_filename(key))) {
         root <- tryCatch(syberia_root(key), error = function(e) NULL)
         if (is.null(root))  root <- syberia_root() # Try to use default root
-        models <- syberia_models(root = root)
-        awesome_regex <- gsub('([]./\\*+()])', '\\\\\\1', key)
-        awesome_regex <- gsub('([^\\])', '\\1.*', awesome_regex) # turn this into ctrl+p
-        if (!is.na(ix <- grep(key, models)[1]))
-          src_file <- file.path(root, 'models', models[ix])
-        if (is.null(src_file) || identical(src_file, FALSE))
+        src_file <- syberia_models(pattern = key, root = root)[1]
+        if (is.null(src_file) || is.na(src_file) || identical(src_file, FALSE))
           stop(pp("No file for model '#{key}'"))
       } else syberia_root(src_file) # Cache syberia root
       message("Loading model: ", src_file)
-      source(src_file)$value
+      source(file.path(syberia_root(), 'models', src_file))$value
     }
     else if (is.list(key)) key
     else if (is.stagerunner(key)) key
@@ -40,7 +37,7 @@ run_model <- function(key = get_cache('last_model') %||%
   if (missing(key) && is.character(key) &&
       is.character(tmp <- get_cache('last_model')) && key == tmp) {
     if (!is.null(old_timestamp <- get_registry_key(
-        'cached_model_modified_timestamp', get_registry_dir(src_file)))) {
+        'cached_model_modified_timestamp', root))) {
       new_timestamp <- file.info(src_file)$mtime
       if (new_timestamp > old_timestamp) coalesce_stagerunner <- TRUE
     }
@@ -49,7 +46,7 @@ run_model <- function(key = get_cache('last_model') %||%
   set_cache(key, 'last_model')
   if (!is.null(src_file))
     set_registry_key('cached_model_modified_timestamp',
-                     file.info(src_file)$mtime, get_registry_dir(src_file))
+                     file.info(src_file)$mtime, root)
 
   if (coalesce_stagerunner) {
     stagerunner <- construct_stage_runner(model_stages)
