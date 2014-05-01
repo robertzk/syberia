@@ -7,8 +7,6 @@
 run_model <- function(key = get_cache('last_model') %||%
                       getOption('syberia.default_model'),
                       ..., fresh = FALSE, verbose = TRUE) {
-  # TODO: Add path mechanism
-  
   src_file <- NULL
   root <- NULL
   model_stages <- 
