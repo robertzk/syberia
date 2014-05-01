@@ -20,15 +20,18 @@ run_model <- function(key = get_cache('last_model') %||%
           stop(pp("No file for model '#{key}'"))
       } else root <- syberia_root(src_file) # Cache syberia root
       message("Loading model: ", src_file)
-      source(file.path(syberia_root(), 'models', src_file))$value
+      source(file.path(root %||% syberia_root(), 'models', src_file))$value
     }
     else if (is.list(key)) key
     else if (is.stagerunner(key)) key
     else stop("Invalid model key")
   
   if (is.null(src_file))
-    src_file <- normalized_filename(get_cache('last_model'))
+    src_file <- get_cache('last_model')
   if (is.null(root)) root <- syberia_root(src_file)
+
+  display_file <- src_file
+  src_file <- file.path(root, 'models', src_file)
 
   # Coalesce the stagerunner if model file updated
   coalesce_stagerunner <- FALSE
@@ -41,10 +44,9 @@ run_model <- function(key = get_cache('last_model') %||%
     }
   }
 
-  set_cache(key, 'last_model')
-  if (!is.null(src_file))
-    set_registry_key('cached_model_modified_timestamp',
-                     file.info(src_file)$mtime, get_registry_dir(root))
+  set_cache(display_file, 'last_model')
+  set_registry_key('cached_model_modified_timestamp',
+                   file.info(src_file)$mtime, get_registry_dir(root))
 
   if (coalesce_stagerunner) {
     stagerunner <- construct_stage_runner(model_stages)
@@ -54,15 +56,19 @@ run_model <- function(key = get_cache('last_model') %||%
   }
 
   # TODO: Figure out how to integrate tests into this. We need something like:
-  tests_file <- file.path(root, 'models', gsub('^[^/]+', 'test', src_file))
+  tests_file <- file.path(root, 'models', gsub('^[^/]+', 'test', display_file))
   if (file.exists(tests_file)) {
     tests <- source(tests_file)$value
     testrunner <- stageRunner$new(new.env(), tests)
-    testrunner$transform(function(fn) { force(fn); function(after) fn(cached_env, after) })
+    testrunner$transform(function(fn) {
+      require(testthat)
+      force(fn)
+      function(after) fn(cached_env, after)
+    })
     stagerunner$overlay(testrunner, 'tests')
    }
 
-  message("Running model: ", src_file)
+  message("Running model: ", display_file)
   out <- tryCatch(stagerunner$run(..., verbose = verbose),
            error = function(e) e)
   set_cache(stagerunner, 'last_stagerunner')
