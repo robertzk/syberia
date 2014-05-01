@@ -54,13 +54,13 @@ run_model <- function(key = get_cache('last_model') %||%
   }
 
   # TODO: Figure out how to integrate tests into this. We need something like:
-  # tests_file <- gsub('^[^/]+', 'test', src_file)
-  # if (file.exists(tests_file)) {
-  #   tests <- source(tests_file)$value
-  #   testrunner <- stageRunner$new(new.env(), tests)
-  #   testrunner$transform(function(fn) { force(fn); function(after) fn(cached_env, after) })
-  #   stagerunner$overlay(testrunner)
-  # }
+  tests_file <- file.path(root, 'models', gsub('^[^/]+', 'test', src_file))
+  if (file.exists(tests_file)) {
+    tests <- source(tests_file)$value
+    testrunner <- stageRunner$new(new.env(), tests)
+    testrunner$transform(function(fn) { force(fn); function(after) fn(cached_env, after) })
+    stagerunner$overlay(testrunner, 'tests')
+   }
 
   message("Running model: ", src_file)
   out <- tryCatch(stagerunner$run(..., verbose = verbose),
