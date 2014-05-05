@@ -34,6 +34,10 @@ model_stage <- function(model_parameters) {
     # Manually skip munge procedure since it was already done
     modelenv$model_stage$model$munge_procedure <-
       attr(modelenv$data, 'mungepieces') %||% list()
+    # Since munge was called with train_only, the mungebits are incapable of
+    # getting predicted. The line below remedies this.
+    for (ix in seq_along(modelenv$model_stage$model$munge_procedure))
+      modelenv$model_stage$model$munge_procedure[[ix]]$trained <- TRUE
   }
 }
 

@@ -25,3 +25,4 @@ Suggests:
     pbapply
 License: MIT
 LazyData: true
+Roxygen: list(wrap = FALSE)
