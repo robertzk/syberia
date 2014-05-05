@@ -12,7 +12,7 @@ context('build_export_stagerunner')
 
 test_that('it returns a stageRunner', {
   modelenv <- new.env()
-  sr <- build_export_stagerunner(modelenv, list())
+  sr <- stageRunner$new(modelenv, build_export_stagerunner(list()), remember = TRUE)
   expect_is(sr, 'stageRunner')
 })
 
@@ -21,7 +21,8 @@ test_that('it correctly builds a stagerunner for one data source', {
   other_env <- new.env()
   saveRDS <- function(...) other_env$file_written <- TRUE
   modelenv <- new.env()
-  sr <- build_export_stagerunner(modelenv, list(file = correct_filename))
+  sr <- stageRunner$new(modelenv,
+    build_export_stagerunner(list(file = correct_filename)), remember = TRUE)
   # Quick and dirty, replace saveRDS in front of its eyes
   environment(environment(sr$stages[[1]]$fn)$fn)$saveRDS <- saveRDS
   sr$run()
@@ -36,7 +37,7 @@ test_that('it runs an example export stage correctly', {
   modelenv <- new.env()
   some_model_data <- list("this is the model", 5)
   modelenv$model_stage <- list(model = some_model_data)
-  export_stage(modelenv, list(file = filename))$run()
+  stageRunner$new(modelenv, export_stage(list(file = filename)), remember = TRUE)$run()
   expect_identical(readRDS(filename), some_model_data)
   unlink(somefile)
 })
@@ -47,7 +48,8 @@ test_that('it runs an example export stage with a copy correctly', {
   modelenv <- new.env(); mock_globalenv <- new.env()
   some_model_data <- list("this is the model", 5)
   modelenv$model_stage <- list(model = some_model_data)
-  sr <- export_stage(modelenv, list(file = filename, copy = 'global_copy_of_model'))
+  sr <- stageRunner$new(modelenv,
+    export_stage(list(file = filename, copy = 'global_copy_of_model')), remember = TRUE)
   environment(sr$stages[[1]]$fn)$globalenv <- function() mock_globalenv
   sr$run()
   expect_identical(mock_globalenv$global_copy_of_model, some_model_data)

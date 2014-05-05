@@ -6,7 +6,7 @@ simple_model <- function(extra = function(env) {}) {
   modelenv$data[[1]] <- as.integer(modelenv$data[[1]] < 5)
   names(modelenv$data)[1] <- 'dep_var'
   extra(modelenv)
-  fn <- model_stage(modelenv,
+  fn <- model_stage(
     list('regularization', distribution = 'bernoulli',
          alpha = 0.5, prediction_type = 'response'))
   capture.output(fn(modelenv))

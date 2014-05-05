@@ -2,12 +2,11 @@
 #'
 #' TODO: Document this more
 #' 
-#' @param modelenv an environment. The persistent modeling environment.
 #' @param model_parameters a list. Model-specific parameters, with the first
 #'    parameter always being the model keyword for the tundra container
 #'    (e.g., glm, gbm, etc.)
 #' @export
-model_stage <- function(modelenv, model_parameters) {
+model_stage <- function(model_parameters) {
   stopifnot(length(model_parameters) > 0 && is.character(model_parameters[[1]]))
   if (!exists(model_fn <- pp('tundra_#{model_parameters[[1]]}')))
     stop("Missing tundra container for keyword '", model_parameters[[1]], "'")

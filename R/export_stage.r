@@ -2,11 +2,10 @@
 #' 
 #' Precise behavior depends on adapter.
 #'
-#' @param modelenv an environment. The current modeling environment.
 #' @param export_options a list. The available export options. Will differ
 #'    depending on the adapter. (default is file adapter)
 #' @export
-export_stage <- function(modelenv, export_options) {
+export_stage <- function(export_options) {
   reserved_words <- c('copy')
 
   meta_options <- export_options[reserved_words]
@@ -20,8 +19,7 @@ export_stage <- function(modelenv, export_options) {
       structure(list(export_options), .Names = export_options$adapter)
   }
 
-  build_export_stagerunner(modelenv,
-    normalize_export_options(export_options), meta_options)
+  build_export_stagerunner(normalize_export_options(export_options), meta_options)
 }
 
 #' Normalize export options by converting a single option into a
@@ -43,9 +41,8 @@ normalize_export_options <- function(export_options) {
 
 #' Build a stagerunner for exporting data with backup sources.
 #'
-#' @param modelenv an environment. The current modeling environment.
 #' @param export a list. Nested list, one adapter per list entry.
-build_export_stagerunner <- function(modelenv, export_options, meta_options = list()) {
+build_export_stagerunner <- function(export_options, meta_options = list()) {
   stages <- lapply(seq_along(export_options), function(index) {
     stage <- function(modelenv) {
       attempt <- suppressWarnings(suppressMessages(
@@ -71,7 +68,7 @@ build_export_stagerunner <- function(modelenv, export_options, meta_options = li
     }), stages)
   }
 
-  stageRunner$new(modelenv, stages, remember = TRUE)
+  stages
 }
 
 #' Fetch an export adapter.
