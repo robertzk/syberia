@@ -1,7 +1,10 @@
 #' Get syberia config relative to another source file.
 get_registry_dir <- function(source_file) {
   prev_dir <- ""
-  dir <- dirname(source_file)
+  if (!is.na(tmp <- file.info(source_file)$isdir) && tmp)
+    dir <- source_file
+  else dir <- dirname(source_file)
+
   while(prev_dir != dir) {
     if (file.exists(file.path(dir, "syberia.config"))) {
       if (!file.exists(.syberia_dir <- file.path(dir, ".syberia")))
