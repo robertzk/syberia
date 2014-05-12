@@ -19,7 +19,9 @@ syberia_config <- function(root = syberia_root(), exists_check = FALSE) {
     if (file.exists(tmp <- file.path(root, file))) config_file <- tmp
   if (exists_check) return(!is.null(config_file))
   if (is.null(config_file)) stop("No syberia config file at: ", root)
-  config_env <- new.env()
+  provided_env <- new.env()
+  provided_env$syberia_root <- root
+  config_env <- new.env(parent = provided_env)
   source(config_file, local = config_env)
   as.list.environment(config_env)
 }
