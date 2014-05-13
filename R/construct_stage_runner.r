@@ -45,7 +45,10 @@ construct_stage_runner <- function(stages) {
   #  if (is.stagerunner(stage)) "Begin" else "Run", character(1)),
   #  names(stages), "stage")
 
-  stageRunner$new(modelenv, stages, remember = TRUE)
+  # Recall the parameter remember :
+  # whether or not it caches intermediate stages (placing it in cached_env
+  # in the terminal stageRunnerNodes)
+  stageRunner$new(modelenv, stages, remember = TRUE) 
 }
 
 
