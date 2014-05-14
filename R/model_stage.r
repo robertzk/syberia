@@ -37,7 +37,7 @@ model_stage <- function(model_parameters) {
     # Since munge was called with train_only, the mungebits are incapable of
     # getting predicted. The line below remedies this.
     for (ix in seq_along(modelenv$model_stage$model$munge_procedure))
-      modelenv$model_stage$model$munge_procedure[[ix]]$trained <- TRUE
+      modelenv$model_stage$model$munge_procedure[[ix]]$bit$trained <- TRUE
   }
 }
 
