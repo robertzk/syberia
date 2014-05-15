@@ -72,3 +72,4 @@ run_model <- function(key = get_cache('last_model') %||%
 #'    the last syberia run.
 #' @export
 last_run <- function() get_cache('last_run')
+
