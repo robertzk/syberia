@@ -68,8 +68,8 @@ model_stage <- function(model_parameters) {
 fetch_model_container <- function(type) {
   if (!exists(model_fn <- pp('tundra_#{type}'))) {
     prefilename <- file.path(syberia_root(), 'lib', 'classifiers', type)
-    if (!(exists(filename <- pp('#{prefilename}.r')) ||
-          exists(filename <- pp('#{prefilename}.R')))) {
+    if (!(file.exists(filename <- pp('#{prefilename}.r')) ||
+          file.exists(filename <- pp('#{prefilename}.R')))) {
       stop("Missing tundra container for keyword '", type, "'. ",
            "It must exist in the tundra package or be present in ",
            pp("lib/classifiers/#{type}.R"), call. = FALSE)
