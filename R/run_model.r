@@ -11,8 +11,8 @@ run_model <- function(key = syberiaStructure:::get_cache('last_model') %||%
   root <- NULL
 
   syberiaStructure:::set_cache(TRUE, 'runtime/executing')
-  syberiaStructure:::set_cache(FALSE, 'runtime/any_modified')
   on.exit(syberiaStructure:::set_cache(FALSE, 'runtime/executing'))
+  syberiaStructure:::set_cache(FALSE, 'runtime/any_modified')
 
   # Used by syberiaStructure::syberia_resource
   syberiaStructure:::set_cache(parent.frame(), 'runtime/current_env')
