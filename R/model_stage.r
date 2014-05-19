@@ -66,6 +66,7 @@ model_stage <- function(model_parameters) {
 #'   object with a \code{train} and \code{predict} method.
 #' @export
 fetch_model_container <- function(type) {
+  # TODO: (RK) Should we be using syberia_objects for this?
   prefilename <- file.path(syberia_root(), 'lib', 'classifiers', type)
   if (!(file.exists(filename <- pp('#{prefilename}.r')) ||
         file.exists(filename <- pp('#{prefilename}.R')))) {
