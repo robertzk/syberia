@@ -64,8 +64,7 @@ run_model <- function(key = syberiaStructure:::get_cache('last_model') %||%
     tests <- resource$value()
     testrunner <- stageRunner$new(new.env(), tests)
     testrunner$transform(function(fn) {
-      require(testthat)
-      force(fn)
+      require(testthat); force(fn)
       function(after) fn(cached_env, after)
     })
   }
