@@ -30,17 +30,6 @@ run_model <- function(key = syberiaStructure:::get_cache('last_model') %||%
       message("Loading model: ", src_file)
       model_filepath <- file.path(root %||% syberia_root(), 'models', src_file)
       resource <- syberia_resource_with_modification_tracking(model_filepath, root, body = FALSE)
-      resource_dir <- dirname(model_filepath)
-      if (basename(resource_dir) ==
-          substring(tmp <- basename(model_filepath), 1, nchar(tmp) - 2)) {
-        # If the model is in its own subdirectory, check all helpers files for
-        # modification time as well.
-        helper_files <- list.files(resource_dir, recursive = TRUE)
-        # Trigger syberia_resource_with_modification_tracking to update whether
-        # or not any helper files were modified.
-        for (file in helper_files) syberia_resource_with_modification_tracking(
-          file.path(resource_dir, file), root, body = FALSE)
-      }
       resource$value()
     }
     else if (is.list(key)) key
@@ -80,6 +69,7 @@ run_model <- function(key = syberiaStructure:::get_cache('last_model') %||%
       syberiaStructure:::get_cache('runtime/any_modified')) 
 
   if (coalesce_stagerunner) {
+    message("Copying cached environments...")
     stagerunner <- construct_stage_runner(model_stages)
     stagerunner$coalesce(syberiaStructure:::get_cache('last_stagerunner'))
   } else if (!missing(key) || !is.stagerunner(
