@@ -25,7 +25,7 @@ model_stage <- function(model_parameters) {
 
     # Instantiate tundra container for model
     modelenv$model_stage$model <-
-      get(model_fn)(list(), model_parameters, list(variable_summaries = summaries))
+      model_fn(list(), model_parameters, list(variable_summaries = summaries))
 
     # Train the model
     modelenv$model_stage$model$train(modelenv$data, verbose = TRUE)
@@ -66,29 +66,26 @@ model_stage <- function(model_parameters) {
 #'   object with a \code{train} and \code{predict} method.
 #' @export
 fetch_model_container <- function(type) {
-  if (!exists(model_fn <- pp('tundra_#{type}'))) {
-    prefilename <- file.path(syberia_root(), 'lib', 'classifiers', type)
-    if (!(file.exists(filename <- pp('#{prefilename}.r')) ||
-          file.exists(filename <- pp('#{prefilename}.R')))) {
-      stop("Missing tundra container for keyword '", type, "'. ",
-           "It must exist in the tundra package or be present in ",
-           pp("lib/classifiers/#{type}.R"), call. = FALSE)
-    }
-    
-    provided_env <- new.env()
-    source(filename, local = provided_env)
-    if (!all(c('train', 'predict') %in% ls(provided_env)) &&
-         is.function(provided_env$train) && is.function(provided_env$predict))
-      stop(pp("The file lib/classifiers/#{type}.R must contain both ",
-              "'train' and 'predict' functions."), call. = FALSE)
-
-    model_fn <- function(munge_procedure = list(), default_args = list(),
-                         internal = list()) {
-      tundra:::tundra_container$new(type, provided_env$train, provided_env$predict,
-                                    munge_procedure, default_args, internal)
-    }
+  # TODO: (RK) Should we be using syberia_objects for this?
+  prefilename <- file.path(syberia_root(), 'lib', 'classifiers', type)
+  if (!(file.exists(filename <- pp('#{prefilename}.r')) ||
+        file.exists(filename <- pp('#{prefilename}.R')))) {
+    if (exists(model_fn <- pp('tundra_#{type}'))) return(get(model_fn))
+    stop("Missing tundra container for keyword '", type, "'. ",
+         "It must exist in the tundra package or be present in ",
+         pp("lib/classifiers/#{type}.R"), call. = FALSE)
   }
+  
+  provided_env <- new.env()
+  source(filename, local = provided_env)
+  if (!all(c('train', 'predict') %in% ls(provided_env)) &&
+       is.function(provided_env$train) && is.function(provided_env$predict))
+    stop(pp("The file lib/classifiers/#{type}.R must contain both ",
+            "'train' and 'predict' functions."), call. = FALSE)
 
-  model_fn
+  function(munge_procedure = list(), default_args = list(), internal = list()) {
+    tundra:::tundra_container$new(type, provided_env$train, provided_env$predict,
+                                  munge_procedure, default_args, internal)
+  }
 }
 

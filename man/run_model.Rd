@@ -3,7 +3,7 @@
 \alias{run_model}
 \title{Build a model using a data source from scratch.}
 \usage{
-run_model(key = get_cache("last_model") \%||\%
+run_model(key = syberiaStructure:::get_cache("last_model") \%||\%
   getOption("syberia.default_model"), ..., fresh = FALSE, verbose = TRUE)
 }
 \arguments{
