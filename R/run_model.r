@@ -3,6 +3,11 @@
 #' @param key a string or list. If the former, there must be a
 #'   file with name \code{model_stages} followed by \code{.r} so that syberia
 #'   can read the model configurations.
+#' @param ... additional arguments to pass to \code{$run(...)} on the stageRunner.
+#'   For example, \code{to = 'some/key'}.
+#' @param fresh logical. Whether or not to use the cache. By default, \code{FALSE}.
+#' @param verbose logical. Whether or not to display messages. The default is
+#'   \code{TRUE}.
 #' @export
 run_model <- function(key = get_cache('last_model') %||%
                       getOption('syberia.default_model'),
@@ -54,6 +59,17 @@ run_model <- function(key = get_cache('last_model') %||%
 
   if (inherits(out, 'simpleError'))
     stop(out$message)
-  else out
+  else {
+    set_cache(out, 'last_run')
+    out
+  }
 }
+
+#' The before and after environments of the last syberia run.
+#'
+#' @return a list with \code{before} and \code{after} keys giving
+#'    what the modeling environment looked like before and after
+#'    the last syberia run.
+#' @export
+last_run <- function() get_cache('last_run')
 
