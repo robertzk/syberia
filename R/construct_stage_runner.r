@@ -41,9 +41,9 @@ construct_stage_runner <- function(stages) {
   }), .Names = names(stages))
 
   # Label stages appropriately
-  names(stages) <- paste(vapply(stages, function(stage)
-    if (is.stagerunner(stage)) "Begin" else "Run", character(1)),
-    names(stages), "stage")
+  #names(stages) <- paste(vapply(stages, function(stage)
+  #  if (is.stagerunner(stage)) "Begin" else "Run", character(1)),
+  #  names(stages), "stage")
 
   # Recall the parameter remember :
   # whether or not it caches intermediate stages (placing it in cached_env

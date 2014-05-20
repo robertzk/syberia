@@ -6,5 +6,5 @@
 #'
 #' @name syberia
 #' @docType package
-#' @import devtools stringr mungebitsTransformations tundra stagerunner frost
+#' @import testthat devtools stringr
 NULL
