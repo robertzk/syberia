@@ -10,6 +10,14 @@ run_model(key = syberiaStructure:::get_cache("last_model") \%||\%
 \item{key}{a string or list. If the former, there must be a
 file with name \code{model_stages} followed by \code{.r} so that syberia
 can read the model configurations.}
+
+\item{...}{additional arguments to pass to \code{$run(...)} on the stageRunner.
+For example, \code{to = 'some/key'}.}
+
+\item{fresh}{logical. Whether or not to use the cache. By default, \code{FALSE}.}
+
+\item{verbose}{logical. Whether or not to display messages. The default is
+\code{TRUE}.}
 }
 \description{
 Build a model using a data source from scratch.

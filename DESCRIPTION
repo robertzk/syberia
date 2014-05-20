@@ -16,13 +16,13 @@ Imports:
     devtools,
     memoise,
     stringr,
-    mungebits,
-    stagerunner,
-    frost
 Suggests:
     glm,
     testthat,
-    pbapply
+    pbapply,
+    mungebits,
+    stagerunner,
+    frost
 License: MIT
 LazyData: true
 Roxygen: list(wrap = FALSE)
