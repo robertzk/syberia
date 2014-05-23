@@ -17,6 +17,11 @@
   so that it follows similar conventions.
 - overload the source function to check if the file is a syberia model.
   If it is, run it instead!
+- adapters should be reference class objects, whose representations
+  get created from a read / write function in lib/adapters just like
+  tundraContainers get created from train / predict in lib/classifiers
+- mungebits should also be syberia resources and have train / predict
+  setup methods in lib/mungebits
 
 Stagerunner:
 
@@ -25,5 +30,8 @@ unfinished stage. DUH! How simple...
 
 Bigger items:
 
-- syberiaTutorial package for an interactive build-up tutorial of Syberia
 - testthatsomemore should have file system testing support
+- Use opencpu's eval_fork to dynamically detach syberia runs from head.
+  Have a jobs() helper.
+- syberiaTutorial package for an interactive build-up tutorial of Syberia
+- move all tests to root/test/ ?
