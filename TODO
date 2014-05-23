@@ -1,0 +1,29 @@
+- Import/export adapters should be syberia resources like everything else.
+- skip / copy in import and export should be deprecated and just an R adapter.
+- If import  or export is just a character, it should create a
+  chain of adapters as defined by the syberia_config file. For export,
+  a character means we should just use the top of the adapter chain
+  (usually file). If the stage is left completely blank, the default
+  should be the model version which will then recursively use the just
+  mentioned default (so if you do something really clever like define a
+  *custom* import/export adapter, which is capable of understanding your
+  model version, you will never again have to write import or export)
+- syberia_init function for creating a syberia project.
+- potentially obsolete the syberia_config file. The root of the syberia
+  projects should just be defined by the .syberia directory (and maybe
+  we can even get rid of that)
+- for model stage, maybe we should change the convention to:
+  model = list(gbm = list(...), logreg = list(...))
+  so that it follows similar conventions.
+- overload the source function to check if the file is a syberia model.
+  If it is, run it instead!
+
+Stagerunner:
+
+- Default run stage for a remembering stageRunner should be from the *last*
+unfinished stage. DUH! How simple...
+
+Bigger items:
+
+- syberiaTutorial package for an interactive build-up tutorial of Syberia
+- testthatsomemore should have file system testing support
