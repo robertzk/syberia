@@ -78,13 +78,25 @@ fetch_model_container <- function(type) {
   
   provided_env <- new.env()
   source(filename, local = provided_env)
-  if (!all(c('train', 'predict') %in% ls(provided_env)) &&
-       is.function(provided_env$train) && is.function(provided_env$predict))
-    stop(pp("The file lib/classifiers/#{type}.R must contain both ",
-            "'train' and 'predict' functions."), call. = FALSE)
+  
+  provided_fns <- list(train = NULL, predict = NULL)
+  for (function_name in c('train', 'predict')) {
+    provided_fns[[function_name]] <- grep(function_name, ls(provided_env), value = TRUE)
+    provided_fns[[function_name]] <- 
+      Filter(function(x) is.function(provided_env[[x]]), provided_fns[[function_name]])
+    if (length(provided_fns[[function_name]]) == 0) {
+      stop("The custom classifier in lib/classifiers/", type, ".R should define ",
+           "a '", function_name, "' function.", call. = FALSE)
+    } else if (length(provided_fns[[function_name]]) > 1) {
+      stop("The custom classifier in lib/classifiers/", type, ".R should define ",
+           "only one '", function_name, "' function. Instead, you defined ",
+           length(provided_fns[[function_name]]), ", namely, ",
+           paste0(provided_fns[[function_name]], collapse = ', '), ".", call. = FALSE)
+    }
+  }
 
   function(munge_procedure = list(), default_args = list(), internal = list()) {
-    tundra:::tundra_container$new(type, provided_env$train, provided_env$predict,
+    tundra:::tundra_container$new(type, provided_env[[provided_fns$train]], provided_env[[provided_fns$predict]],
                                   munge_procedure, default_args, internal)
   }
 }
