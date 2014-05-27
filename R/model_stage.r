@@ -79,9 +79,9 @@ fetch_model_container <- function(type) {
   provided_env <- new.env()
   source(filename, local = provided_env)
   if (!all(c('train', 'predict') %in% ls(provided_env)) &&
-       is.function(provided_env$train) && is.function(provided_env$predict))
-    stop(pp("The file lib/classifiers/#{type}.R must contain both ",
-            "'train' and 'predict' functions."), call. = FALSE)
+        is.function(get(ls(provided_env)[grep("train", ls(provided_env))], envir = provided_env)) && is.function(get(ls(provided_env)[grep("predict", ls(provided_env))], envir = provided_env))
+      stop(pp("The file lib/classifiers/#{type}.R must contain both ",
+              "functions with 'train' and 'predict' as key words."), call. = FALSE)
 
   function(munge_procedure = list(), default_args = list(), internal = list()) {
     tundra:::tundra_container$new(type, provided_env$train, provided_env$predict,
