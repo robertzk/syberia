@@ -78,26 +78,38 @@ fetch_model_container <- function(type) {
   
   provided_env <- new.env()
   source(filename, local = provided_env)
-  
-  provided_fns <- list(train = NULL, predict = NULL)
-  for (function_name in c('train', 'predict')) {
-    provided_fns[[function_name]] <- grep(function_name, ls(provided_env), value = TRUE)
-    provided_fns[[function_name]] <- 
-      Filter(function(x) is.function(provided_env[[x]]), provided_fns[[function_name]])
-    if (length(provided_fns[[function_name]]) == 0) {
-      stop("The custom classifier in lib/classifiers/", type, ".R should define ",
-           "a '", function_name, "' function.", call. = FALSE)
-    } else if (length(provided_fns[[function_name]]) > 1) {
-      stop("The custom classifier in lib/classifiers/", type, ".R should define ",
-           "only one '", function_name, "' function. Instead, you defined ",
-           length(provided_fns[[function_name]]), ", namely, ",
-           paste0(provided_fns[[function_name]], collapse = ', '), ".", call. = FALSE)
-    }
-  }
+  provided_functions <- is_valid_custom_classifier(provided_env, type)
 
   function(munge_procedure = list(), default_args = list(), internal = list()) {
-    tundra:::tundra_container$new(type, provided_env[[provided_fns$train]], provided_env[[provided_fns$predict]],
+    tundra:::tundra_container$new(type, provided_functions$train, provided_functions$predict,
                                   munge_procedure, default_args, internal)
   }
 }
 
+#' Ensures a custom classifier is valid.
+#'
+#' There can only be one function defined that contains the string "train".
+#' Similarly there can only be one such function containing "predict".
+#' If this condition is not met, this function will throw an error.
+#'
+#' @param provided_env environment. The environment the classifier was loaded from.
+#' @param type character. The keyword for the classifier.
+#' @param a list containing keys "train" and "predict" indicating the train
+#'    and predict functions.
+is_valid_custom_classifier <- function(provided_env, type) {
+  provided_fns <- list(train = NULL, predict = NULL)
+  for (function_type in names(provided_fns)) {
+    fn <- Filter(
+      function(x) is.function(provided_env[[x]]),
+      grep(function_type, ls(provided_env), value = TRUE)
+    )
+    error <- function(snip = 'a') paste0("The custom classifier in lib/classifiers/", type,
+      ".R should define ", snip, " '", testthat::colourise(function_type, 'green'), "' function.")
+    if (length(fn) == 0) stop(error(), call. = FALSE)
+    else if (length(fn) > 1)
+      stop(error('only one'), " Instead, you defined ", length(fn), ", namely: ",
+           paste0(fn, collapse = ', '), call. = FALSE)
+    provided_fns[[function_type]] <- provided_env[[fn]]
+  }
+  provided_fns
+}
