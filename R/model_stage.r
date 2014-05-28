@@ -94,7 +94,7 @@ fetch_model_container <- function(type) {
 #'
 #' @param provided_env environment. The environment the classifier was loaded from.
 #' @param type character. The keyword for the classifier.
-#' @param a list containing keys "train" and "predict" indicating the train
+#' @return a list containing keys "train" and "predict" indicating the train
 #'    and predict functions.
 parse_custom_classifier <- function(provided_env, type) {
   provided_fns <- list(train = NULL, predict = NULL)
