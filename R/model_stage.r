@@ -78,7 +78,7 @@ fetch_model_container <- function(type) {
   
   provided_env <- new.env()
   source(filename, local = provided_env)
-  provided_functions <- is_valid_custom_classifier(provided_env, type)
+  provided_functions <- parse_custom_classifier(provided_env, type)
 
   function(munge_procedure = list(), default_args = list(), internal = list()) {
     tundra:::tundra_container$new(type, provided_functions$train, provided_functions$predict,
@@ -86,7 +86,7 @@ fetch_model_container <- function(type) {
   }
 }
 
-#' Ensures a custom classifier is valid.
+#' Ensures a custom classifier is valid and returns its train and predict methods.
 #'
 #' There can only be one function defined that contains the string "train".
 #' Similarly there can only be one such function containing "predict".
@@ -96,7 +96,7 @@ fetch_model_container <- function(type) {
 #' @param type character. The keyword for the classifier.
 #' @param a list containing keys "train" and "predict" indicating the train
 #'    and predict functions.
-is_valid_custom_classifier <- function(provided_env, type) {
+parse_custom_classifier <- function(provided_env, type) {
   provided_fns <- list(train = NULL, predict = NULL)
   for (function_type in names(provided_fns)) {
     fn <- Filter(
