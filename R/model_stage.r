@@ -17,7 +17,7 @@ model_stage <- function(model_parameters) {
     # Track variable summaries
     summaries <- modelenv$import_stage$variable_summaries
     summaries <- lapply(summaries,
-      function(vars) vars[intersect(names(vars), colnames(modelenv$data))]
+      function(vars) vars[setdiff(intersect(names(vars), colnames(modelenv$data)), 'dep_var')]
     )
     # TODO: Remove unimportant variables so they do not trigger
     # velocity check. For this, we need a model-agnostic variable
