@@ -88,7 +88,8 @@ export_adapter <- function(adapter = 'file') {
       if (is.character(opts)) opts <- list(file = opts)
       filename <- opts$file %||% opts$filename %||% opts$name %||% opts$path
       stopifnot(is.character(filename))
-      capture.output(s3store(modelenv$model_stage$model, export_options$file))
+      #capture.output(s3store(modelenv$model_stage$model, export_options$file))
+      s3store(modelenv$model_stage$model, filename)
       modelenv$export_stage$file <- c(modelenv$export_stage$file, filename)
     }
   } else {
