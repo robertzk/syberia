@@ -1,3 +1,4 @@
+#' @export
 `%||%` <- function(x, y) if (is.null(x)) y else x
 
 #' Fetch the current Syberia version.
