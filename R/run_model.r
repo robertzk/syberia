@@ -93,16 +93,7 @@ run_model <- function(key = syberiaStructure:::get_cache('last_model') %||%
   if (inherits(out, 'simpleError'))
     stop(out$message)
   else {
-    set_cache(out, 'last_run')
+    syberiaStructure:::set_cache(out, 'last_run')
     out
   }
 }
-
-#' The before and after environments of the last syberia run.
-#'
-#' @return a list with \code{before} and \code{after} keys giving
-#'    what the modeling environment looked like before and after
-#'    the last syberia run.
-#' @export
-last_run <- function() get_cache('last_run')
-
