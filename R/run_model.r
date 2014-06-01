@@ -37,7 +37,12 @@ run_model <- function(key = syberiaStructure:::get_cache('last_model') %||%
       provides <- list(root = root, 
         model_version = version <- gsub('^[^/]+/|.[rR]$', '', src_file),
         model_name = basename(version),
-        output = function(suffix = '') file.path(root, 'tmp', version, suffix))
+        output = function(suffix = '', create = TRUE, dir = file.path(root, 'tmp')) {
+          filename <- file.path(dir, version, suffix)
+          if (create && !file.exists(dir <- dirname(filename)))
+            dir.create(dir, recursive = TRUE)
+          filename
+        })
       resource <- syberia_resource_with_modification_tracking(model_filepath,
         root, body = FALSE, provides = provides)
       resource$value()
