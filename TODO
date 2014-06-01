@@ -22,6 +22,10 @@
   tundraContainers get created from train / predict in lib/classifiers
 - mungebits should also be syberia resources and have train / predict
   setup methods in lib/mungebits
+- let config/stages/import.r etc. function as default configurations for
+  stages. For example, If we placed list(dep_var = 'default_indicator') 
+  in config/stages/evaluation.r, then this would get merged into the
+  a syberia definition missing evaluation/dep_var.
 
 Stagerunner:
 
