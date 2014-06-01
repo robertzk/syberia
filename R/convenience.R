@@ -26,7 +26,7 @@ record <- function(varname, envir = globalenv()) {
   })
 }
 
-
+#' @export
 is.trigger <- function(x) inherits(x, 'trigger')
 
 #' The before and after environments of the last syberia run.
