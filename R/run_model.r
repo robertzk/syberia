@@ -33,8 +33,13 @@ run_model <- function(key = syberiaStructure:::get_cache('last_model') %||%
           stop(pp("No file for model '#{key}'"))
       } else root <- syberia_root(src_file) # Cache syberia root
       message("Loading model: ", src_file)
-      model_filepath <- file.path(root %||% syberia_root(), 'models', src_file)
-      resource <- syberia_resource_with_modification_tracking(model_filepath, root, body = FALSE)
+      model_filepath <- file.path(root <- root %||% syberia_root(), 'models', src_file)
+      provides <- list(root = root, 
+        model_version = version <- gsub('^[^/]+/|.[rR]$', '', src_file),
+        model_name = basename(version),
+        output = function(suffix = '') file.path(root, 'tmp', version, suffix))
+      resource <- syberia_resource_with_modification_tracking(model_filepath,
+        root, body = FALSE, provides = provides)
       resource$value()
     }
     else if (is.list(key)) key
