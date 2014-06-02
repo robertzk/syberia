@@ -85,24 +85,15 @@ run_model <- function(key = syberiaStructure:::get_cache('last_model') %||%
   if (!is.null(testrunner)) stagerunner$overlay(testrunner, 'tests')
 
   message("Running model: ", display_file)
+  syberiaStructure:::set_cache(stagerunner, 'last_stagerunner')
   out <- tryCatch(stagerunner$run(..., verbose = verbose),
            error = function(e) e)
   # TODO: (RK) Attempt to record stack trace using evaluate:::try_capture_stack
-  syberiaStructure:::set_cache(stagerunner, 'last_stagerunner')
 
   if (inherits(out, 'simpleError'))
     stop(out$message)
   else {
-    set_cache(out, 'last_run')
+    syberiaStructure:::set_cache(out, 'last_run')
     out
   }
 }
-
-#' The before and after environments of the last syberia run.
-#'
-#' @return a list with \code{before} and \code{after} keys giving
-#'    what the modeling environment looked like before and after
-#'    the last syberia run.
-#' @export
-last_run <- function() get_cache('last_run')
-
