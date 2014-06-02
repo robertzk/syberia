@@ -10,6 +10,8 @@
   presentation files (like plots). The behavior of `output` may change in the
   future, but for now it is fixed to the "tmp" directory.
 
+  Finally, there is also a `root` helper for the root of the current syberia project.
+
 # Version 0.4.0
 
 * `syberia_version` function for printing the current syberia version.
