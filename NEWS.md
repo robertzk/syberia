@@ -2,12 +2,12 @@
 
 * Inside of syberia models, the local variables `model_version`, `model_name`,
   and `output` are now available. The former two are the full model version
-  (e.g., "default/en-US/1.0") and model name ("1.0"), respectively, whereas
+  (e.g., `"default/en-US/1.0"`) and model name (`"1.0"`), respectively, whereas
   `output` is a helper function that outputs to the `tmp` directory relative
   to the root of the syberia project. For example, `output("blah.csv")` 
-  yields "<syberia_project_root>/tmp/default/en-US/1.0/blah.csv". This can
+  yields `"<syberia_project_root>/tmp/default/en-US/1.0/blah.csv"`. This can
   be very helpful for temporary output files, like a copy of the model or
-  presentation files (like plots). The behavior of output may change in the
+  presentation files (like plots). The behavior of `output` may change in the
   future, but for now it is fixed to the "tmp" directory.
 
 # Version 0.4.0
