@@ -26,7 +26,6 @@
   stages. For example, If we placed list(dep_var = 'default_indicator') 
   in config/stages/evaluation.r, then this would get merged into the
   a syberia definition missing evaluation/dep_var.
-- Use Sys.glob built-in helper in syberiaStructure
 
 Stagerunner:
 
@@ -40,3 +39,10 @@ Bigger items:
   Have a jobs() helper.
 - syberiaTutorial package for an interactive build-up tutorial of Syberia
 - move all tests to root/test/ ?
+
+Technicalities:
+
+- Use Sys.glob built-in helper in syberiaStructure
+- Incorporate setTimeLimit functionality (see openCPU package for help)
+- Use base::reg.finalizer to clean up Syberia's cached environments
+- Use Recall in recursive stageRunner methods
