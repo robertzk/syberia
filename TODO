@@ -47,3 +47,5 @@ Technicalities:
 - Use base::reg.finalizer to clean up Syberia's cached environments
 - Use Recall in recursive stageRunner methods
 - Use rapply instead of nested helper lapply's
+- More interesting functions: all.names, all.vars, agrep, abbreviate,
+  browseEnv (especially on a stageRunner context), aregexec, Find, Position
