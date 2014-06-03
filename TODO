@@ -46,3 +46,4 @@ Technicalities:
 - Incorporate setTimeLimit functionality (see openCPU package for help)
 - Use base::reg.finalizer to clean up Syberia's cached environments
 - Use Recall in recursive stageRunner methods
+- Use rapply instead of nested helper lapply's
