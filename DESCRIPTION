@@ -23,8 +23,7 @@ Suggests:
     testthat,
     pbapply,
     mungebits,
-    stagerunner,
-    frost
+    stagerunner
 License: MIT
 LazyData: true
 Roxygen: list(wrap = FALSE)
