@@ -6,9 +6,11 @@ before_install:
 install:
 - ./travis-tool.sh install_deps
 - ./travis-tool.sh install_r devtools microbenchmark knitr arules pbapply glm memoise stringr
+- ./travis-tool.sh install_github robertzk/Ramd robertzk/productivus
 - ./travis-tool.sh install_github robertzk/stagerunner robertzk/frost
 - ./travis-tool.sh install_github robertzk/statsUtils robertzk/mungebits
 - ./travis-tool.sh install_github robertzk/mungebitsTransformations
+- ./travis-tool.sh install_github robertzk/syberiaStages robertzk/syberiaStructure
 script: ./travis-tool.sh run_tests
 after_failure:
 - ./travis-tool.sh dump_logs
