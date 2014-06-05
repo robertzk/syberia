@@ -19,7 +19,6 @@ Imports:
     memoise,
     stringr,
 Suggests:
-    glm,
     testthat,
     pbapply,
     mungebits,
