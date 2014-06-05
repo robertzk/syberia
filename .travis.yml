@@ -5,7 +5,8 @@ before_install:
 - ./travis-tool.sh bootstrap
 install:
 - ./travis-tool.sh install_deps
-- ./travis-tool.sh install_r devtools microbenchmark knitr arules pbapply glm memoise stringr
+- ./travis-tool.sh install_r devtools microbenchmark knitr arules pbapply glm memoise
+  stringr
 - ./travis-tool.sh install_github robertzk/Ramd robertzk/productivus
 - ./travis-tool.sh install_github robertzk/stagerunner robertzk/frost
 - ./travis-tool.sh install_github robertzk/statsUtils robertzk/mungebits
@@ -25,4 +26,4 @@ notifications:
     - '%{repository}#%{build_number} (%{branch} - %{commit} : %{author}): %{message}
       | Details: %{build_url} | Changes: %{compare_url}'
     rooms:
-      secure: adYeJa1+f7wmApndxHcGfdWRPZBIcyG/7kyecWkYbMHMjB+pNlI2IGlmz5jniH3ARfloOfJ4qMsEa/o6zrAThCG70sNS7yOjpt9jCbJQDxElSck4/MBYLpDjSIMWIvqh/1jFy7vHcTuJn8oqyPZqgfRaD1jhEs7Q2MfmBde0fWs=
+      secure: JrgAb2CBX2QovuYo2HQ8vPaqP46L2lVGd/dlxgblAqqqBzv5sPmfjasMtxj25gNHABIPuOjn3jSqzC0gOJahJ7SCKJbplAgR2lYEbclkUYWrcxPivdDnHmotztBbRRDMC+G5F1wM2NBrrJRJDS3SbgVpIMD16dVO31nbFyzzBa0=
