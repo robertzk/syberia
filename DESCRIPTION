@@ -18,8 +18,8 @@ Imports:
     devtools,
     memoise,
     stringr,
+    testthat
 Suggests:
-    testthat,
     pbapply,
     mungebits,
     stagerunner
