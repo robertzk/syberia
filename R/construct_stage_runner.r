@@ -22,7 +22,6 @@ construct_stage_runner <- function(stages) {
 
   modelenv <- new.env()
   syberiaStructure:::syberia_stack(all = TRUE) # Clear the resource stack
-  browser()
   stages <- structure(lapply(seq_along(stages), function(stage_index) {
     stage_name <- names(stages)[stage_index]
 
