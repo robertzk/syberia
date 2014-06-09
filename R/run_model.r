@@ -48,7 +48,8 @@ run_model <- function(key = syberiaStructure:::get_cache('last_model') %||%
   display_file <- src_file
   src_file <- file.path(root, 'models', src_file)
 
-  syberiaStructure:::set_cache(src_file, 'last_model')
+  syberiaStructure:::set_cache(display_file, 'last_model')
+  syberiaStructure:::set_cache(src_file, 'last_src_file')
 
   # TODO: Figure out how to integrate tests into this. We need something like:
   tests_file <- file.path(root, 'models', gsub('^[^/]+', 'test', display_file))
@@ -67,7 +68,7 @@ run_model <- function(key = syberiaStructure:::get_cache('last_model') %||%
   # TODO: (RK) Use cleverer overloading of "source" later for this.
 
   # Trigger modification tracking on any just-in-time resources:
-  for (resource in syberiaStructure:::get_cache('model_resources'))
+  for (resource in syberiaStructure:::get_cache('model_resources')[[src_file]])
     syberia_resource_with_modification_tracking(resource$filename,
                                                 resource$root, body = FALSE)
 

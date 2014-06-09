@@ -22,6 +22,7 @@ construct_stage_runner <- function(stages) {
 
   modelenv <- new.env()
   syberiaStructure:::syberia_stack(all = TRUE) # Clear the resource stack
+  browser()
   stages <- structure(lapply(seq_along(stages), function(stage_index) {
     stage_name <- names(stages)[stage_index]
 
@@ -48,10 +49,9 @@ construct_stage_runner <- function(stages) {
   # Remember any just-in-time resources that were compiled from running
   # these stages (for example, things in lib).
   model_resources <- syberiaStructure:::get_cache('model_resources')
-  model_resources[[syberiaStructure:::get_cache('last_model')]] <-
+  model_resources[[syberiaStructure:::get_cache('last_src_file')]] <-
     syberiaStructure:::syberia_stack(all = TRUE)
   syberiaStructure:::set_cache(model_resources, 'model_resources')
-
 
   # Label stages appropriately
   #names(stages) <- paste(vapply(stages, function(stage)
