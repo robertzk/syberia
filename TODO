@@ -26,6 +26,11 @@
   stages. For example, If we placed list(dep_var = 'default_indicator') 
   in config/stages/evaluation.r, then this would get merged into the
   a syberia definition missing evaluation/dep_var.
+- lib/classifiers triggers custom classifiers on partial match, so if
+  someone has a 'gbm_other', it will overwrite tundra's GBM. Fixing this
+  could be tricky because model_stage is using syberia_objects to fetch
+  the classifier, which would be idempotent -- maybe some sort of clever flag
+  in syberia objects?
 
 Stagerunner:
 
