@@ -21,24 +21,37 @@ construct_stage_runner <- function(stages) {
     stop("All model steps must be named (e.g., import, data, model, ...).")
 
   modelenv <- new.env()
-  stages <- structure(lapply(names(stages), function(stage_name) {
+  syberiaStructure:::syberia_stack(all = TRUE) # Clear the resource stack
+  stages <- structure(lapply(seq_along(stages), function(stage_index) {
+    stage_name <- names(stages)[stage_index]
+
     stage_var <- paste0(stage_name, '_stage')
     if (!exists(stage_var)) stop("No such stage '", stage_name, "'")
     stage <- get(stage_var)
+    # TODO: (RK) Make this a just-in-time resource so users can define
+    # their own stages.
     stopifnot(is.function(stage))
     
     arity <- length(formals(stage))
-    if (arity > 1) stage(modelenv, stages[[stage_name]])
+    if (arity > 1) stage(modelenv, stages[[stage_index]])
     else if (arity == 1) {
       # If the stage only takes one argument, Syberia adopts the convention
       # that if the argument contains the string 'opt' or 'par', then the
       # options get passed, otherwise the modeling environment does.
       # This allows for flexibility with the stage definitions.
       if (identical(TRUE, grepl('opt|par', names(formals(stage)))))
-        stage(stages[[stage_name]])
+        stage(stages[[stage_index]])
       else stage(modelenv)
     } else stage()
   }), .Names = names(stages))
+
+  # Remember any just-in-time resources that were compiled from running
+  # these stages (for example, things in lib).
+  model_resources <- syberiaStructure:::get_cache('model_resources')
+  model_resources[[syberiaStructure:::get_cache('last_model')]] <-
+    syberiaStructure:::syberia_stack(all = TRUE)
+  syberiaStructure:::set_cache(model_resources, 'model_resources')
+
 
   # Label stages appropriately
   #names(stages) <- paste(vapply(stages, function(stage)

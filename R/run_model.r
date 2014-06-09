@@ -27,7 +27,7 @@ run_model <- function(key = syberiaStructure:::get_cache('last_model') %||%
     #if (missing(key)) get_cache('last_model')
     if (is.character(key)) {
       if (FALSE == (src_file <- normalized_filename(key))) {
-        root <- tryCatch(syberia_root(key), error = function(e) NULL) %||% syberia_root()
+        root <- tryCatch(syberia_root(key), error = function(e) syberia_root())
         src_file <- syberia_models(pattern = key, root = root)[1]
         if (is.null(src_file) || is.na(src_file) || identical(src_file, FALSE))
           stop(pp("No file for model '#{key}'"))
@@ -41,14 +41,14 @@ run_model <- function(key = syberiaStructure:::get_cache('last_model') %||%
     else if (is.stagerunner(key)) key
     else stop("Invalid model key")
   
-  if (is.null(src_file))
+  if (is.null(src_file))  # TODO: (RK) Fix this, it may be unnecessary
     src_file <- syberiaStructure:::get_cache('last_model')
   if (is.null(root)) root <- syberia_root(src_file)
 
   display_file <- src_file
   src_file <- file.path(root, 'models', src_file)
 
-  syberiaStructure:::set_cache(display_file, 'last_model')
+  syberiaStructure:::set_cache(src_file, 'last_model')
 
   # TODO: Figure out how to integrate tests into this. We need something like:
   tests_file <- file.path(root, 'models', gsub('^[^/]+', 'test', display_file))
@@ -66,7 +66,13 @@ run_model <- function(key = syberiaStructure:::get_cache('last_model') %||%
   # Determine whether any of the files related to the model have changed
   # TODO: (RK) Use cleverer overloading of "source" later for this.
 
-  # Coalesce the stagerunner if model file updated
+  # Trigger modification tracking on any just-in-time resources:
+  for (resource in syberiaStructure:::get_cache('model_resources'))
+    syberia_resource_with_modification_tracking(resource$filename,
+                                                resource$root, body = FALSE)
+
+  # Coalesce the stagerunner if model file updated, helper files updated,
+  # *OR* any of its just-in-time resources (tests, lib/classifiers, etc) updated.
   coalesce_stagerunner <- 
     (#missing(key) && is.character(key) && # TODO: (RK) Figure out if this is necessary
       is.character(tmp <- syberiaStructure:::get_cache('last_model')) &&
