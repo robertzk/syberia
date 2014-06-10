@@ -69,8 +69,8 @@ run_model <- function(key = syberiaStructure:::get_cache('last_model') %||%
 
   # Trigger modification tracking on any just-in-time resources:
   for (resource in syberiaStructure:::get_cache('model_resources')[[src_file]])
-    syberia_resource_with_modification_tracking(resource$filename,
-                                                resource$root, body = FALSE)
+    syberia_resource_with_modification_tracking(resource$filename, resource$root,
+                                                body = FALSE, soft = TRUE)
 
   # Coalesce the stagerunner if model file updated, helper files updated,
   # *OR* any of its just-in-time resources (tests, lib/classifiers, etc) updated.
