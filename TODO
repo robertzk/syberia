@@ -1,25 +1,13 @@
-- Import/export adapters should be syberia resources like everything else.
-- skip / copy in import and export should be deprecated and just an R adapter.
-- If import  or export is just a character, it should create a
-  chain of adapters as defined by the syberia_config file. For export,
-  a character means we should just use the top of the adapter chain
-  (usually file). If the stage is left completely blank, the default
-  should be the model version which will then recursively use the just
-  mentioned default (so if you do something really clever like define a
-  *custom* import/export adapter, which is capable of understanding your
-  model version, you will never again have to write import or export)
+- testthatsomemore should have file system testing support
 - syberia_init function for creating a syberia project.
 - potentially obsolete the syberia_config file. The root of the syberia
   projects should just be defined by the .syberia directory (and maybe
   we can even get rid of that)
 - for model stage, maybe we should change the convention to:
   model = list(gbm = list(...), logreg = list(...))
-  so that it follows similar conventions.
+  so that it follows similar conventions. (In syberia@multi_model_stage)
 - overload the source function to check if the file is a syberia model.
   If it is, run it instead!
-- adapters should be reference class objects, whose representations
-  get created from a read / write function in lib/adapters just like
-  tundraContainers get created from train / predict in lib/classifiers
 - mungebits should also be syberia resources and have train / predict
   setup methods in lib/mungebits
 - let config/stages/import.r etc. function as default configurations for
@@ -35,11 +23,11 @@
 Stagerunner:
 
 - Default run stage for a remembering stageRunner should be from the *last*
-unfinished stage. DUH! How simple...
+unfinished stage. DUH! How simple... (in syberia@model_env_presets and
+stagerunner@mode_parameter)
 
 Bigger items:
 
-- testthatsomemore should have file system testing support
 - Use opencpu's eval_fork to dynamically detach syberia runs from head.
   Have a jobs() helper.
 - syberiaTutorial package for an interactive build-up tutorial of Syberia
