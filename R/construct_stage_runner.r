@@ -11,16 +11,18 @@
 #'
 #' @param stages a list of lists. Each sublist is the argument to its
 #'    named stage.
+#' @param modelenv environment. The modeling environment with which to
+#'    construct the stagerunner. All operations will be performed on this
+#'    environment. The default is simply \code{new.env()}.
 #' @return stageRunner parametrizing the given stages
 #' @export
-construct_stage_runner <- function(stages) {
+construct_stage_runner <- function(stages, modelenv = new.env()) {
   if (is.stagerunner(stages)) return(stages)
 
   stopifnot(is.list(stages))
   if ("" %in% names(stages) || is.null(names(stages)))
     stop("All model steps must be named (e.g., import, data, model, ...).")
 
-  modelenv <- new.env()
   syberiaStructure:::syberia_stack(all = TRUE) # Clear the resource stack
   stages <- structure(lapply(seq_along(stages), function(stage_index) {
     stage_name <- names(stages)[stage_index]
