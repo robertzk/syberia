@@ -26,6 +26,7 @@
   stages. For example, If we placed list(dep_var = 'default_indicator') 
   in config/stages/evaluation.r, then this would get merged into the
   a syberia definition missing evaluation/dep_var.
+- Support whole stage-level unit tests ("before", "after", and "each")
 
 Stagerunner:
 
