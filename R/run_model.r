@@ -27,7 +27,7 @@ run_model <- function(key = syberiaStructure:::get_cache('last_model') %||%
     #if (missing(key)) get_cache('last_model')
     if (is.character(key)) {
       if (FALSE == (src_file <- normalized_filename(key))) {
-        root <- tryCatch(syberia_root(key), error = function(e) syberia_root())
+        root <- tryCatch(syberia_root(key), error = function(e) NULL) %||% syberia_root()
         src_file <- syberia_models(pattern = key, root = root)[1]
         if (is.null(src_file) || is.na(src_file) || identical(src_file, FALSE))
           stop(pp("No file for model '#{key}'"))
