@@ -7,6 +7,8 @@ Description: Syberia provides an opinionated unified framework for
     founded on convention over configuration and aims to solve the
     problems of classifier-specific data preparation and
     classifier-specific modeling parameters.
+Author: Robert Krzyzanowski <technoguyrob@gmail.com>
+Maintainer: Robert Krzyzanowski <technoguyrob@gmail.com>
 Authors@R: c(person("Robert", "Krzyzanowski",
     email = "technoguyrob@gmail.com", role = c("aut", "cre")))
 Depends:
@@ -16,13 +18,11 @@ Imports:
     devtools,
     memoise,
     stringr,
+    testthat
 Suggests:
-    glm,
-    testthat,
     pbapply,
     mungebits,
-    stagerunner,
-    frost
+    stagerunner
 License: MIT
 LazyData: true
 Roxygen: list(wrap = FALSE)
