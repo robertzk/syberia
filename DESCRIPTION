@@ -20,7 +20,6 @@ Imports:
     stringr,
     testthat,
     Ramd,
-    syberiaStructure,
     syberiaStages,
     mungebits,
     stagerunner,
