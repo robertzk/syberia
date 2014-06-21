@@ -10,7 +10,8 @@ install:
 - ./travis-tool.sh install_github robertzk/stagerunner robertzk/tundra
 - ./travis-tool.sh install_github robertzk/statsUtils robertzk/mungebits
 - ./travis-tool.sh install_github robertzk/syberiaMungebits
-- ./travis-tool.sh install_github robertzk/syberiaStages robertzk/syberiaStructure
+- ./travis-tool.sh install_github robertzk/syberiaStructure
+- ./travis-tool.sh install_github robertzk/syberiaStages
 script: ./travis-tool.sh run_tests
 after_failure:
 - ./travis-tool.sh dump_logs
