@@ -6,5 +6,5 @@
 #'
 #' @name syberia
 #' @docType package
-#' @import testthat devtools stringr
+#' @import testthat devtools stringr memoise
 NULL
