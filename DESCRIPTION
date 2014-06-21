@@ -18,7 +18,8 @@ Imports:
     devtools,
     memoise,
     stringr,
-    testthat
+    testthat,
+    Matrix
 Suggests:
     pbapply,
     mungebits,
