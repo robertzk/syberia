@@ -62,7 +62,7 @@ load_github_packages <- function(pkgs, install = TRUE, silent = FALSE) {
 
   suppressMessages(suppressWarnings(require(utils)))
   apply_method <-
-    if ('pbapply' %in% utils::installed.packages() && !identical(silent, FALSE)) {
+    if ('pbapply' %in% base::.packages() && !identical(silent, FALSE)) {
       suppressMessages(suppressWarnings(require(pbapply)))
       pblapply
     } else lapply
@@ -70,7 +70,7 @@ load_github_packages <- function(pkgs, install = TRUE, silent = FALSE) {
   if (install) {
     uninstalled_packages <-
       pkgs[vapply(package_names, Negate(package_exists), logical(1))]
-    install_github_packages(uninstalled_packages, apply_method = apply_method)
+    # install_github_packages(uninstalled_packages, apply_method = apply_method)
   }
 
   apply_method(package_names, function(pkg) {

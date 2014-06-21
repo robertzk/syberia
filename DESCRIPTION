@@ -19,11 +19,15 @@ Imports:
     memoise,
     stringr,
     testthat,
-    Matrix
-Suggests:
-    pbapply,
+    Ramd,
+    syberiaStructure,
+    syberiaStages,
     mungebits,
     stagerunner,
+    Matrix,
+    tundra
+Suggests:
+    pbapply,
     testthatsomemore
 License: MIT
 LazyData: true
