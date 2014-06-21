@@ -12,19 +12,21 @@ Maintainer: Robert Krzyzanowski <technoguyrob@gmail.com>
 Authors@R: c(person("Robert", "Krzyzanowski",
     email = "technoguyrob@gmail.com", role = c("aut", "cre")))
 Depends:
-    R (>= 3.0.0),
-    syberiaStructure
+    R (>= 3.0.0)
 Imports:
     devtools,
     memoise,
     stringr,
     testthat,
     Ramd,
-    syberiaStages,
-    mungebits,
     stagerunner,
+    statsUtils,
+    mungebits,
     Matrix,
-    tundra
+    tundra,
+    syberiaMungebits,
+    syberiaStructure,
+    syberiaStages
 Suggests:
     pbapply,
     testthatsomemore
