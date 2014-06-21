@@ -1,4 +1,5 @@
 context('construct_stage_runner')
+require(testthatsomemore)
 
 test_that('it can accept stages with arity 1', {
   construct_stage_runner <- force(construct_stage_runner)
