@@ -7,6 +7,7 @@ install:
 - ./travis-tool.sh install_deps
 - ./travis-tool.sh install_r devtools microbenchmark knitr
 - ./travis-tool.sh install_r arules pbapply memoise stringr testthat
+- ./travis-tool.sh install_r gbm glmnet party survival
 - ./travis-tool.sh install_github robertzk/Ramd
 - ./travis-tool.sh install_github robertzk/testthatsomemore
 - ./travis-tool.sh install_github robertzk/stagerunner
