@@ -36,7 +36,6 @@ unfinished stage. DUH! How simple...
 
 Bigger items:
 
-- testthatsomemore should have file system testing support
 - Use opencpu's eval_fork to dynamically detach syberia runs from head.
   Have a jobs() helper.
 - syberiaTutorial package for an interactive build-up tutorial of Syberia
