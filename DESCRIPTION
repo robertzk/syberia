@@ -22,7 +22,8 @@ Imports:
 Suggests:
     pbapply,
     mungebits,
-    stagerunner
+    stagerunner,
+    testthatsomemore
 License: MIT
 LazyData: true
 Roxygen: list(wrap = FALSE)
