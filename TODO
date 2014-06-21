@@ -27,6 +27,7 @@
   in config/stages/evaluation.r, then this would get merged into the
   a syberia definition missing evaluation/dep_var.
 - Support whole stage-level unit tests ("before", "after", and "each")
+- Figure out how to bring back github-based loading now that CI works in an ugly way
 
 Stagerunner:
 
