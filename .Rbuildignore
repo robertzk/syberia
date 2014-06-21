@@ -3,3 +3,4 @@ data/.DS_Store
 ..Rcheck
 .git
 .gitignore
+.travis.yml

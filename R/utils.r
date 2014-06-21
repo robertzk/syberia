@@ -6,7 +6,7 @@
 syberia_version <- function() utils::packageVersion('syberia')
 
 package_exists <- function(name) {
-  name %in% rownames(utils::installed.packages())
+  is.element(name, base::.packages())
 }
 
 as.list.environment <- function(env) {
