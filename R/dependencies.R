@@ -1,11 +1,11 @@
 .github_packages <- list(
   list('syberiaStructure', 'robertzk'),
   list('syberiaStages', 'robertzk'),
-  list('productivus', 'robertzk'),
+ #list('productivus', 'robertzk'),
   list('Ramd', 'robertzk'),
-  list('frost', 'robertzk'),
+ #list('frost', 'robertzk'),
   list('stagerunner', 'robertzk'),
-  list('mungebitsTransformations', 'robertzk'),
+  list('syberiaMungebits', 'robertzk'),
   list('mungebits', 'robertzk'),
   list('tundra', 'robertzk')
 )
