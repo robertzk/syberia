@@ -6,5 +6,5 @@
 #'
 #' @name syberia
 #' @docType package
-#' @import testthat devtools stringr memoise Matrix Ramd syberiaStages mungebits stagerunner tundra syberiaStructure
+#' @import testthat devtools stringr memoise Matrix Ramd syberiaStages mungebits stagerunner tundra
 NULL
