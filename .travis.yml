@@ -7,8 +7,10 @@ install:
 - ./travis-tool.sh install_deps
 - ./travis-tool.sh install_r devtools microbenchmark knitr arules pbapply memoise stringr testthat
 - ./travis-tool.sh install_github robertzk/Ramd
-- ./travis-tool.sh install_github robertzk/stagerunner robertzk/tundra
-- ./travis-tool.sh install_github robertzk/statsUtils robertzk/mungebits
+- ./travis-tool.sh install_github robertzk/stagerunner
+- ./travis-tool.sh install_github robertzk/statsUtils
+- ./travis-tool.sh install_github robertzk/mungebits
+- ./travis-tool.sh install_github robertzk/tundra
 - ./travis-tool.sh install_github robertzk/syberiaMungebits
 - ./travis-tool.sh install_github robertzk/syberiaStructure
 - ./travis-tool.sh install_github robertzk/syberiaStages
