@@ -25,6 +25,7 @@
 #'   for this project. TODO: (RK) Record list of possible options somewhere.
 #' @export
 syberia_config <- function(root = syberia_root(), exists_check = FALSE) {
+  # TODO: (RK) Memoize these unless config changes -- treat it as a syberia resource
   files <- c('syberia.config', 'syberia_config.r', 'syberia_config.R')
   config_file <- NULL
   for (file in files)
