@@ -5,8 +5,7 @@ before_install:
 - ./travis-tool.sh bootstrap
 install:
 - ./travis-tool.sh install_deps
-- ./travis-tool.sh install_r devtools microbenchmark knitr arules pbapply memoise
-  stringr testthat
+- ./travis-tool.sh install_r devtools microbenchmark knitr arules pbapply memoise stringr testthat
 - ./travis-tool.sh install_github robertzk/Ramd
 - ./travis-tool.sh install_github robertzk/stagerunner robertzk/tundra
 - ./travis-tool.sh install_github robertzk/statsUtils robertzk/mungebits
