@@ -50,3 +50,4 @@ Technicalities:
 - Use rapply instead of nested helper lapply's
 - More interesting functions: all.names, all.vars, agrep, abbreviate,
   browseEnv (especially on a stageRunner context), aregexec, Find, Position
+- Use addTaskCallback in conjunction with running models.
