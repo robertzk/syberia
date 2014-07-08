@@ -7,22 +7,29 @@ Description: Syberia provides an opinionated unified framework for
     founded on convention over configuration and aims to solve the
     problems of classifier-specific data preparation and
     classifier-specific modeling parameters.
+Author: Robert Krzyzanowski <technoguyrob@gmail.com>
+Maintainer: Robert Krzyzanowski <technoguyrob@gmail.com>
 Authors@R: c(person("Robert", "Krzyzanowski",
     email = "technoguyrob@gmail.com", role = c("aut", "cre")))
 Depends:
-    R (>= 3.0.0),
-    syberiaStructure
+    R (>= 3.0.0)
 Imports:
     devtools,
     memoise,
     stringr,
-Suggests:
-    glm,
     testthat,
-    pbapply,
-    mungebits,
+    Ramd,
     stagerunner,
-    frost
+    statsUtils,
+    mungebits,
+    Matrix,
+    tundra,
+    syberiaMungebits,
+    syberiaStructure,
+    syberiaStages
+Suggests:
+    pbapply,
+    testthatsomemore
 License: MIT
 LazyData: true
 Roxygen: list(wrap = FALSE)

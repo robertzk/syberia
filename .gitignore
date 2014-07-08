@@ -4,3 +4,7 @@
 *.Rproj
 
 syberia.Rproj
+
+..Rcheck
+*.Rcheck
+*.tar.gz

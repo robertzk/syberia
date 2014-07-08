@@ -1,4 +1,3 @@
-- testthatsomemore should have file system testing support
 - syberia_init function for creating a syberia project.
 - potentially obsolete the syberia_config file. The root of the syberia
   projects should just be defined by the .syberia directory (and maybe
@@ -19,6 +18,8 @@
   could be tricky because model_stage is using syberia_objects to fetch
   the classifier, which would be idempotent -- maybe some sort of clever flag
   in syberia objects?
+- Support whole stage-level unit tests ("before", "after", and "each")
+- Figure out how to bring back github-based loading now that CI works in an ugly way
 
 Stagerunner:
 

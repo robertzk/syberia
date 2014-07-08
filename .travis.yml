@@ -1,0 +1,34 @@
+language: c
+before_install:
+- curl -OL http://raw.github.com/craigcitro/r-travis/master/scripts/travis-tool.sh
+- chmod 755 ./travis-tool.sh
+- ./travis-tool.sh bootstrap
+install:
+- ./travis-tool.sh install_deps
+- ./travis-tool.sh install_r devtools microbenchmark knitr
+- ./travis-tool.sh install_r arules pbapply memoise stringr testthat
+- ./travis-tool.sh install_r gbm glmnet party survival Matrix
+- ./travis-tool.sh install_github robertzk/Ramd
+- ./travis-tool.sh install_github robertzk/testthatsomemore
+- ./travis-tool.sh install_github robertzk/stagerunner
+- ./travis-tool.sh install_github robertzk/statsUtils
+- ./travis-tool.sh install_github robertzk/mungebits
+- ./travis-tool.sh install_github robertzk/tundra
+- ./travis-tool.sh install_github robertzk/syberiaMungebits
+- ./travis-tool.sh install_github robertzk/syberiaStructure
+- ./travis-tool.sh install_github robertzk/syberiaStages
+script: ./travis-tool.sh run_tests
+after_failure:
+- ./travis-tool.sh dump_logs
+notifications:
+  email:
+    on_success: change
+    on_failure: change
+  hipchat:
+    on_success: change
+    on_failure: change
+    template:
+    - '%{repository}#%{build_number} (%{branch} - %{commit} : %{author}): %{message}
+      | Details: %{build_url} | Changes: %{compare_url}'
+    rooms:
+      secure: xdZQoR+UqBVjKkmtH/b7ukKTMRZQQhiwyYL1nhcnTOCDf8vYjXGwWm8rEeb/Wk+3UfGCVN2XfQtj/odoChTvg1M1uivTFn7DmNMzAUnu84gF7onoExPuwNtas1nJDdtZojyha8+VpUp5W6wGv0UhjiyZVQqdiq3jBchGAjAVNVE=
