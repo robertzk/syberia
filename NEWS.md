@@ -1,3 +1,16 @@
+# Version 0.4.1
+
+* This version was released in conjunction with version 0.2.0 of
+  syberiaStages and version 0.2.0 of syberiaStructure. The addition
+  is the notion of Syberia IO "adapters". 
+
+  IO adapters are (reference class) objects that have a \code{read}
+  and \code{write} method. By wrapping things in an adapter, you do not have to
+  worry about whether to use, e.g., \code{read.csv} versus \code{s3read}
+  or \code{write.csv} versus \code{s3store}. If you are familiar with
+  the tundra package, think of adapters as like tundra containers for
+  importing and exporting data.
+
 # Version 0.4.0
 
 * `syberia_version` function for printing the current syberia version.

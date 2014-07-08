@@ -11,34 +11,48 @@
 #'
 #' @param stages a list of lists. Each sublist is the argument to its
 #'    named stage.
+#' @param modelenv environment. The modeling environment with which to
+#'    construct the stagerunner. All operations will be performed on this
+#'    environment. The default is simply \code{new.env()}.
 #' @return stageRunner parametrizing the given stages
 #' @export
-construct_stage_runner <- function(stages) {
+construct_stage_runner <- function(stages, modelenv = new.env()) {
   if (is.stagerunner(stages)) return(stages)
 
   stopifnot(is.list(stages))
   if ("" %in% names(stages) || is.null(names(stages)))
     stop("All model steps must be named (e.g., import, data, model, ...).")
 
-  modelenv <- new.env()
-  stages <- structure(lapply(names(stages), function(stage_name) {
+  syberiaStructure:::syberia_stack(all = TRUE) # Clear the resource stack
+  stages <- structure(lapply(seq_along(stages), function(stage_index) {
+    stage_name <- names(stages)[stage_index]
+
     stage_var <- paste0(stage_name, '_stage')
     if (!exists(stage_var)) stop("No such stage '", stage_name, "'")
     stage <- get(stage_var)
+    # TODO: (RK) Make this a just-in-time resource so users can define
+    # their own stages.
     stopifnot(is.function(stage))
     
     arity <- length(formals(stage))
-    if (arity > 1) stage(modelenv, stages[[stage_name]])
+    if (arity > 1) stage(modelenv, stages[[stage_index]])
     else if (arity == 1) {
       # If the stage only takes one argument, Syberia adopts the convention
       # that if the argument contains the string 'opt' or 'par', then the
       # options get passed, otherwise the modeling environment does.
       # This allows for flexibility with the stage definitions.
       if (identical(TRUE, grepl('opt|par', names(formals(stage)))))
-        stage(stages[[stage_name]])
+        stage(stages[[stage_index]])
       else stage(modelenv)
     } else stage()
   }), .Names = names(stages))
+
+  # Remember any just-in-time resources that were compiled from running
+  # these stages (for example, things in lib).
+  model_resources <- syberiaStructure:::get_cache('model_resources')
+  model_resources[[syberiaStructure:::get_cache('last_src_file')]] <-
+    syberiaStructure:::syberia_stack(all = TRUE)
+  syberiaStructure:::set_cache(model_resources, 'model_resources')
 
   # Label stages appropriately
   #names(stages) <- paste(vapply(stages, function(stage)
@@ -50,5 +64,4 @@ construct_stage_runner <- function(stages) {
   # in the terminal stageRunnerNodes)
   stageRunner$new(modelenv, stages, remember = TRUE) 
 }
-
 
