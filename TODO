@@ -5,8 +5,6 @@
 - for model stage, maybe we should change the convention to:
   model = list(gbm = list(...), logreg = list(...))
   so that it follows similar conventions. (In syberia@multi_model_stage)
-- overload the source function to check if the file is a syberia model.
-  If it is, run it instead!
 - mungebits should also be syberia resources and have train / predict
   setup methods in lib/mungebits
 - let config/stages/import.r etc. function as default configurations for
