@@ -3,11 +3,15 @@
 \alias{construct_stage_runner}
 \title{Return a stageRunner object that parametrizes a list of stages.}
 \usage{
-construct_stage_runner(stages)
+construct_stage_runner(stages, modelenv = new.env())
 }
 \arguments{
 \item{stages}{a list of lists. Each sublist is the argument to its
 named stage.}
+
+\item{modelenv}{environment. The modeling environment with which to
+construct the stagerunner. All operations will be performed on this
+environment. The default is simply \code{new.env()}.}
 }
 \value{
 stageRunner parametrizing the given stages
