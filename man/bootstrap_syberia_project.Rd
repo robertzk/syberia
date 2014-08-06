@@ -72,5 +72,42 @@ This "file return value" is precisely the \code{output} that is available
 For more information on this, see the \code{director} package.}
 
 }
+
+The \code{config/routes.R} file in your syberia project should look something
+like this:
+
+\code{list('lib/classifiers' = 'classifier',
+           'data'            = 'data')}
+
+where we have two kinds of resources: classifiers and data sources.
+
+It is up to you how to define what these resources "do". The
+\code{lib/classifiers} and \code{data} directories (in the root of your
+syberia project) can have arbitrary code, and the \code{resource},
+\code{input}, and \code{output} (like in the list above) are made available
+to the controller.
+
+The return value of a controller will be the final result of a user
+attempting to load a resource. For example, if we had the controller
+\code{"lib/controllers/classifier.R"} with:
+
+\code{function() {
+  classifier <- list(train = input$train, predict = input$predict)
+  class(classifier) <- 'simpleClassifier'
+  classifier
+}}
+
+then we could define a classifier object like the one generated above
+by placing a \code{train} and \code{predict} function in a file
+\code{"simple.R"} in the \code{lib/classifiers} directory.
+
+Then, if we have our syberia project, say
+   \code{proj <- syberia_project('some/directory')}
+we could load this object with
+   \code{simple_classifier <- proj$resource('lib/classifiers/simple')}
+and have an object that we can call \code{simple_classifier$train(...)}
+and \code{simple_classifier$predict} on.
+
+TODO: (RK) Explain why this is better than just random files.
 }
 

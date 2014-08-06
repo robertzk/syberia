@@ -93,8 +93,76 @@ syberia_project <- local({
 #'
 #' }
 #'
+#' The \code{config/routes.R} file in your syberia project should look something
+#' like this:
+#'
+#' \code{list('lib/classifiers' = 'classifier',
+#'            'data'            = 'data')}
+#'
+#' where we have two kinds of resources: classifiers and data sources.
+#' 
+#' It is up to you how to define what these resources "do". The
+#' \code{lib/classifiers} and \code{data} directories (in the root of your
+#' syberia project) can have arbitrary code, and the \code{resource},
+#' \code{input}, and \code{output} (like in the list above) are made available
+#' to the controller.
+#'
+#' The return value of a controller will be the final result of a user
+#' attempting to load a resource. For example, if we had the controller
+#' \code{"lib/controllers/classifier.R"} with:
+#'
+#' \code{function() {
+#'   classifier <- list(train = input$train, predict = input$predict)
+#'   class(classifier) <- 'simpleClassifier'
+#'   classifier
+#' }}
+#'
+#' then we could define a classifier object like the one generated above
+#' by placing a \code{train} and \code{predict} function in a file
+#' \code{"simple.R"} in the \code{lib/classifiers} directory.
+#'
+#' Then, if we have our syberia project, say
+#'    \code{proj <- syberia_project('some/directory')}
+#' we could load this object with
+#'    \code{simple_classifier <- proj$resource('lib/classifiers/simple')}
+#' and have an object that we can call \code{simple_classifier$train(...)}
+#' and \code{simple_classifier$predict} on.
+#'
+#' TODO: (RK) Explain why this is better than just random files.
+#'
 #' @param project director. The syberia director object to boostrap.
 bootstrap_syberia_project <- function(director) {
+  director$register_parser(routes_parser)
+  director
+}
 
+#' A director parser for parsing a routes file.
+#'
+#' A routes file (in \code{"config/routes.r"} relative to the syberia project)
+#' should contain a list whose names give the route prefixes and whose
+#' values are the controller names for parsing resources that begin with
+#' these prefixes. For example, if the file contains
+#' 
+#' \code{list('models' = 'models', 'lib/adapters' = 'adapters')}
+#'
+#' then files in the directory \code{"models"} (relative to the root of the
+#' syberia project) will be processed by the \code{"models"} controller
+#' and the files in the directory \code{"lib/adapters"} will be
+#' processed by the \code{adapters} controller. There should be files
+#' \code{"adapters.R"} and \code{"models.R"} in the \code{"lib/controllers"}
+#' directory containing only a single function. The function (the heart of
+#' the controller) will be applied to files sourced in the respective
+#' resource directory (\code{"models"} or \code{"lib/adapters"}).
+#' See the function \code{bootstrap_syberia_project} to understand what
+#' things are available in a controller function.
+#'
+#' @seealso \code{bootstrap_syberia_project}.
+routes_parser <- function() {
+  if (!is.list(output)) {
+    stop("In your ", director:::colourise("config/routes.R", "red"), " file in the ",
+         "syberia project at ", sQuote(director:::colourise(director$.root, 'blue')),
+         " you should return a list (put it at the end of the file). ",
+         "Currently, you have something of type ", class(output)[1], ".")
+  }
 }
 
