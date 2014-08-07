@@ -164,12 +164,13 @@ routes_parser <- function() {
   error <- function(...) {
     stop("In your ", director:::colourise("config/routes.R", "red"), " file in the ",
          "syberia project at ", sQuote(director:::colourise(director$.root, 'blue')),
-         , ' ', ..., call. = FALSE)
+         ' ', ..., call. = FALSE)
   }
 
+  browser()
   if (!is.list(output)) {
     error("you should return a list (put it at the end of the file). ",
-         "Currently, you have something of type ", class(output)[1], ".")
+         "Currently, you have something of type ", sQuote(class(output)[1]), ".")
     # TODO: (RK) More informative message here.
   }
   if (length(output) > 0 &&
@@ -188,7 +189,7 @@ routes_parser <- function() {
       if (!is.character(controller) && !is.function(controller)) {
         error("Every route must be a character or a function (your route ",
               director:::colourise(sQuote(route), 'yellow'), " is of type ",
-              class(controller)[1], ")")
+              sQuote(class(controller)[1]), ")")
       }
 
       if (is.character(controller)) {
