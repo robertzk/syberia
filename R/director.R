@@ -133,7 +133,9 @@ syberia_project <- local({
 #' @param project director. The syberia director object to boostrap.
 bootstrap_syberia_project <- function(director) {
   routes_path <- file.path('config', 'routes')
-  director$register_parser(routes_path, routes_parser, overwrite = TRUE)
+  if (director$exists(routes_path)) {
+    director$register_parser(routes_path, routes_parser, overwrite = TRUE)
+  }
   director
 }
 
@@ -159,10 +161,10 @@ bootstrap_syberia_project <- function(director) {
 #'
 #' @seealso \code{bootstrap_syberia_project}.
 routes_parser <- function() {
-  error <- function(msg) {
+  error <- function(...) {
     stop("In your ", director:::colourise("config/routes.R", "red"), " file in the ",
          "syberia project at ", sQuote(director:::colourise(director$.root, 'blue')),
-         , ' ', msg, call. = FALSE)
+         , ' ', ..., call. = FALSE)
   }
 
   if (!is.list(output)) {
