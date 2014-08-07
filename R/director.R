@@ -130,13 +130,38 @@ syberia_project <- local({
 #'
 #' TODO: (RK) Explain why this is better than just random files.
 #'
-#' @param project director. The syberia director object to boostrap.
+#' @param project director. The syberia director object to bootstrap.
 bootstrap_syberia_project <- function(project) {
+  register_config(project)
+  register_routes(project)
+  project$.cache$bootstrapped <- TRUE
+  project
+}
+
+
+#' Register configuration when bootstrapping a syberia project.
+#'
+#' @param project director. The syberia director object to bootstrap.
+register_config <- function(project) {
+  application_config_path <- file.path('config', 'application')
+  if (!project$exists(application_config_path)) {
+    stop("You must have a config/application.R file in your syberia project ",
+         "at directory ", sQuote(project$root()), ".", .call = FALSE)
+  }
+
+  project$register_parser(application_config_path,
+                          function() as.list(input), overwrite = TRUE)
+}
+
+#' Register routes when bootstrapping a syberia project.
+#'
+#' @param project director. The syberia director object to bootstrap.
+register_routes <- function(project) {
   routes_path <- file.path('config', 'routes')
   if (project$exists(routes_path)) {
     project$register_parser(routes_path, routes_parser, overwrite = TRUE)
+    project$resource('config/routes')
   }
-  project
 }
 
 #' A director parser for parsing a routes file.
@@ -200,7 +225,6 @@ routes_parser <- function() {
       # TODO: (RK) More validations on routes?
     })
   }
-
-  director$.cache$bootstrapped <- TRUE
+  TRUE
 }
 
