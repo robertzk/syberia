@@ -132,7 +132,8 @@ syberia_project <- local({
 #'
 #' @param project director. The syberia director object to boostrap.
 bootstrap_syberia_project <- function(director) {
-  director$register_parser(routes_parser)
+  routes_path <- file.path('config', 'routes')
+  director$register_parser(routes_path, routes_parser, overwrite = TRUE)
   director
 }
 
@@ -158,11 +159,46 @@ bootstrap_syberia_project <- function(director) {
 #'
 #' @seealso \code{bootstrap_syberia_project}.
 routes_parser <- function() {
-  if (!is.list(output)) {
+  error <- function(msg) {
     stop("In your ", director:::colourise("config/routes.R", "red"), " file in the ",
          "syberia project at ", sQuote(director:::colourise(director$.root, 'blue')),
-         " you should return a list (put it at the end of the file). ",
-         "Currently, you have something of type ", class(output)[1], ".")
+         , ' ', msg, call. = FALSE)
   }
+
+  if (!is.list(output)) {
+    error("you should return a list (put it at the end of the file). ",
+         "Currently, you have something of type ", class(output)[1], ".")
+    # TODO: (RK) More informative message here.
+  }
+  if (length(output) > 0 &&
+      (any(sapply(names(output), function(n) !isTRUE(nzchar(n)))) ||
+       length(unique(names(output))) != length(output))) {
+    error(" your list of routes needs to have unique prefixes.")
+    # TODO: (RK) Provide better information about name duplication or missing names.
+  }
+
+  # Only parse the routes file if it has changed, or the project has not
+  # been bootstrapped.
+  if (resource_object$any_dependencies_modified() ||
+      !isTRUE(director$.cache$bootstrapped)) {
+    lapply(names(output), function(route) {
+      controller <- output[[route]]
+      if (!is.character(controller) && !is.function(controller)) {
+        error("Every route must be a character or a function (your route ",
+              director:::colourise(sQuote(route), 'yellow'), " is of type ",
+              class(controller)[1], ")")
+      }
+
+      if (is.character(controller)) {
+        controller <- director$resource(file.path('lib', 'controllers', controller))
+        controller <- controller$value()
+      }
+
+      director$register_parser(route, controller)
+      # TODO: (RK) More validations on routes?
+    })
+  }
+
+  director$.cache$bootstrapped <- TRUE
 }
 
