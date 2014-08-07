@@ -167,7 +167,6 @@ routes_parser <- function() {
          ' ', ..., call. = FALSE)
   }
 
-  browser()
   if (!is.list(output)) {
     error("you should return a list (put it at the end of the file). ",
          "Currently, you have something of type ", sQuote(class(output)[1]), ".")
