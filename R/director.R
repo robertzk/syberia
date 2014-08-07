@@ -131,12 +131,12 @@ syberia_project <- local({
 #' TODO: (RK) Explain why this is better than just random files.
 #'
 #' @param project director. The syberia director object to boostrap.
-bootstrap_syberia_project <- function(director) {
+bootstrap_syberia_project <- function(project) {
   routes_path <- file.path('config', 'routes')
-  if (director$exists(routes_path)) {
-    director$register_parser(routes_path, routes_parser, overwrite = TRUE)
+  if (project$exists(routes_path)) {
+    project$register_parser(routes_path, routes_parser, overwrite = TRUE)
   }
-  director
+  project
 }
 
 #' A director parser for parsing a routes file.

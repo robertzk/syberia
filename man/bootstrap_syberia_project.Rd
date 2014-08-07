@@ -3,7 +3,7 @@
 \alias{bootstrap_syberia_project}
 \title{Bootstrap a syberia project by setting up its director object.}
 \usage{
-bootstrap_syberia_project(director)
+bootstrap_syberia_project(project)
 }
 \arguments{
 \item{project}{director. The syberia director object to boostrap.}
