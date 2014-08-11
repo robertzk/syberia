@@ -160,7 +160,7 @@ register_routes <- function(project) {
   routes_path <- file.path('config', 'routes')
   if (project$exists(routes_path)) {
     project$register_parser(routes_path, routes_parser, overwrite = TRUE)
-    project$resource('config/routes')
+    project$resource('config/routes')$value()
   }
 }
 
