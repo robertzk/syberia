@@ -135,6 +135,7 @@ bootstrap_syberia_project <- function(project) {
   register_config(project)
   register_controllers(project)
   register_routes(project)
+  register_tests(project)
   project$.cache$bootstrapped <- TRUE
   project
 }
@@ -184,6 +185,33 @@ register_controllers <- function(project) {
            " must be a function, but instead is of class ",
            sQuote(class(input$preprocessor[1])), call. = FALSE)
     list(parser = output, preprocessor = input$preprocessor)
+  })
+}
+
+#' Register the default controller for Syberia project tests.
+#'
+#' By default, tests in a Syberia project will have access to the resource
+#' they are testing as well the \code{testthatsomemore} package.
+#' This function is responsible for bootstrapping this behavior in a
+#' Syberia project.
+#'
+#' @param project director. The syberia director object on which to register
+#'   the tests controller.
+register_tests <- function(project) {
+  project$register_preprocessor('test', function() {
+    if (!is.element('testthatsomemore', installed.packages()[,1]))
+      install_github('robertzk/testthatsomemore')
+    library(testthatsomemore)
+    tested_resource <- gsub("^test\\/", "", resource)
+    if (!director$exists(tested_resource)) {
+      warning("You are testing ", sQuote(director:::colourise(tested_resource, "yellow")),
+              "but it does not exist in the project.", call. = FALSE, immediate = TRUE)
+      return(NULL)
+    }
+
+    context(tested_resource)
+    source_args$local$resource <- director$resource(tested_resource)$value()
+    source()
   })
 }
 
