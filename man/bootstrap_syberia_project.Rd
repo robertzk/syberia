@@ -6,7 +6,7 @@
 bootstrap_syberia_project(project)
 }
 \arguments{
-\item{project}{director. The syberia director object to boostrap.}
+\item{project}{director. The syberia director object to bootstrap.}
 }
 \description{
 The initial parsers that are derived from the syberia configuration
