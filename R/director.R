@@ -184,7 +184,7 @@ register_routes <- function(project) {
 #' See the function \code{bootstrap_syberia_project} to understand what
 #' things are available in a controller function.
 #'
-#' @seealso \code{bootstrap_syberia_project}.
+#' @seealso \code{bootstrap_syberia_project}. 
 routes_parser <- function() {
   error <- function(...) {
     stop("In your ", director:::colourise("config/routes.R", "red"), " file in the ",
