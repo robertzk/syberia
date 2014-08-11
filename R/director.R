@@ -133,6 +133,7 @@ syberia_project <- local({
 #' @param project director. The syberia director object to bootstrap.
 bootstrap_syberia_project <- function(project) {
   register_config(project)
+  register_controllers(project)
   register_routes(project)
   project$.cache$bootstrapped <- TRUE
   project
@@ -162,6 +163,28 @@ register_routes <- function(project) {
     project$register_parser(routes_path, routes_parser, overwrite = TRUE)
     project$resource('config/routes')$value()
   }
+}
+
+#' Register parser for controllers.
+#'
+#' The only non-trivial action is to look for a \code{preprocessors} local
+#' variable in the \code{input} provider to the parser. The parsed value
+#' of a controller will be a list containing a \code{preprocessor} and
+#' a \code{parser}
+#'
+#' @param project director. The syberia director object on which to register
+#'   the default controllers parser.
+register_controllers <- function(project) {
+  controllers_path <- file.path('lib', 'controllers')
+  project$register_parser(controllers_path, function() {
+    if (exists('preprocessor', envir = input, inherits = FALSE) &&
+        !is.function(input$preprocessor))
+      stop("The preprocessor defined in ",
+           sQuote(director:::colourise(resource, 'red')),
+           " must be a function, but instead is of class ",
+           sQuote(class(input$preprocessor[1])), call. = FALSE)
+    list(parser = output, preprocessor = input$preprocessor)
+  })
 }
 
 #' A director parser for parsing a routes file.
@@ -219,9 +242,11 @@ routes_parser <- function() {
       if (is.character(controller)) {
         controller <- director$resource(file.path('lib', 'controllers', controller))
         controller <- controller$value()
-      }
+      } else if (is.function(controller)) controller <- list(parser = controller)
 
-      director$register_parser(route, controller)
+      director$register_parser(route, controller$parser)
+      if (is.list(controller) && is.function(controller$preprocessor))
+        director$register_preprocessor(route, controller$preprocessor)
       # TODO: (RK) More validations on routes?
     })
   }
