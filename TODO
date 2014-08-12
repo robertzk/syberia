@@ -1,7 +1,5 @@
+- Write up NEWS explaining syberia integration
 - syberia_init function for creating a syberia project.
-- potentially obsolete the syberia_config file. The root of the syberia
-  projects should just be defined by the .syberia directory (and maybe
-  we can even get rid of that)
 - for model stage, maybe we should change the convention to:
   model = list(gbm = list(...), logreg = list(...))
   so that it follows similar conventions. (In syberia@multi_model_stage)
@@ -11,11 +9,6 @@
   stages. For example, If we placed list(dep_var = 'default_indicator') 
   in config/stages/evaluation.r, then this would get merged into the
   a syberia definition missing evaluation/dep_var.
-- lib/classifiers triggers custom classifiers on partial match, so if
-  someone has a 'gbm_other', it will overwrite tundra's GBM. Fixing this
-  could be tricky because model_stage is using syberia_objects to fetch
-  the classifier, which would be idempotent -- maybe some sort of clever flag
-  in syberia objects?
 - Support whole stage-level unit tests ("before", "after", and "each")
 - Figure out how to bring back github-based loading now that CI works in an ugly way
 
@@ -30,7 +23,6 @@ Bigger items:
 - Use opencpu's eval_fork to dynamically detach syberia runs from head.
   Have a jobs() helper.
 - syberiaTutorial package for an interactive build-up tutorial of Syberia
-- move all tests to root/test/ ?
 
 Technicalities:
 
@@ -42,3 +34,4 @@ Technicalities:
 - More interesting functions: all.names, all.vars, agrep, abbreviate,
   browseEnv (especially on a stageRunner context), aregexec, Find, Position
 - Use addTaskCallback in conjunction with running models.
+

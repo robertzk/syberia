@@ -19,3 +19,4 @@ test_project <- function(project) {
   pblapply(tests, function(t) suppressMessages(project$resource(t)$value()))
   invisible(TRUE)
 }
+
