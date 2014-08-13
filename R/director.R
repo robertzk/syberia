@@ -198,7 +198,7 @@ register_controllers <- function(project) {
 #' @param project director. The syberia director object on which to register
 #'   the tests controller.
 register_tests <- function(project) {
-  project$register_preprocessor('test', function() {
+  project$register_preprocessor('test', function(resource_object, director, source_args, source) {
     if (!is.element('testthatsomemore', installed.packages()[,1]))
       install_github('robertzk/testthatsomemore')
     library(testthatsomemore)
@@ -210,7 +210,9 @@ register_tests <- function(project) {
     }
 
     context(tested_resource)
-    source_args$local$resource <- director$resource(tested_resource)$value()
+    tested_resource_object <- director$resource(tested_resource)
+    source_args$local$resource <-
+      function() tested_resource_object$value(recompile. = TRUE)
     source()
   })
 }
