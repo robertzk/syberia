@@ -35,7 +35,7 @@ run_model <- function(key = syberiaStructure:::get_cache('last_model') %||%
       message("Loading model: ", src_file)
       model_filepath <- file.path(root %||% syberia_root(), 'models', src_file)
       resource <- syberia_resource_with_modification_tracking(model_filepath, root, body = FALSE)
-      resource$value()
+      resource$value() #function () do.call(base::source, source_args)$value
     }
     else if (is.list(key)) key
     else if (is.stagerunner(key)) key
