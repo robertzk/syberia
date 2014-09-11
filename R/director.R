@@ -204,9 +204,10 @@ register_tests <- function(project) {
     library(testthatsomemore)
     tested_resource <- gsub("^test\\/", "", resource)
     if (!director$exists(tested_resource)) {
-      warning("You are testing ", sQuote(director:::colourise(tested_resource, "yellow")),
-              "but it does not exist in the project.", call. = FALSE, immediate = TRUE)
-      return(NULL)
+      # TODO: (RK) Figure out how this interacts with virtual resources.
+      #warning("You are testing ", sQuote(director:::colourise(tested_resource, "yellow")),
+      #        " but it does not exist in the project.\n", call. = FALSE, immediate = TRUE)
+      #return(NULL)
     }
 
     context(tested_resource)

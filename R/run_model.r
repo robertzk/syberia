@@ -12,6 +12,18 @@
 run_model <- function(key = syberiaStructure:::get_cache('last_model') %||%
                       getOption('syberia.default_model'),
                       ..., fresh = FALSE, verbose = TRUE) {
+  # TODO: (RK) Remove this hack.
+  if (file.exists(file.path(syberia_root(), 'config', 'routes.R'))) {
+    # A director project!
+    project <- syberia_project(syberia_root())
+    keys <- project$find(key, base = 'models/')
+    if (length(keys) == 0) stop("No model ", sQuote(key),
+        " found in syberia project ", sQuote(project$root()), call. = FALSE)
+    stagerunner <- project$resource(keys[1])$value()
+    syberiaStructure:::set_cache(stagerunner, 'last_stagerunner')
+    return(stagerunner$run(..., verbose = verbose))
+  }
+
   src_file <- NULL
   root <- NULL
 

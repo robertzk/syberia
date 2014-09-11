@@ -13,6 +13,11 @@ test_project <- function(project, base = '') {
   if (is.character(project)) project <- syberia_project(project)
   test_path <- file.path(project$root(), 'test')
   tests <- project$find(base = paste0('test/', base))
+
+  # TODO: (RK) Check READMEs
+  # TODO: (RK) Check all resources have tests, except those w/ test = FALSE in routes
+  # TODO: (RK) In config/environments/test, allow test hooks for additional testing.
+    
   # Run all tests
   Ramd::packages('pbapply')
   pblapply(tests, function(t) suppressMessages(project$resource(t)$value()))
