@@ -184,7 +184,7 @@ register_controllers <- function(project) {
            sQuote(director:::colourise(resource, 'red')),
            " must be a function, but instead is of class ",
            sQuote(class(input$preprocessor[1])), call. = FALSE)
-    list(parser = output, preprocessor = input$preprocessor)
+    list(parser = output, preprocessor = input$preprocessor, cache = isTRUE(input$cache))
   })
 }
 
@@ -275,8 +275,8 @@ routes_parser <- function() {
         controller <- controller$value()
       } else if (is.function(controller)) controller <- list(parser = controller)
 
-      director$register_parser(route, controller$parser)
-      if (is.list(controller) && is.function(controller$preprocessor))
+      director$register_parser(route, controller$parser, cache = isTRUE(controller$cache))
+      if (is.function(controller$preprocessor))
         director$register_preprocessor(route, controller$preprocessor)
       # TODO: (RK) More validations on routes?
     })
