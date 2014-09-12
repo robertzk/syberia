@@ -186,7 +186,8 @@ register_controllers <- function(project) {
            sQuote(director:::colourise(resource, 'red')),
            " must be a function, but instead is of class ",
            sQuote(class(input$preprocessor[1])), call. = FALSE)
-    list(parser = output, preprocessor = input$preprocessor, cache = isTRUE(input$cache))
+    list(parser = output, preprocessor = input$preprocessor,
+         cache = isTRUE(input$cache), test = !identical(FALSE, input$test))
   })
 }
 
@@ -259,6 +260,9 @@ routes_parser <- function() {
       }
 
       if (is.character(controller)) {
+        director$.cache$routes[[route]] <- director$.cache$routes[[route]] %||% character(0)
+        director$.cache$routes[[route]] <- c(director$.cache$routes[[route]], controller)
+
         controller <- director$resource(file.path('lib', 'controllers', controller))
         controller <- controller$value()
       } else if (is.function(controller)) controller <- list(parser = controller)

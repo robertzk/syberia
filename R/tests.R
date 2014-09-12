@@ -34,6 +34,8 @@ test_project <- function(project, base = '') {
   # TODO: (RK) Check READMEs
   # TODO: (RK) Check all resources have tests, except those w/ test = FALSE in routes
   # TODO: (RK) In config/environments/test, allow test hooks for additional testing.
+
+  ensure_resources_have_tests(project, tests)
   
   ensure_no_global_variable_pollution({
     test_hook(project, type = 'setup')$run() # Run the test setup hook stageRunner
@@ -49,6 +51,57 @@ test_project <- function(project, base = '') {
 
   invisible(TRUE)
 }
+
+#' Check that all mandatory tested resources have tests.
+#'
+#'
+ensure_resources_have_tests <- function(project, tests = project$find(base = 'test/')) {
+  controllers <- project$find('lib/controllers/')
+
+  # Do not consider test controllers -- no meta-tests, heh!
+  controllers <- controllers[!grepl('^\\/lib/controllers/test/', controllers)]
+
+  # Filter down to the controllers that have make tests mandatory
+  # (the ones that aren't will have test <- FALSE)
+  controllers <- setNames(
+    lapply(controllers, function(x) project$resource(x)$value()),
+    controllers)
+  controllers <- names(Filter(function(controller) controller$test, controllers))
+
+  # Remove the lib/controllers prefix
+  controllers <- gsub("\\/?lib\\/controllers/", "", controllers)
+
+  # Get the routes that match controllers which we are testing.
+  routes <- names(Filter(
+    function(route_controller) is.element(route_controller, controllers),
+    project$.cache$routes
+  ))
+
+  # Filter down to the resources that contain one of the routes as a substring
+  # (and thus are owned by a controller which makes testing mandatory).
+  resources <- Filter(function(x) substring(x, 1, 6) != '/test/', project$find(''))
+  resources <- gsub('^\\/', '', resources)
+  all_routes <- names(project$.cache$routes)
+  unrouted_resources <- Filter(
+    function(x) !director:::any_is_substring_of(x, all_routes), resources)
+  resources <- Filter(function(x) director:::any_is_substring_of(x, routes), resources)
+  resources <- c(unrouted_resources, resources)
+
+  # Remove system resources from consideration.
+  built_in_routes <- c('config', 'etc', 'lib/controllers')
+  exceptions <- c(built_in_routes, test_environment_config(project)$optional_tests)
+  resources <- Filter(
+    function(x) !director:::any_is_substring_of(x, exceptions), resources)
+
+  # Error if any resources don't have tests.
+  necessary_tests <- file.path('test', resources)
+  missing_tests <- setdiff(necessary_tests, tests)
+  if (length(missing_tests) > 0) {
+    stop(call. = FALSE, "Tests are missing for the following resources:\n\n",
+         director:::colourise(paste(missing_tests, collapse = "\n"), 'red'))
+  }
+}
+
 
 #' Fetch the test setup or teardown hook, if any exists.
 #'
@@ -77,8 +130,7 @@ test_hook <- function(project, type = 'setup') {
     # TODO: (RK) Fix director absolute file paths in $.filename and this hack
     filename <- director:::strip_root(project$root(),
                                       project$.filename(test_environment_path))
-    test_environment_config <- project$resource(test_environment_path)$value()
-    hooks <- test_environment_config[[type]] %||% list()
+    hooks <- test_environment_config(project)[[type]] %||% list()
 
     # TODO: (RK) Maybe replace this with a new stageRunner method to check 
     # argument validity? In the future, stageRunner could maybe do more!
@@ -109,4 +161,12 @@ test_hook <- function(project, type = 'setup') {
     stageRunner(hook_env, hooks)
   } else stageRunner(new.env(), list())
 }
+
+#' Get the configuration for the test environment.
+#' @param project director or character. The director for the syberia project.
+test_environment_config <- function(project) {
+  test_environment_path <- 'config/environments/test'
+  project$resource(test_environment_path)$value()
+}
+
 
