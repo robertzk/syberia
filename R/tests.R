@@ -54,7 +54,8 @@ test_project <- function(project, base = '') {
 
 #' Check that all mandatory tested resources have tests.
 #'
-#'
+#' @param project director or character. The director for the syberia project.
+#' @param tests character. The tests to check. By default, all tests in the project.
 ensure_resources_have_tests <- function(project, tests = project$find(base = 'test/')) {
   controllers <- project$find('lib/controllers/')
 
@@ -94,6 +95,7 @@ ensure_resources_have_tests <- function(project, tests = project$find(base = 'te
     function(x) !director:::any_is_substring_of(x, exceptions), resources)
 
   # Error if any resources don't have tests.
+  # TODO: (RK) Check for tests in subdirectories only?
   necessary_tests <- file.path('test', resources)
   missing_tests <- setdiff(necessary_tests, tests)
   if (length(missing_tests) > 0) {
