@@ -35,15 +35,17 @@ test_project <- function(project, base = '') {
   # TODO: (RK) Check all resources have tests, except those w/ test = FALSE in routes
   # TODO: (RK) In config/environments/test, allow test hooks for additional testing.
   
-  test_hook(project, type = 'setup')$run() # Run the test setup hook stageRunner
+  ensure_no_global_variable_pollution({
+    test_hook(project, type = 'setup')$run() # Run the test setup hook stageRunner
 
-  # Run all tests
-  Ramd::packages('pbapply')
-  pblapply(tests, function(t) suppressMessages(project$resource(t)$value()))
+    # Run all tests
+    Ramd::packages('pbapply')
+    pblapply(tests, function(t) suppressMessages(project$resource(t)$value()))
 
-  # TODO: (RK) Populate teardown stageRunner environment with test info?
-  # Could be useful to some people.
-  test_hook(project, type = 'teardown')$run() # Run the test teardown hook stageRunner
+    # TODO: (RK) Populate teardown stageRunner environment with test info?
+    # Could be useful to some people.
+    test_hook(project, type = 'teardown')$run() # Run the test teardown hook stageRunner
+  }, desc = "running this project's tests")
 
   invisible(TRUE)
 }
