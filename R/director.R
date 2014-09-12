@@ -153,6 +153,8 @@ register_config <- function(project) {
 
   project$register_parser(application_config_path,
                           function() as.list(input), overwrite = TRUE)
+  project$register_parser(file.path('config', 'environments'),
+                          function() as.list(input), overwrite = TRUE)
 }
 
 #' Register routes when bootstrapping a syberia project.
@@ -201,7 +203,7 @@ register_controllers <- function(project) {
 #'   the tests controller.
 #' @seealso \code{\link{test_project}}
 register_tests <- function(project) {
-  project$register_preprocessor('test', default_tests_preprocessor)
+  project$register_preprocessor('test', default_tests_preprocessor, overwrite = TRUE)
 }
 
 #' A director parser for parsing a routes file.

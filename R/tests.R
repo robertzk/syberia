@@ -36,6 +36,7 @@ test_project <- function(project, base = '') {
   # TODO: (RK) In config/environments/test, allow test hooks for additional testing.
   
   # Perform test setup  
+  test_setup(project)$run() # Run the test setup hook stageRunner
 
   # Run all tests
   Ramd::packages('pbapply')
@@ -63,11 +64,41 @@ test_setup <- function(project) {
          "an object of class ", class(project)[1])
   }
 
-  if (project$exists('config/environments/test')) {
+  test_environment_path <- 'config/environments/test'
+  if (project$exists(test_environment_path)) {
+    # TODO: (RK) Fix director absolute file paths in $.filename and this hack
+    filename <- director:::strip_root(project$root(),
+                                      project$.filename(test_environment_path))
+    test_environment_config <- project$resource(test_environment_path)$value()
+    setup_hooks <- test_environment_config$setup %||% list()
+
+    # TODO: (RK) Maybe replace this with a new stageRunner method to check 
+    # argument validity? In the future, stageRunner could maybe do more!
+    colored_filename <- sQuote(director:::colourise(filename, 'blue'))
+    if (!is.list(setup_hooks) && !is.function(setup_hooks) && !is.stagerunner(setup_hooks)) {
+      stop("Test setup hooks must be a function or a list of functions.\n\nIn ",
+           colored_filename, ", ensure that ",
+           "you have ", sQuote(director:::colourise('setup <- some_function', 'yellow')),
+           " as right now it's an object of class ",
+           sQuote(director:::colourise(class(setup_hooks)[1], 'red')), call. = FALSE)
+    }
+    if (!is.list(setup_hooks)) setup_hooks <- list(setup_hooks)
+
+    have_correct_arity <- rapply(setup_hooks, how = 'unlist',
+      function(hook) is.function(hook) && length(formals(hook)) > 0)
+    if (!all(have_correct_arity)) {
+      stop("Test setup hooks must all be functions that take at least one ",
+           "argument.\n\nThis argument will be an environment that has one ",
+           "key, ", sQuote('director'), ". In ", colored_filename,
+           " ensure your ", sQuote(director:::colourise('setup', 'yellow')),
+           " local variable meets this constraint.", call. = FALSE)
+    }
+
     # Do not give access to global environment to ensure modularity.
     setup_hook_env <- new.env(parent = parent.env(globalenv()))
+    setup_hook_env$director <- project
 
-    #stageRunner(setup_hook_env, 
+    stageRunner(setup_hook_env, setup_hooks)
   } else stageRunner(new.env(), list())
 }
 
