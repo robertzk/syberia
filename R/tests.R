@@ -35,31 +35,37 @@ test_project <- function(project, base = '') {
   # TODO: (RK) Check all resources have tests, except those w/ test = FALSE in routes
   # TODO: (RK) In config/environments/test, allow test hooks for additional testing.
   
-  # Perform test setup  
-  test_setup(project)$run() # Run the test setup hook stageRunner
+  test_hook(project, type = 'setup')$run() # Run the test setup hook stageRunner
 
   # Run all tests
   Ramd::packages('pbapply')
   pblapply(tests, function(t) suppressMessages(project$resource(t)$value()))
 
+  # TODO: (RK) Populate teardown stageRunner environment with test info?
+  # Could be useful to some people.
+  test_hook(project, type = 'teardown')$run() # Run the test teardown hook stageRunner
+
   invisible(TRUE)
 }
 
-#' Fetch the test setup hook, if any exists.
+#' Fetch the test setup or teardown hook, if any exists.
 #'
 #' The resource \code{config/environments/test} should contain a local variable
-#' \code{setup} that has a function or list of functions to be incorporated
-#' into a stageRunner that will run the actual test setup.
+#' \code{setup} or \code{teardown} that has a function or list of functions to
+#' be incorporated into a stageRunner that will run the actual test setup
+#' or teardown.
 #'
 #' The seed environment for the stageRunner will contain the director object
 #' of the relevant project in the key \code{director}.
 #'
 #' @param project director or character. The director for the syberia project.
-#' @seealso \code{\link{test_projet}}
-#' @return a stageRunner that will run the relevant setup hook(s).
-test_setup <- function(project) {
+#' @param type character. Must be \code{'setup'} or \code{'teardown'}, the former
+#'   being the default.
+#' @seealso \code{\link{test_project}}
+#' @return a stageRunner that will run the relevant setup or teardown hook(s).
+test_hook <- function(project, type = 'setup') {
   if (!is.director(project)) {
-    stop("To fetch the setup hook for a project, please pass in a director ",
+    stop("To fetch the ", type, " hook for a project, please pass in a director ",
          "object (the director for the syberia project). Instead I got ",
          "an object of class ", class(project)[1])
   }
@@ -70,35 +76,35 @@ test_setup <- function(project) {
     filename <- director:::strip_root(project$root(),
                                       project$.filename(test_environment_path))
     test_environment_config <- project$resource(test_environment_path)$value()
-    setup_hooks <- test_environment_config$setup %||% list()
+    hooks <- test_environment_config[[type]] %||% list()
 
     # TODO: (RK) Maybe replace this with a new stageRunner method to check 
     # argument validity? In the future, stageRunner could maybe do more!
     colored_filename <- sQuote(director:::colourise(filename, 'blue'))
-    if (!is.list(setup_hooks) && !is.function(setup_hooks) && !is.stagerunner(setup_hooks)) {
-      stop("Test setup hooks must be a function or a list of functions.\n\nIn ",
+    if (!is.list(hooks) && !is.function(hooks) && !is.stagerunner(hooks)) {
+      stop("Test ", type, " hooks must be a function or a list of functions.\n\nIn ",
            colored_filename, ", ensure that ",
-           "you have ", sQuote(director:::colourise('setup <- some_function', 'yellow')),
+           "you have ", sQuote(director:::colourise(paste0(type, ' <- some_function'), 'yellow')),
            " as right now it's an object of class ",
-           sQuote(director:::colourise(class(setup_hooks)[1], 'red')), call. = FALSE)
+           sQuote(director:::colourise(class(hooks)[1], 'red')), call. = FALSE)
     }
-    if (!is.list(setup_hooks)) setup_hooks <- list(setup_hooks)
+    if (!is.list(hooks)) hooks <- list(hooks)
 
-    have_correct_arity <- rapply(setup_hooks, how = 'unlist',
+    have_correct_arity <- rapply(hooks, how = 'unlist',
       function(hook) is.function(hook) && length(formals(hook)) > 0)
     if (!all(have_correct_arity)) {
-      stop("Test setup hooks must all be functions that take at least one ",
-           "argument.\n\nThis argument will be an environment that has one ",
+      stop("Test ", type, " hooks must all be functions that take at least one ",
+           "argument.\n\nThe first argument will be an environment that has one ",
            "key, ", sQuote('director'), ". In ", colored_filename,
-           " ensure your ", sQuote(director:::colourise('setup', 'yellow')),
+           " ensure your ", sQuote(director:::colourise(type, 'yellow')),
            " local variable meets this constraint.", call. = FALSE)
     }
 
     # Do not give access to global environment to ensure modularity.
-    setup_hook_env <- new.env(parent = parent.env(globalenv()))
-    setup_hook_env$director <- project
+    hook_env <- new.env(parent = parent.env(globalenv()))
+    hook_env$director <- project
 
-    stageRunner(setup_hook_env, setup_hooks)
+    stageRunner(hook_env, hooks)
   } else stageRunner(new.env(), list())
 }
 
