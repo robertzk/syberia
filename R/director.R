@@ -153,6 +153,8 @@ register_config <- function(project) {
 
   project$register_parser(application_config_path,
                           function() as.list(input), overwrite = TRUE)
+  project$register_parser(file.path('config', 'environments'),
+                          function() as.list(input), overwrite = TRUE)
 }
 
 #' Register routes when bootstrapping a syberia project.
@@ -184,7 +186,8 @@ register_controllers <- function(project) {
            sQuote(director:::colourise(resource, 'red')),
            " must be a function, but instead is of class ",
            sQuote(class(input$preprocessor[1])), call. = FALSE)
-    list(parser = output, preprocessor = input$preprocessor, cache = isTRUE(input$cache))
+    list(parser = output, preprocessor = input$preprocessor,
+         cache = isTRUE(input$cache), test = !identical(FALSE, input$test))
   })
 }
 
@@ -193,45 +196,15 @@ register_controllers <- function(project) {
 #' By default, tests in a Syberia project will have access to the resource
 #' they are testing as well the \code{testthatsomemore} package.
 #' This function is responsible for bootstrapping this behavior in a
-#' Syberia project.
-#'
-#' By default, no test setup or teardown occurs. That is, there is no code that
-#' is executed before all tests run and after all tests run. However, there do
-#' exist hooks to provide this behavior. This can also be used to perform
-#' additional testing not covered by sourcing all files in the "test/" directory
-#' of the syberia project.
-#'
-#' To provide a setup or teardown hook, simply place a function or list of
-#' functions in a local variable \code{setup} or \code{teardown}, respectively,
-#' in \code{config/environments/test} relative to the root of the syberia project.
-#'
-#' For example, creating a file \code{config/environments/test.R} with the code
-#' code \code{setup <- function(env) cat("Running all tests.")} will print a message
-#' before all the tests are run. The one parameter the function must take is an
-#' environment which will contain a single key, `director`, pointing to the 
-#' `director` object coming from `syberia_project`.
+#' Syberia project. See the documentation for \code{test_project}
+#' to understand how to create setup and teardown hooks (code that will be
+#' run before all tests are executed).
 #'
 #' @param project director. The syberia director object on which to register
 #'   the tests controller.
+#' @seealso \code{\link{test_project}}
 register_tests <- function(project) {
-  project$register_preprocessor('test', function(resource_object, director, source_args, source) {
-    if (!is.element('testthatsomemore', installed.packages()[,1]))
-      install_github('robertzk/testthatsomemore')
-    library(testthatsomemore)
-    tested_resource <- gsub("^test\\/", "", resource)
-    if (!director$exists(tested_resource)) {
-      # TODO: (RK) Figure out how this interacts with virtual resources.
-      #warning("You are testing ", sQuote(director:::colourise(tested_resource, "yellow")),
-      #        " but it does not exist in the project.\n", call. = FALSE, immediate = TRUE)
-      #return(NULL)
-    }
-
-    context(tested_resource)
-    tested_resource_object <- director$resource(tested_resource)
-    source_args$local$resource <-
-      function() tested_resource_object$value(recompile. = TRUE)
-    source()
-  })
+  project$register_preprocessor('test', default_tests_preprocessor, overwrite = TRUE)
 }
 
 #' A director parser for parsing a routes file.
@@ -287,6 +260,9 @@ routes_parser <- function() {
       }
 
       if (is.character(controller)) {
+        director$.cache$routes[[route]] <- director$.cache$routes[[route]] %||% character(0)
+        director$.cache$routes[[route]] <- c(director$.cache$routes[[route]], controller)
+
         controller <- director$resource(file.path('lib', 'controllers', controller))
         controller <- controller$value()
       } else if (is.function(controller)) controller <- list(parser = controller)
@@ -298,5 +274,29 @@ routes_parser <- function() {
     })
   }
   TRUE
+}
+
+#' The default preprocessor for syberia tests.
+#' @param resource_object directorResource
+#' @param director director
+#' @param source_args list
+#' @param source function
+default_tests_preprocessor <- function(resource_object, director, source_args, source) {
+  if (!is.element('testthatsomemore', installed.packages()[,1]))
+    install_github('robertzk/testthatsomemore')
+  library(testthatsomemore)
+  tested_resource <- gsub("^test\\/", "", resource)
+  if (!director$exists(tested_resource)) {
+    # TODO: (RK) Figure out how this interacts with virtual resources.
+    #warning("You are testing ", sQuote(director:::colourise(tested_resource, "yellow")),
+    #        " but it does not exist in the project.\n", call. = FALSE, immediate = TRUE)
+    #return(NULL)
+  }
+
+  context(tested_resource)
+  tested_resource_object <- director$resource(tested_resource)
+  source_args$local$resource <-
+    function() tested_resource_object$value(recompile. = TRUE)
+  source()
 }
 
