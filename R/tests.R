@@ -45,7 +45,7 @@ test_project <- function(project, base = '') {
     # TODO: (RK) Populate teardown stageRunner environment with test info?
     # Could be useful to some people.
     test_hook(project, type = 'teardown')$run() # Run the test teardown hook stageRunner
-  }, desc = "running this project's tests")
+  }, desc = "running this project's tests (this is bad and should never happen)")
 
   invisible(TRUE)
 }
