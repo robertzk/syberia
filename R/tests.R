@@ -100,7 +100,7 @@ ensure_resources_have_tests <- function(project, tests = project$find(base = 'te
   missing_tests <- setdiff(necessary_tests, tests)
   if (length(missing_tests) > 0) {
     stop(call. = FALSE, "Tests are missing for the following resources:\n\n",
-         director:::colourise(paste(missing_tests, collapse = "\n"), 'red'))
+         director:::colourise(paste(gsub('^test/', '', missing_tests), collapse = "\n"), 'red'))
   }
 }
 
