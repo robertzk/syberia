@@ -201,24 +201,7 @@ register_controllers <- function(project) {
 #'   the tests controller.
 #' @seealso \code{\link{test_project}}
 register_tests <- function(project) {
-  project$register_preprocessor('test', function(resource_object, director, source_args, source) {
-    if (!is.element('testthatsomemore', installed.packages()[,1]))
-      install_github('robertzk/testthatsomemore')
-    library(testthatsomemore)
-    tested_resource <- gsub("^test\\/", "", resource)
-    if (!director$exists(tested_resource)) {
-      # TODO: (RK) Figure out how this interacts with virtual resources.
-      #warning("You are testing ", sQuote(director:::colourise(tested_resource, "yellow")),
-      #        " but it does not exist in the project.\n", call. = FALSE, immediate = TRUE)
-      #return(NULL)
-    }
-
-    context(tested_resource)
-    tested_resource_object <- director$resource(tested_resource)
-    source_args$local$resource <-
-      function() tested_resource_object$value(recompile. = TRUE)
-    source()
-  })
+  project$register_preprocessor('test', default_tests_preprocessor)
 }
 
 #' A director parser for parsing a routes file.
@@ -285,5 +268,29 @@ routes_parser <- function() {
     })
   }
   TRUE
+}
+
+#' The default preprocessor for syberia tests.
+#' @param resource_object directorResource
+#' @param director director
+#' @param source_args list
+#' @param source function
+default_tests_preprocessor <- function(resource_object, director, source_args, source) {
+  if (!is.element('testthatsomemore', installed.packages()[,1]))
+    install_github('robertzk/testthatsomemore')
+  library(testthatsomemore)
+  tested_resource <- gsub("^test\\/", "", resource)
+  if (!director$exists(tested_resource)) {
+    # TODO: (RK) Figure out how this interacts with virtual resources.
+    #warning("You are testing ", sQuote(director:::colourise(tested_resource, "yellow")),
+    #        " but it does not exist in the project.\n", call. = FALSE, immediate = TRUE)
+    #return(NULL)
+  }
+
+  context(tested_resource)
+  tested_resource_object <- director$resource(tested_resource)
+  source_args$local$resource <-
+    function() tested_resource_object$value(recompile. = TRUE)
+  source()
 }
 

@@ -46,8 +46,28 @@ test_project <- function(project, base = '') {
 
 #' Fetch the test setup hook, if any exists.
 #'
-#' See 
+#' The resource \code{config/environments/test} should contain a local variable
+#' \code{setup} that has a function or list of functions to be incorporated
+#' into a stageRunner that will run the actual test setup.
+#'
+#' The seed environment for the stageRunner will contain the director object
+#' of the relevant project in the key \code{director}.
+#'
+#' @param project director or character. The director for the syberia project.
+#' @seealso \code{\link{test_projet}}
+#' @return a stageRunner that will run the relevant setup hook(s).
 test_setup <- function(project) {
+  if (!is.director(project)) {
+    stop("To fetch the setup hook for a project, please pass in a director ",
+         "object (the director for the syberia project). Instead I got ",
+         "an object of class ", class(project)[1])
+  }
 
+  if (project$exists('config/environments/test')) {
+    # Do not give access to global environment to ensure modularity.
+    setup_hook_env <- new.env(parent = parent.env(globalenv()))
+
+    #stageRunner(setup_hook_env, 
+  } else stageRunner(new.env(), list())
 }
 
