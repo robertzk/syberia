@@ -195,6 +195,22 @@ register_controllers <- function(project) {
 #' This function is responsible for bootstrapping this behavior in a
 #' Syberia project.
 #'
+#' By default, no test setup or teardown occurs. That is, there is no code that
+#' is executed before all tests run and after all tests run. However, there do
+#' exist hooks to provide this behavior. This can also be used to perform
+#' additional testing not covered by sourcing all files in the "test/" directory
+#' of the syberia project.
+#'
+#' To provide a setup or teardown hook, simply place a function or list of
+#' functions in a local variable \code{setup} or \code{teardown}, respectively,
+#' in \code{config/environments/test} relative to the root of the syberia project.
+#'
+#' For example, creating a file \code{config/environments/test.R} with the code
+#' code \code{setup <- function(env) cat("Running all tests.")} will print a message
+#' before all the tests are run. The one parameter the function must take is an
+#' environment which will contain a single key, `director`, pointing to the 
+#' `director` object coming from `syberia_project`.
+#'
 #' @param project director. The syberia director object on which to register
 #'   the tests controller.
 register_tests <- function(project) {
