@@ -34,10 +34,6 @@ test_project <- function(project, base = '') {
   ignored_tests <- file.path('test', test_environment_config(project)$ignored_tests %||% character(0))
   tests <- Filter(function(x) !director:::any_is_substring_of(x, ignored_tests), tests)
 
-  # TODO: (RK) Check READMEs
-  # TODO: (RK) Check all resources have tests, except those w/ test = FALSE in routes
-  # TODO: (RK) In config/environments/test, allow test hooks for additional testing.
-
   ensure_resources_have_tests(project, tests)
   
   ensure_no_global_variable_pollution(check_options = TRUE, {
