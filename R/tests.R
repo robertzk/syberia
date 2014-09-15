@@ -40,8 +40,13 @@ test_project <- function(project, base = '') {
     test_hook(project, type = 'setup')$run() # Run the test setup hook stageRunner
 
     # Run all tests
+    # TODO: (RK) Don't rely on pblapply
     Ramd::packages('pbapply')  
-    pblapply(tests, function(t) suppressMessages(project$resource(t)$value()))
+    pblapply(tests, function(t) {
+      ensure_no_global_variable_pollution(check_options = TRUE, {
+        suppressMessages(project$resource(t)$value())
+      }, desc = paste('running', t))
+    })
 
     # TODO: (RK) Populate teardown stageRunner environment with test info?
     # Could be useful to some people.
