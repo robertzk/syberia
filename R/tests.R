@@ -41,6 +41,8 @@ test_project <- function(project, base = '') {
 
     # Run all tests
     # TODO: (RK) Don't rely on pblapply
+    old_pboptions <- options('pboptions')
+    on.exit(options(old_pboptions))
     Ramd::packages('pbapply')  
     pblapply(tests, function(t) {
       ensure_no_global_variable_pollution(check_options = TRUE, {
