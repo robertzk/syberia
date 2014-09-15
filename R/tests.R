@@ -40,7 +40,7 @@ test_project <- function(project, base = '') {
 
   ensure_resources_have_tests(project, tests)
   
-  ensure_no_global_variable_pollution({
+  ensure_no_global_variable_pollution(check_options = TRUE, {
     test_hook(project, type = 'setup')$run() # Run the test setup hook stageRunner
 
     # Run all tests
