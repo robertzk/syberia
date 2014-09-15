@@ -13,3 +13,16 @@ test_that('It can catch variable addition', {
 
 suppressWarnings(rm('*test*', envir = globalenv()))
 
+old_options <- options('digits')
+on.exit(options(old_options))
+
+test_that('It does not error on no global options changing', {
+  assert(ensure_no_global_variable_pollution(check_options = TRUE, { NULL }))
+})
+
+test_that('It can detect global options changing', {
+  expect_error(ensure_no_global_variable_pollution(check_options = TRUE, {
+    options(list(digits = old_options$digits - 1))
+  }, 'global options were modified'))
+})
+

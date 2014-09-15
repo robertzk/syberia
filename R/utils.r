@@ -51,18 +51,30 @@ ensure_no_global_variable_pollution <- function(expr, desc, check_options = FALS
   out <- eval.parent(substitute(expr))
 
   after <- ls(globalenv())
+  missing_desc <- missing(desc)
   shorten <- function(vars) if (length(vars) > 5) c(vars[1:5], '...') else vars
-  message <- function(vars, type = 'removed') {
-    msg <- paste("Some global variables were", type)
-    if (!eval.parent(quote(missing(desc)))) msg <- paste(msg, "while", desc)
+  message <- function(vars, type = 'variables', action = 'removed') {
+    msg <- paste("Some global", type, "were", action)
+    if (!eval.parent(quote(missing_desc))) msg <- paste(msg, "while", desc)
     msg <- paste0(msg, ": ", director:::colourise(paste(vars, collapse = ", "), 'red'))
   }
 
-  if (length(bads <- setdiff(before, after)) > 0) stop(message(bads))
-  else if (length(bads <- setdiff(after, before)) > 0) stop(message(bads, 'added'))
+  check_before_after <- function(before, after, type) {
+    if (length(bads <- setdiff(before, after)) > 0) stop(message(bads, type = type))
+    else if (length(bads <- setdiff(after, before)) > 0)
+      stop(message(bads, type = type, action = 'added'))
+  }
 
-  if (isTRUE(check_options) && !identical(options(), old_options))
-    stop("Global options were changed.", call. = FALSE)
+  check_before_after(before, after, 'variables')
+
+  if (isTRUE(check_options) && !identical(new_options <- options(), old_options)) {
+    before <- ls(old_options); after <- ls(new_options)
+    check_before_after(before, after, 'options')
+    diffs <- vapply(before,
+      function(name)! identical(old_options[[name]], new_options[[name]]), logical(1))
+    stop("Some global options were modified: ",
+         director:::colourise(paste(names(which(diffs)), collapse = ", "), 'red'))
+  }
 
   out
 }
