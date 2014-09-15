@@ -149,9 +149,9 @@ test_hook <- function(project, type = 'setup') {
     }
     if (!is.list(hooks)) hooks <- list(hooks)
 
-    have_correct_arity <- rapply(hooks, how = 'unlist',
-      function(hook) is.function(hook) && length(formals(hook)) > 0)
-    if (!all(have_correct_arity)) {
+    all_have_correct_arity <- is.stagerunner(hooks) || all(rapply(hooks, how = 'unlist',
+      function(hook) is.function(hook) && length(formals(hook)) > 0))
+    if (!all_have_correct_arity) {
       stop("Test ", type, " hooks must all be functions that take at least one ",
            "argument.\n\nThe first argument will be an environment that has one ",
            "key, ", sQuote('director'), ". In ", colored_filename,
