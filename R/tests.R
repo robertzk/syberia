@@ -31,6 +31,9 @@ test_project <- function(project, base = '') {
   test_path <- file.path(project$root(), 'test')
   tests <- project$find(base = paste0('test/', base))
 
+  ignored_tests <- file.path('test', test_environment_config(project)$ignored_tests %||% character(0))
+  tests <- Filter(function(x) !director:::any_is_substring_of(x, ignored_tests), tests)
+
   # TODO: (RK) Check READMEs
   # TODO: (RK) Check all resources have tests, except those w/ test = FALSE in routes
   # TODO: (RK) In config/environments/test, allow test hooks for additional testing.
@@ -41,7 +44,7 @@ test_project <- function(project, base = '') {
     test_hook(project, type = 'setup')$run() # Run the test setup hook stageRunner
 
     # Run all tests
-    Ramd::packages('pbapply')
+    Ramd::packages('pbapply')  
     pblapply(tests, function(t) suppressMessages(project$resource(t)$value()))
 
     # TODO: (RK) Populate teardown stageRunner environment with test info?
@@ -103,7 +106,6 @@ ensure_resources_have_tests <- function(project, tests = project$find(base = 'te
          director:::colourise(paste(gsub('^test/', '', missing_tests), collapse = "\n"), 'red'))
   }
 }
-
 
 #' Fetch the test setup or teardown hook, if any exists.
 #'
@@ -168,7 +170,8 @@ test_hook <- function(project, type = 'setup') {
 #' @param project director or character. The director for the syberia project.
 test_environment_config <- function(project) {
   test_environment_path <- 'config/environments/test'
-  project$resource(test_environment_path)$value()
+  if (!project$exists(test_environment_path)) list()
+  else project$resource(test_environment_path)$value()
 }
 
 
