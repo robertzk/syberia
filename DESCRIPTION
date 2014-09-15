@@ -20,6 +20,7 @@ Imports:
     testthat,
     Ramd,
     stagerunner,
+    director,
     statsUtils,
     mungebits,
     Matrix,

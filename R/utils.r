@@ -34,3 +34,36 @@ normalized_filename <- function(filename) {
   else if (file.exists(tmp <- pp("#{filename}.R"))) tmp
   else FALSE
 }
+
+#' Ensure no global variables are polluted during an expression.
+#'
+#' If any global variables are removed or created, it will
+#' give a descriptive error.
+#' 
+#' @param expr expression. The R expression to evaluate
+#' @param desc character. A string to add to "you modified global 
+#' @param check_options logical. Whether to check if any global options were changed.
+#'   variables while [\code{desc} goes here]".
+ensure_no_global_variable_pollution <- function(expr, desc, check_options = FALSE) {
+  if (isTRUE(check_options)) old_options <- options()
+  before <- ls(globalenv())
+
+  out <- eval.parent(substitute(expr))
+
+  after <- ls(globalenv())
+  shorten <- function(vars) if (length(vars) > 5) c(vars[1:5], '...') else vars
+  message <- function(vars, type = 'removed') {
+    msg <- paste("Some global variables were", type)
+    if (!eval.parent(quote(missing(desc)))) msg <- paste(msg, "while", desc)
+    msg <- paste0(msg, ": ", director:::colourise(paste(vars, collapse = ", "), 'red'))
+  }
+
+  if (length(bads <- setdiff(before, after)) > 0) stop(message(bads))
+  else if (length(bads <- setdiff(after, before)) > 0) stop(message(bads, 'added'))
+
+  if (isTRUE(check_options) && !identical(options(), old_options))
+    stop("Global options were changed.", call. = FALSE)
+
+  out
+}
+
