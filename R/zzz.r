@@ -8,5 +8,7 @@
     rm('run', envir = .GlobalEnv)
 
   makeActiveBinding('run', function() run_model, .GlobalEnv)
+
+  addTaskCallback(auto_run)
 }
 
