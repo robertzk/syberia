@@ -57,10 +57,11 @@ auto_run <- function(x, ...) {
       is.stagerunner(active_runner())) {
     run_commands <- deparse(x)
     run_commands <- strsplit(run_commands, ":")[[1]]
-    if (length(run_commands) == 2)
+    tryCatch(finally = return(TRUE), { if (length(run_commands) == 2)
       run_model(, run_commands[[1]], run_commands[[2]])
     else if (length(run_commands) == 1)
       run_model(, run_commands[[1]])
+    })
   }
   TRUE
 }
