@@ -52,13 +52,15 @@ last_run <- function() syberiaStructure:::get_cache('last_run')
 #' # and the fifth substage of the second stage of the last active runner
 #' # will be executed.
 auto_run <- function(x, ...) {
-  if (is.call(x) && length(x) >= 2 && x[[1]] == '/' && is.numeric(x[[2]])) {
+  if (is.call(x) && length(x) >= 1 && x[[1]] == '/' &&
+      (is.numeric(x[[2]]) || is.numeric(x[[3]])) &&
+      is.stagerunner(active_runner())) {
     run_commands <- deparse(x)
     run_commands <- strsplit(run_commands, ":")[[1]]
     if (length(run_commands) == 2)
-      active_runner()$run(, run_commands[[1]], run_commands[[2]])
+      run_model(, run_commands[[1]], run_commands[[2]])
     else if (length(run_commands) == 1)
-      active_runner()$run(, run_commands[[1]])
+      run_model(, run_commands[[1]])
   }
   TRUE
 }
