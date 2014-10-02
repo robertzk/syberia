@@ -35,6 +35,8 @@ test_project <- function(project, base = '') {
   tests <- Filter(function(x) !director:::any_is_substring_of(x, ignored_tests), tests)
 
   ensure_resources_have_tests(project, tests)
+
+  load_test_packages()
   
   ensure_no_global_variable_pollution(check_options = TRUE, {
     test_hook(project, type = 'setup')$run() # Run the test setup hook stageRunner
@@ -56,6 +58,14 @@ test_project <- function(project, base = '') {
   }, desc = "running this project's tests (this is bad and should never happen)")
 
   invisible(TRUE)
+}
+
+load_test_packages <- function() {
+  Ramd::packages('testthat')
+  if (!is.element('testthatsomemore', installed.packages()[,1]))
+    install_github('robertzk/testthatsomemore')
+  library(testthat)
+  library(testthatsomemore)
 }
 
 #' Check that all mandatory tested resources have tests.

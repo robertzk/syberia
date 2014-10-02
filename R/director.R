@@ -282,9 +282,6 @@ routes_parser <- function() {
 #' @param source_args list
 #' @param source function
 default_tests_preprocessor <- function(resource_object, director, source_args, source) {
-  if (!is.element('testthatsomemore', installed.packages()[,1]))
-    install_github('robertzk/testthatsomemore')
-  library(testthatsomemore)
   tested_resource <- gsub("^test\\/", "", resource)
   if (!director$exists(tested_resource)) {
     # TODO: (RK) Figure out how this interacts with virtual resources.
