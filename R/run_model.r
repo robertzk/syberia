@@ -6,7 +6,6 @@
 #' @param ... additional arguments to pass to \code{$run(...)} on the stageRunner.
 #'   For example, \code{to = 'some/key'}.
 #' @param fresh logical. Whether or not to use the cache. By default, \code{FALSE}.
-#' @importFrom director colourise
 #' @param verbose logical. Whether or not to display messages. The default is
 #'   \code{TRUE}.
 #' @export
