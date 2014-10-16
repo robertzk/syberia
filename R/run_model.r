@@ -6,6 +6,7 @@
 #' @param ... additional arguments to pass to \code{$run(...)} on the stageRunner.
 #'   For example, \code{to = 'some/key'}.
 #' @param fresh logical. Whether or not to use the cache. By default, \code{FALSE}.
+#' @importFrom director colourise
 #' @param verbose logical. Whether or not to display messages. The default is
 #'   \code{TRUE}.
 #' @export
@@ -98,7 +99,7 @@ run_model <- function(key = syberiaStructure:::get_cache('last_model') %||%
       syberiaStructure:::get_cache('runtime/any_modified')) 
 
   if (coalesce_stagerunner) {
-    message(testthat:::colourise("Copying cached environments...", "yellow"))
+    message(director:::colourise("Copying cached environments...", "yellow"))
     stagerunner <- construct_stage_runner(model_stages)
     stagerunner$coalesce(syberiaStructure:::get_cache('last_stagerunner'))
   } else if (!missing(key) || !is.stagerunner(

@@ -1,6 +1,6 @@
 .onAttach <- function(...) {
   if (!identical(silent <- getOption("syberia.silent"), TRUE))
-    message(paste0("Loading ", testthat:::colourise('Syberia', 'red'), "...\n"))
+    message(paste0("Loading ", director:::colourise('Syberia', 'red'), "...\n"))
 
   load_github_packages(.github_packages, silent = silent)
 
