@@ -6,9 +6,9 @@ before_install:
 install:
 - ./travis-tool.sh install_deps
 - ./travis-tool.sh install_r devtools microbenchmark knitr
-- ./travis-tool.sh install_r arules pbapply memoise stringr testthat
+- ./travis-tool.sh install_r arules pbapply memoise stringr
 - ./travis-tool.sh install_r gbm glmnet party survival Matrix
-- ./travis-tool.sh install_github robertzk/Ramd
+- ./travis-tool.sh install_github robertzk/Ramd hadley/testthat
 - ./travis-tool.sh install_github robertzk/testthatsomemore
 - ./travis-tool.sh install_github robertzk/stagerunner
 - ./travis-tool.sh install_github robertzk/director

@@ -98,7 +98,7 @@ run_model <- function(key = syberiaStructure:::get_cache('last_model') %||%
       syberiaStructure:::get_cache('runtime/any_modified')) 
 
   if (coalesce_stagerunner) {
-    message(testthat:::colourise("Copying cached environments...", "yellow"))
+    message(director:::colourise("Copying cached environments...", "yellow"))
     stagerunner <- construct_stage_runner(model_stages)
     stagerunner$coalesce(syberiaStructure:::get_cache('last_stagerunner'))
   } else if (!missing(key) || !is.stagerunner(
