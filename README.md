@@ -1,5 +1,5 @@
 Syberia
-=======
+========
 
 Syberia is a framework for building, debugging, testing, and deploying
 classifiers developed in R. It includes support for importing data,
