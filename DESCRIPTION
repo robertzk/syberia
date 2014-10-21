@@ -1,7 +1,7 @@
 Package: syberia
 Type: Package
 Title: Syberia
-Version: 0.4.1
+Version: 0.4.2
 Description: Syberia provides an opinionated unified framework for
     fast iteration on classifier development and deployment. It is
     founded on convention over configuration and aims to solve the
