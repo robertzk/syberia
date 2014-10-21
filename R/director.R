@@ -161,6 +161,7 @@ bootstrap_syberia_project <- function(project) {
 #'
 #' @inheritParams bootstrap_syberia_project
 custom_bootstrap <- function(project) {
+  if (project$exists('config/boot')) project$resource('config/boot')$value()
 }
 
 
