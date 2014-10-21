@@ -30,7 +30,10 @@ Imports:
     syberiaStages
 Suggests:
     pbapply,
+    testthat,
+    knitr
     testthatsomemore
+VignetteBuilder: knitr
 License: MIT
 LazyData: true
 Roxygen: list(wrap = FALSE)
