@@ -2,7 +2,7 @@
 % Please edit documentation in R/director.R
 \name{custom_bootstrap}
 \alias{custom_bootstrap}
-\title{Run use custom bootstrapping in boot/config.}
+\title{Run custom bootstrapping and startup actions.}
 \usage{
 custom_bootstrap(project)
 }

@@ -141,7 +141,7 @@ bootstrap_syberia_project <- function(project) {
   project
 }
 
-#' Run use custom bootstrapping in boot/config.
+#' Run custom bootstrapping and startup actions.
 #'
 #' When a syberia project is first loaded, it is "bootstrapped" by performing
 #' several startup procedures: registering the config/application file, 
