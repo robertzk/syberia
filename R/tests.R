@@ -21,6 +21,8 @@
 #'
 #' @param project director or character. The director for the syberia project.
 #'    If a \code{character}, it will be passed to \code{syberia_project} first.
+#' @param base character. Any subdirectory to test specifically. By default,
+#'    the empty string \code{''} which means "test everything".
 #' @seealso \code{\link{syberia_project}}
 #' @export
 #' @return \code{TRUE} if all tests pass or will error otherwise. Note this
@@ -74,7 +76,7 @@ load_test_packages <- function() {
 #'
 #' @param project director or character. The director for the syberia project.
 #' @param tests character. The tests to check. By default, all tests in the project.
-#' @parma ignore character. A vector of tests to ignore (and not check for presence).
+#' @param ignore character. A vector of tests to ignore (and not check for presence).
 ensure_resources_have_tests <- function(project, tests = project$find(base = 'test/'), ignore = character(0)) {
   controllers <- project$find('lib/controllers/')
 
@@ -183,6 +185,7 @@ test_hook <- function(project, type = 'setup') {
 }
 
 #' Get the configuration for the test environment.
+#'
 #' @param project director or character. The director for the syberia project.
 test_environment_config <- function(project) {
   test_environment_path <- 'config/environments/test'

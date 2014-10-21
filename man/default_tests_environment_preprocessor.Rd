@@ -12,8 +12,6 @@ default_tests_environment_preprocessor(director, source_args, source)
 \item{source_args}{list}
 
 \item{source}{function}
-
-\item{resource_object}{directorResource}
 }
 \description{
 The default preprocessor for syberia test environments.

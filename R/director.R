@@ -136,8 +136,31 @@ bootstrap_syberia_project <- function(project) {
   register_controllers(project)
   register_routes(project)
   register_tests(project)
+  custom_bootstrap(project)
   project$.cache$bootstrapped <- TRUE
   project
+}
+
+#' Run use custom bootstrapping in boot/config.
+#'
+#' When a syberia project is first loaded, it is "bootstrapped" by performing
+#' several startup procedures: registering the config/application file, 
+#' registering the controllers, registering the routes, and setting up
+#' the tests so that \code{test_project} works correctly. The user
+#' can specify additional actions to perform using \code{custom_bootstrap}
+#' if and only if a config/boot resource is present (i.e., either a
+#' config/boot.R file or config/boot/boot.R file).
+#'
+#' Note that due to the dynamic and interactive nature of R, bootstrapping
+#' can occur non-deterministically. Unlike, for example, a Ruby on Rails application,
+#' which has one entrance point, a syberia project will be bootstrapped
+#' whenever it is referenced from R code the first time. This includes when
+#' any resources are loaded, tests are ran, configuration is accessed, etc.
+#' You should think of the bootstrapping process as "lazy loading" all that
+#' a syberia project needs to get to work.
+#'
+#' @inheritParams bootstrap_syberia_project
+custom_bootstrap <- function(project) {
 }
 
 
@@ -301,7 +324,6 @@ default_tests_preprocessor <- function(resource_object, director, source_args, s
 
 #' The default preprocessor for syberia test environments.
 #'
-#' @param resource_object directorResource
 #' @param director director
 #' @param source_args list
 #' @param source function
