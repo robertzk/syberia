@@ -31,8 +31,8 @@ Imports:
 Suggests:
     pbapply,
     testthat,
+    testthatsomemore,
     knitr
-    testthatsomemore
 VignetteBuilder: knitr
 License: MIT
 LazyData: true
