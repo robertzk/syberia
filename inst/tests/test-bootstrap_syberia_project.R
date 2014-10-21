@@ -1,4 +1,4 @@
-context('bootstrap_syberia_project')
+context('bootstrapping')
 library(testthatsomemore)
 
 test_that('it can bootstrap a trivial syberia project correctly', {
