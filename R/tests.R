@@ -32,9 +32,11 @@ test_project <- function(project, base = '') {
   tests <- project$find(base = paste0('test/', base))
 
   ignored_tests <- file.path('test', test_environment_config(project)$ignored_tests %||% character(0))
+  all_tests <- tests
   tests <- Filter(function(x) !director:::any_is_substring_of(x, ignored_tests), tests)
+  ignored_test_paths <- setdiff(all_tests, tests)
 
-  ensure_resources_have_tests(project, tests)
+  ensure_resources_have_tests(project, tests, ignore = ignored_test_paths)
 
   load_test_packages()
   
@@ -72,7 +74,8 @@ load_test_packages <- function() {
 #'
 #' @param project director or character. The director for the syberia project.
 #' @param tests character. The tests to check. By default, all tests in the project.
-ensure_resources_have_tests <- function(project, tests = project$find(base = 'test/')) {
+#' @parma ignore character. A vector of tests to ignore (and not check for presence).
+ensure_resources_have_tests <- function(project, tests = project$find(base = 'test/'), ignore = character(0)) {
   controllers <- project$find('lib/controllers/')
 
   # Do not consider test controllers -- no meta-tests, heh!
@@ -113,7 +116,7 @@ ensure_resources_have_tests <- function(project, tests = project$find(base = 'te
   # Error if any resources don't have tests.
   # TODO: (RK) Check for tests in subdirectories only?
   necessary_tests <- file.path('test', resources)
-  missing_tests <- setdiff(necessary_tests, tests)
+  missing_tests <- setdiff(necessary_tests, c(tests, ignore))
   if (length(missing_tests) > 0) {
     stop(call. = FALSE, "Tests are missing for the following resources:\n\n",
          director:::colourise(paste(gsub('^test/', '', missing_tests), collapse = "\n"), 'red'))
