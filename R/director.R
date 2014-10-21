@@ -13,7 +13,7 @@ syberia_project <- local({
   # A cache of directors for the existent syberia projects
   syberia_projects <- list()
 
-  function(filename) {
+  function(filename = getwd()) {
     if (!(is.character(filename) && length(filename) == 1)) {
       stop("To fetch a syberia project, you must specify a file path ",
            "(a character vector of length 1). Instead we got a ",
