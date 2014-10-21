@@ -1,4 +1,4 @@
-context('ensure_no_global_variable_pollution')
+context('ensure no global variable pollution')
 
 suppressWarnings(rm('*test*', envir = globalenv()))
 

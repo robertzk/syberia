@@ -1,3 +1,11 @@
+# Version 0.4.2
+
+* Users can provide custom bootstrapping (i.e., things to do the first
+  time the syberia project is loaded) by defining a `config/boot` resource.
+  For example, placing `cat("Bootstrapped")` in `config/boot.R` will
+  print "Bootstrapped" every time the syberia project is loaded for the
+  first time in a fresh console.
+
 # Version 0.4.1
 
 * This version was released in conjunction with version 0.2.0 of
