@@ -204,6 +204,7 @@ register_controllers <- function(project) {
 #'   the tests controller.
 #' @seealso \code{\link{test_project}}
 register_tests <- function(project) {
+  project$register_preprocessor('config/environments/test', default_tests_environment_preprocessor, overwrite = TRUE)
   project$register_preprocessor('test', default_tests_preprocessor, overwrite = TRUE)
 }
 
@@ -277,6 +278,7 @@ routes_parser <- function() {
 }
 
 #' The default preprocessor for syberia tests.
+#'
 #' @param resource_object directorResource
 #' @param director director
 #' @param source_args list
@@ -294,6 +296,19 @@ default_tests_preprocessor <- function(resource_object, director, source_args, s
   tested_resource_object <- director$resource(tested_resource)
   source_args$local$resource <-
     function() tested_resource_object$value(recompile. = TRUE)
+  source()
+}
+
+#' The default preprocessor for syberia test environments.
+#'
+#' @param resource_object directorResource
+#' @param director director
+#' @param source_args list
+#' @param source function
+default_tests_environment_preprocessor <- function(director, source_args, source) {
+  # Provide access to the director for people with hardcore test setup
+  # and teardown hooks.
+  source_args$local$director <- director 
   source()
 }
 
