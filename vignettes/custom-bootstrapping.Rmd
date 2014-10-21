@@ -21,3 +21,14 @@ any resources are loaded, tests are ran, configuration is accessed, etc.
 You should think of the bootstrapping process as "lazy loading" all that
 a syberia project needs to get to work.
 
+Example
+------
+
+Place the following `config/boot.R` in your syberia project.
+
+```r
+cat("Bootstrapped!")
+```
+
+Whenever you perform any action that uses your syberia project for the first
+time in a fresh console, you should see "Bootstrapped!"
