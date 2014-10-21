@@ -1,4 +1,4 @@
-context('bootstrap_syberia_project')
+context('bootstrapping')
 library(testthatsomemore)
 
 test_that('it can bootstrap a trivial syberia project correctly', {
@@ -22,3 +22,11 @@ test_that('it can define a controller through routes', {
     expect_identical(d$resource('foo')$value(), 'test')
   })
 })
+
+test_that("custom bootstrap hooks are ran", {
+  within_file_structure(list('foo.R', config = list('application.R',
+      boot.R = 'cat("Bootstrapped")')), {
+    expect_output(syberia_project(tempdir), "Bootstrapped")
+  })
+})
+
