@@ -52,7 +52,7 @@ test_project <- function(project = syberia_project(), base = '') {
     Ramd::packages('pbapply')  
     pblapply(tests, function(t) {
       ensure_no_global_variable_pollution(check_options = TRUE, {
-        suppressMessages(project$resource(t)$value())
+        suppressMessages(project$resource(t)$value(recompile = TRUE))
       }, desc = paste('running', t))
     })
 
