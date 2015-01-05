@@ -8,6 +8,7 @@ install:
 - "./travis-tool.sh install_r devtools microbenchmark knitr"
 - "./travis-tool.sh install_r arules pbapply memoise stringr"
 - "./travis-tool.sh install_r gbm glmnet party survival Matrix"
+- "./travis-tool.sh github_package jimhester/covr"
 - "./travis-tool.sh install_github robertzk/Ramd hadley/testthat"
 - "./travis-tool.sh install_github robertzk/testthatsomemore"
 - "./travis-tool.sh install_github robertzk/stagerunner"
@@ -20,7 +21,9 @@ install:
 - "./travis-tool.sh install_github robertzk/syberiaStages"
 script: "./travis-tool.sh run_tests"
 after_failure:
-- "./travis-tool.sh dump_logs"
+  - "./travis-tool.sh dump_logs"
+after_success:
+  - "Rscript -e 'library(covr);coveralls()'"
 notifications:
   email:
     on_success: change
