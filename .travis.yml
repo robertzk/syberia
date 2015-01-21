@@ -8,7 +8,7 @@ install:
 - "./travis-tool.sh install_r devtools microbenchmark knitr"
 - "./travis-tool.sh install_r arules pbapply memoise stringr"
 - "./travis-tool.sh install_r gbm glmnet party survival Matrix"
-- "./travis-tool.sh github_package jimhester/covr"
+- "./travis-tool.sh github_package jimhester/covr hadley/lowliner"
 - "./travis-tool.sh install_github robertzk/Ramd hadley/testthat"
 - "./travis-tool.sh install_github robertzk/testthatsomemore"
 - "./travis-tool.sh install_github robertzk/objectdiff"
