@@ -27,7 +27,8 @@ Imports:
     tundra,
     syberiaMungebits,
     syberiaStructure,
-    syberiaStages
+    syberiaStages,
+    objectdiff
 Suggests:
     pbapply,
     testthat,

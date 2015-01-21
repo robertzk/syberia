@@ -1,3 +1,10 @@
+- *.sy packages that act as syberia templates
+- equivalent of Gemfile / bundler, and ability to specify source (CRAN, github, etc.)
+  This way, we can have syberia templates off of packages. The package itself
+  could contain global helpers as functions and a syberia skeleton
+  in inst/layout.
+
+
 - Write up NEWS explaining syberia integration
 - syberia_init function for creating a syberia project.
 - for model stage, maybe we should change the convention to:
