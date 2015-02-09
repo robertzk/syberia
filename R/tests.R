@@ -156,7 +156,7 @@ test_hook <- function(project, type = 'setup') {
     # TODO: (RK) Fix director absolute file paths in $.filename and this hack
     filename <- director:::strip_root(project$root(),
                                       project$.filename(test_environment_path))
-    hooks <- test_environment_config(project)[[type]] %||% list()
+    hooks <- test_environment_config(project)[[type]] %||% list(force)
 
     # TODO: (RK) Maybe replace this with a new stageRunner method to check 
     # argument validity? In the future, stageRunner could maybe do more!
@@ -185,7 +185,7 @@ test_hook <- function(project, type = 'setup') {
     hook_env$director <- project
 
     stageRunner(hook_env, hooks)
-  } else stageRunner(new.env(), list())
+  } else stageRunner(new.env(), list(force))
 }
 
 #' Get the configuration for the test environment.
