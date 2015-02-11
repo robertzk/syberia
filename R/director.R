@@ -1,4 +1,4 @@
-#' Fetch a syberia project director relative a filename.
+#' Fetch a syberia project director relative to a filename.
 #'
 #' @param filename character. Some in a syberia project.
 #' @return the director object for the syberia project.
