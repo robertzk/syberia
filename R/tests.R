@@ -51,10 +51,11 @@ test_project <- function(project = syberia_project(), base = '') {
     # TODO: (RK) Don't rely on pblapply
     old_pboptions <- options('pboptions')
     on.exit(options(old_pboptions))
-    Ramd::packages('pbapply')  
     single_setup <- test_hook(project, type = 'single_setup')
     single_teardown <- test_hook(project, type = 'single_teardown')
-    pblapply(tests, function(t) {
+    requireNamespace("pbapply")
+    apply_function <- if ("pbapply" %in% .packages()) pbapply::pblapply else lapply
+    apply_function(tests, function(t) {
       ensure_no_global_variable_pollution(check_options = TRUE, {
         single_setup$run()
         suppressMessages(project$resource(t)$value(recompile = TRUE))
