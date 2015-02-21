@@ -35,6 +35,6 @@ Suggests:
     testthatsomemore,
     knitr
 VignetteBuilder: knitr
-License: MIT
+License: GPL (>= 2)
 LazyData: true
 Roxygen: list(wrap = FALSE)
