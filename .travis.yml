@@ -36,4 +36,7 @@ notifications:
     - "%{repository}#%{build_number} (%{branch} - %{commit} : %{author}): %{message}
       | Details: %{build_url} | Changes: %{compare_url}"
     rooms:
-      secure: l+wmlZJjYTD9Gv+oSp+y5IE6UFAwGEbfiUdoIU8VA4AihIsarEu9/h1WfuZLf00qlxktx45BLsecvn5QGX+IHVTXDFxmYyL+pzuTdNYZjc87EutstyJ1Ahdt5IA49A8X+PHAO7v60XIjrUrXPKwx3vxsVmO1RSayo0xAwfnupmk=
+      senv:
+- global:
+  - WARNINGS_ARE_ERRORS=1
+  - _R_CHECK_FORCE_SUGGESTS_=0ecure: l+wmlZJjYTD9Gv+oSp+y5IE6UFAwGEbfiUdoIU8VA4AihIsarEu9/h1WfuZLf00qlxktx45BLsecvn5QGX+IHVTXDFxmYyL+pzuTdNYZjc87EutstyJ1Ahdt5IA49A8X+PHAO7v60XIjrUrXPKwx3vxsVmO1RSayo0xAwfnupmk=
