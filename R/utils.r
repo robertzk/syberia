@@ -51,7 +51,7 @@ ensure_no_global_variable_pollution <- function(expr, desc, check_options = FALS
     diffs <- vapply(before,
       function(name)! identical(old_options[[name]], new_options[[name]]), logical(1))
     stop("Some global options were modified: ",
-         director:::colourise(paste(names(which(diffs)), collapse = ", "), 'red'))
+         crayon::red(paste(names(which(diffs)), collapse = ", ")))
   }
 
   out
