@@ -2,10 +2,8 @@
 
 export("%||%")
 export(active_runner)
-export(install_github_packages)
 export(is.trigger)
 export(last_run)
-export(load_github_packages)
 export(record)
 export(run_model)
 export(syberia_project)
