@@ -23,6 +23,15 @@ test_that('it can define a controller through routes', {
   })
 })
 
+test_that('it can define an idempotent controller through routes', {
+  within_file_structure(list('foo.R', config = list('application.R', 'routes.R' = 
+    "list(foo = 'test')"), lib = list(controllers =
+      list(test = list(test.R = 'function() "test"')))), {
+    d <- syberia_project(tempdir)
+    expect_identical(d$resource('foo')$value(), 'test')
+  })
+})
+
 test_that("custom bootstrap hooks are ran", {
   within_file_structure(list('foo.R', config = list('application.R',
       boot.R = 'cat("Bootstrapped")')), {
