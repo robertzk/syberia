@@ -1,3 +1,7 @@
+if (getRversion() >= "2.15.1") {
+  utils::globalVariables(c("input", "resource", "output", "resource_object"))
+}
+
 #' Fetch a syberia project director relative to a filename.
 #'
 #' @param filename character. Some in a syberia project.
