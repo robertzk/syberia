@@ -40,6 +40,8 @@ test_project <- function(project = syberia_project(), base = '') {
 
   ensure_resources_have_tests(project, tests, ignore = ignored_test_paths)
 
+  # TODO: (RK) Figure out how to run this in an environment that has testthat
+  # without attaching to the global environment.
   load_test_packages()
   
   ensure_no_global_variable_pollution(check_options = TRUE, {
@@ -70,10 +72,9 @@ test_project <- function(project = syberia_project(), base = '') {
 
 load_test_packages <- function() {
   Ramd::packages('testthat')
-  if (!is.element('testthatsomemore', installed.packages()[,1]))
-    install_github('robertzk/testthatsomemore')
-  library(testthat)
-  library(testthatsomemore)
+  if (!is.element('testthatsomemore', installed.packages()[,1])) {
+    install.packages('robertzk/testthatsomemore')
+  }
 }
 
 #' Check that all mandatory tested resources have tests.
