@@ -17,9 +17,9 @@ Imports:
     devtools,
     memoise,
     stringr,
-    testthat,
     Ramd,
     stagerunner,
+    testthat,
     director,
     statsUtils,
     mungebits,
@@ -31,7 +31,6 @@ Imports:
     objectdiff
 Suggests:
     pbapply,
-    testthat,
     testthatsomemore,
     knitr
 VignetteBuilder: knitr
