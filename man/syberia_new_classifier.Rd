@@ -7,7 +7,7 @@
 syberia_new_classifier(name)
 }
 \arguments{
-\item{name}{character. The name of the classifier}
+\item{name}{character. The name of the classifierb}
 }
 \description{
 Bootstrap a new classifier for a syberia project
