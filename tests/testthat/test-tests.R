@@ -34,8 +34,10 @@ describe('Running test_project', {
   })
   
   test_that('it can run test_project on a simple project with one failing test', {
-    p <- syberia_project(file.path(getwd(), 'projects', 'simple_failing_test'))
-    expect_error(capture.output(test_project(p)))
+    with_test_mock({
+      p <- syberia_project(file.path(getwd(), 'projects', 'simple_failing_test'))
+      expect_error_(capture.output(test_project(p)))
+    })
   })
 })
 
