@@ -12,7 +12,7 @@ with_test_mock <- function(expr) {
   on.exit(list2env(old_methods, envir = env), add = TRUE)
   on.exit(lockBinding("expect_equal", env), add = TRUE)
   on.exit(lockBinding("test_that", env), add = TRUE)
-  assign("expect_error_", env$expect_error, envir = env)
+  assign("expect_error_", env$expect_error, envir = parent.frame())
   assign("expect_equal", function(...) stop("Didn't match"), envir = env)
   assign("test_that", function(msg, expr) eval.parent(substitute(expr)), envir = env)
   eval.parent(substitute(expr))
