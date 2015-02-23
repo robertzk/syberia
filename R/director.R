@@ -28,7 +28,7 @@ syberia_project <- local({
 
     root <- syberiaStructure::syberia_root(filename)
     if (is.null(root))
-      stop("No syberia files detected in your directory.\n",
+      stop("No syberia files detected in ", filename, "\n",
            "Try syberia_project('path') with a path that includes Syberia files or",
            "changing your working directory to a path with Syberia files.")
     else root <- normalizePath(root)
