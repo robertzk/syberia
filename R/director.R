@@ -25,7 +25,13 @@ syberia_project <- local({
            ' of length ', length(filename)))
     }
     # TODO: (RK) Don't go through syberia_root here
-    root <- normalizePath(syberiaStructure::syberia_root(filename))
+
+    root <- syberiaStructure::syberia_root(filename)
+    if (is.null(root))
+      stop("No syberia files detected in your directory.\n",
+           "Try syberia_project('path') with a path that includes Syberia files or",
+           "changing your working directory to a path with Syberia files.")
+    else root <- normalizePath(root)
     if (!is.element(root, names(syberia_projects))) {
       syberia_projects[[root]] <<- bootstrap_syberia_project(director(root, 'syberia'))
     }
