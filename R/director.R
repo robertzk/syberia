@@ -25,9 +25,10 @@ syberia_project <- local({
            ' of length ', length(filename)))
     }
     # TODO: (RK) Don't go through syberia_root here
-    root <- normalizePath(syberia_root(filename))
-    if (!is.element(root, names(syberia_projects)))
+    root <- normalizePath(syberiaStructure::syberia_root(filename))
+    if (!is.element(root, names(syberia_projects))) {
       syberia_projects[[root]] <<- bootstrap_syberia_project(director(root, 'syberia'))
+    }
     syberia_projects[[root]]
   }
 })
