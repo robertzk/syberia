@@ -3,6 +3,7 @@
 #' @param name character. The name of the folder where the project should be created.
 #' @export
 syberia_new <- function(name) {
+  if (!is.null(syberia_root())) stop("Syberia project within a syberia project doesn't sound good. File an issue at https://github.com/kirillseva/generator-syberia if you want this functionality added.")
   stopifnot(is.character(name) && length(name) <= 1)
   npm <- system2("which", "npm")[[1]]
   # Install necessary software
