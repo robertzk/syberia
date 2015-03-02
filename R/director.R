@@ -1,3 +1,7 @@
+if (getRversion() >= "2.15.1") {
+  utils::globalVariables(c("input", "resource", "output", "resource_object"))
+}
+
 #' Fetch a syberia project director relative to a filename.
 #'
 #' @param filename character. Some in a syberia project.
@@ -21,9 +25,16 @@ syberia_project <- local({
            ' of length ', length(filename)))
     }
     # TODO: (RK) Don't go through syberia_root here
-    root <- normalizePath(syberia_root(filename))
-    if (!is.element(root, names(syberia_projects)))
+
+    root <- syberiaStructure::syberia_root(filename)
+    if (is.null(root))
+      stop("No syberia files detected in ", filename, "\n",
+           "Try syberia_project('path') with a path that includes Syberia files or",
+           "changing your working directory to a path with Syberia files.")
+    else root <- normalizePath(root)
+    if (!is.element(root, names(syberia_projects))) {
       syberia_projects[[root]] <<- bootstrap_syberia_project(director(root, 'syberia'))
+    }
     syberia_projects[[root]]
   }
 })

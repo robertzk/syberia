@@ -1,3 +1,8 @@
+# Version 0.4.3
+
+* A wide collection of legacy functions and helpers were removed.
+  These should not affect any existing Syberia projects.
+
 # Version 0.4.2
 
 * Users can provide custom bootstrapping (i.e., things to do the first

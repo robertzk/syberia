@@ -2,7 +2,7 @@
 % Please edit documentation in R/director.R
 \name{syberia_project}
 \alias{syberia_project}
-\title{Fetch a syberia project director relative a filename.}
+\title{Fetch a syberia project director relative to a filename.}
 \usage{
 syberia_project(filename = getwd())
 }
@@ -13,7 +13,7 @@ syberia_project(filename = getwd())
 the director object for the syberia project.
 }
 \description{
-Fetch a syberia project director relative a filename.
+Fetch a syberia project director relative to a filename.
 }
 \examples{
 \dontrun{

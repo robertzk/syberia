@@ -1,0 +1,3 @@
+list(
+  'lib/people' = 'person'
+)

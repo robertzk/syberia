@@ -40,6 +40,8 @@ test_project <- function(project = syberia_project(), base = '') {
 
   ensure_resources_have_tests(project, tests, ignore = ignored_test_paths)
 
+  # TODO: (RK) Figure out how to run this in an environment that has testthat
+  # without attaching to the global environment.
   load_test_packages()
   
   ensure_no_global_variable_pollution(check_options = TRUE, {
@@ -49,13 +51,16 @@ test_project <- function(project = syberia_project(), base = '') {
     # TODO: (RK) Don't rely on pblapply
     old_pboptions <- options('pboptions')
     on.exit(options(old_pboptions))
-    Ramd::packages('pbapply')  
     single_setup <- test_hook(project, type = 'single_setup')
     single_teardown <- test_hook(project, type = 'single_teardown')
-    pblapply(tests, function(t) {
+    requireNamespace("pbapply")
+    apply_function <- if ("pbapply" %in% installed.packages()[,1]) pbapply::pblapply else lapply
+    apply_function(tests, function(t) {
       ensure_no_global_variable_pollution(check_options = TRUE, {
+        single_setup$context$resource <- t
         single_setup$run()
         suppressMessages(project$resource(t)$value(recompile = TRUE))
+        single_teardown$context$resource <- t
         single_teardown$run()
       }, desc = paste('running', t))
     })
@@ -70,10 +75,9 @@ test_project <- function(project = syberia_project(), base = '') {
 
 load_test_packages <- function() {
   Ramd::packages('testthat')
-  if (!is.element('testthatsomemore', installed.packages()[,1]))
-    install_github('robertzk/testthatsomemore')
-  library(testthat)
-  library(testthatsomemore)
+  if (!is.element('testthatsomemore', installed.packages()[,1])) {
+    install.packages('robertzk/testthatsomemore')
+  }
 }
 
 #' Check that all mandatory tested resources have tests.

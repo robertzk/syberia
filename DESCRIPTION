@@ -1,7 +1,7 @@
 Package: syberia
 Type: Package
 Title: Syberia
-Version: 0.4.2
+Version: 0.4.3
 Description: Syberia provides an opinionated unified framework for
     fast iteration on classifier development and deployment. It is
     founded on convention over configuration and aims to solve the
@@ -15,11 +15,12 @@ Depends:
     R (>= 3.0.0)
 Imports:
     devtools,
+    crayon,
     memoise,
     stringr,
-    testthat,
     Ramd,
     stagerunner,
+    testthat,
     director,
     statsUtils,
     mungebits,
@@ -31,10 +32,9 @@ Imports:
     objectdiff
 Suggests:
     pbapply,
-    testthat,
     testthatsomemore,
     knitr
 VignetteBuilder: knitr
-License: MIT
+License: GPL (>= 2)
 LazyData: true
 Roxygen: list(wrap = FALSE)
