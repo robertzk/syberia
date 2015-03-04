@@ -21,7 +21,7 @@ run_model <- function(key = syberiaStructure:::get_cache('last_model') %||%
     keys <- project$find(key, base = 'models/')
     if (length(keys) == 0) stop("No model ", sQuote(key),
         " found in syberia project ", sQuote(project$root()), call. = FALSE)
-    stagerunner <- project$resource(keys[1])$value()
+    stagerunner <- project$resource(keys[1])$value(fresh = TRUE)
     syberiaStructure:::set_cache(key, 'last_model')
     syberiaStructure:::set_cache(stagerunner, 'last_stagerunner')
     output <- stagerunner$run(..., verbose = verbose)
