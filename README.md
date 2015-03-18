@@ -1,4 +1,4 @@
-Syberia [![Build Status](https://travis-ci.org/robertzk/syberia.svg?branch=master)](https://travis-ci.org/robertzk/syberia.svg?branch=master) [![Coverage Status](https://coveralls.io/repos/robertzk/syberia/badge.png)](https://coveralls.io/r/robertzk/syberia)
+Syberia [![Build Status](https://travis-ci.org/robertzk/syberia.svg?branch=master)](https://travis-ci.org/robertzk/syberia) [![Coverage Status](https://coveralls.io/repos/robertzk/syberia/badge.png)](https://coveralls.io/r/robertzk/syberia)
 ========
 
 ![syberia](http://i.imgur.com/2FSks5x.png)
