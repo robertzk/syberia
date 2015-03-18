@@ -1,3 +1,5 @@
 library(testthat)
 library(testthatsomemore)
-test_package("syberia")
+library(syberia)
+
+test_check("syberia")
