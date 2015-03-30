@@ -129,7 +129,7 @@ ensure_resources_have_tests <- function(project, tests = project$find(base = 'te
   missing_tests <- setdiff(necessary_tests, c(tests, ignore))
   if (length(missing_tests) > 0) {
     stop(call. = FALSE, "Tests are missing for the following resources:\n\n",
-         director:::colourise(paste(gsub('^test/', '', missing_tests), collapse = "\n"), 'red'))
+         crayon::red(paste(gsub('^test/', '', missing_tests), collapse = "\n")))
   }
 }
 
@@ -164,13 +164,13 @@ test_hook <- function(project, type = 'setup') {
 
     # TODO: (RK) Maybe replace this with a new stageRunner method to check 
     # argument validity? In the future, stageRunner could maybe do more!
-    colored_filename <- sQuote(director:::colourise(filename, 'blue'))
+    colored_filename <- sQuote(crayon::blue(filename))
     if (!is.list(hooks) && !is.function(hooks) && !is.stagerunner(hooks)) {
       stop("Test ", type, " hooks must be a function or a list of functions.\n\nIn ",
            colored_filename, ", ensure that ",
-           "you have ", sQuote(director:::colourise(paste0(type, ' <- some_function'), 'yellow')),
+           "you have ", sQuote(crayon::yellow(paste0(type, ' <- some_function'))),
            " as right now it's an object of class ",
-           sQuote(director:::colourise(class(hooks)[1], 'red')), call. = FALSE)
+           sQuote(crayon::red(class(hooks)[1])), call. = FALSE)
     }
     if (!is.list(hooks)) hooks <- list(hooks)
 
@@ -180,7 +180,7 @@ test_hook <- function(project, type = 'setup') {
       stop("Test ", type, " hooks must all be functions that take at least one ",
            "argument.\n\nThe first argument will be an environment that has one ",
            "key, ", sQuote('director'), ". In ", colored_filename,
-           " ensure your ", sQuote(director:::colourise(type, 'yellow')),
+           " ensure your ", sQuote(crayon::yellow(type)),
            " local variable meets this constraint.", call. = FALSE)
     }
 
