@@ -170,6 +170,51 @@ pre_engine <- function(prefix, builder) {
   structure(list(prefix = prefix, builder = builder), class = "pre_engine")
 }
 
+syberia_engine_instance <- function(director) {
+  structure(list(director = director), class = "syberia_engine")
+}
+
+#' @export
+`$.syberia_engine` <- function(engine, method) {
+  if (identical(method, "exists")) syberia_engine_exists(engine)
+  else if (identical(method, "resource")) syberia_engine_resource(engine)
+  else eval.parent(bquote(`$`(.(substitute(engine))[['director']], .(method))))
+}
+
+syberia_engine_exists <- function(engine) {
+  force(engine)
+  function(...) {
+    if (!engine[['director']]$exists(...)) {
+      for (subengine in ls(engine[['director']]$.cache$engines, all = TRUE)) {
+        if (engine[['director']]$.cache$engines[[subengine]]$exists(...)) {
+          return(TRUE)
+        }
+      }
+    }
+    FALSE
+  }
+}
+
+syberia_engine_resource <- function(engine) {
+  force(engine)
+  function(name, ...) {
+    if (!engine[['director']]$exists(name)) {
+      for (subengine in ls(engine[['director']]$.cache$engines, all = TRUE)) {
+        subdirector <- engine[['director']]$.cache$engines[[subengine]]
+        if (subdirector$exists(name)) {
+          return(subdirector$resource(name, ...))
+        }
+      }
+    }
+    engine$resource(name, ...)
+  }
+}
+
+#' @export
+print.syberia_engine <- function(x, ...) {
+  print(x$director)
+}
+
 quote( # Removed when director R6 class is included in Syberia.
 syberia_engine_class <- R6::R6Class("syberia_engine",
   inherit = director::director,

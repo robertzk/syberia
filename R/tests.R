@@ -31,7 +31,7 @@
 test_project <- function(project = syberia_project(), base = '') {
   if (is.character(project)) project <- syberia_project(project)
   test_path <- file.path(project$root(), 'test')
-  tests <- project$find(base = paste0('test/', base))
+  tests <- project$find(base = gsub("\\/$", "", file.path('test', base)))
 
   ignored_tests <- file.path('test', test_environment_config(project)$ignored_tests %||% character(0))
   all_tests <- tests
@@ -59,7 +59,7 @@ test_project <- function(project = syberia_project(), base = '') {
       ensure_no_global_variable_pollution(check_options = TRUE, {
         single_setup$.context$resource <- t
         single_setup$run()
-        suppressMessages(project$resource(t)$value(recompile = TRUE))
+        suppressMessages(project$resource(t, recompile = TRUE, recompile. = TRUE))
         single_teardown$.context$resource <- t
         single_teardown$run()
       }, desc = paste('running', t))
@@ -85,7 +85,7 @@ load_test_packages <- function() {
 #' @param project director or character. The director for the syberia project.
 #' @param tests character. The tests to check. By default, all tests in the project.
 #' @param ignore character. A vector of tests to ignore (and not check for presence).
-ensure_resources_have_tests <- function(project, tests = project$find(base = 'test/'), ignore = character(0)) {
+ensure_resources_have_tests <- function(project, tests = project$find(base = 'test'), ignore = character(0)) {
   controllers <- project$find('lib/controllers/')
 
   # Do not consider test controllers -- no meta-tests, heh!
@@ -94,7 +94,7 @@ ensure_resources_have_tests <- function(project, tests = project$find(base = 'te
   # Filter down to the controllers that have make tests mandatory
   # (the ones that aren't will have test <- FALSE)
   controllers <- setNames(
-    lapply(controllers, function(x) project$resource(x)$value()),
+    lapply(controllers, function(x) project$resource(x)),
     controllers)
   controllers <- names(Filter(function(controller) controller$test, controllers))
 
@@ -104,14 +104,14 @@ ensure_resources_have_tests <- function(project, tests = project$find(base = 'te
   # Get the routes that match controllers which we are testing.
   routes <- names(Filter(
     function(route_controller) is.element(route_controller, controllers),
-    project$.cache$routes
+    project$cache_get("routes")
   ))
 
   # Filter down to the resources that contain one of the routes as a substring
   # (and thus are owned by a controller which makes testing mandatory).
-  resources <- Filter(function(x) substring(x, 1, 6) != '/test/', project$find(''))
+  resources <- Filter(function(x) substring(x, 1, 5) != 'test/', project$find(''))
   resources <- gsub('^\\/', '', resources)
-  all_routes <- names(project$.cache$routes)
+  all_routes <- names(project$cache_get("routes"))
   unrouted_resources <- Filter(
     function(x) !director:::any_is_substring_of(x, all_routes), resources)
   resources <- Filter(function(x) director:::any_is_substring_of(x, routes), resources)
@@ -159,7 +159,7 @@ test_hook <- function(project, type = 'setup') {
   if (project$exists(test_environment_path)) {
     # TODO: (RK) Fix director absolute file paths in $.filename and this hack
     filename <- director:::strip_root(project$root(),
-                                      project$.filename(test_environment_path))
+                                      project$filename(test_environment_path))
     hooks <- test_environment_config(project)[[type]] %||% list(force)
 
     # TODO: (RK) Maybe replace this with a new stageRunner method to check 
@@ -198,7 +198,7 @@ test_hook <- function(project, type = 'setup') {
 test_environment_config <- function(project) {
   test_environment_path <- 'config/environments/test'
   if (!project$exists(test_environment_path)) list()
-  else project$resource(test_environment_path)$value()
+  else project$resource(test_environment_path)
 }
 
 

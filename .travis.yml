@@ -13,7 +13,7 @@ install:
 - "./travis-tool.sh install_github robertzk/testthatsomemore"
 - "./travis-tool.sh install_github robertzk/objectdiff"
 - "./travis-tool.sh install_github robertzk/stagerunner"
-- "./travis-tool.sh install_github robertzk/director"
+- "./travis-tool.sh install_github robertzk/director@documentation_cleanup"
 - "./travis-tool.sh install_github robertzk/statsUtils"
 - "./travis-tool.sh install_github robertzk/mungebits"
 - "./travis-tool.sh install_github robertzk/tundra"

@@ -15,7 +15,7 @@ package_exists <- function(name) {
 
 as.list.environment <- function(env) {
   out <- base::as.list.environment(env)
-  lapply(out, function(x) if (is.environment(x)) as.list(x) else x)
+  lapply(out, function(x) if (is.environment(x) && !is(x, "R6")) as.list(x) else x)
 }
 
 #' Ensure no global variables are polluted during an expression.

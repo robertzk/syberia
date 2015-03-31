@@ -21,7 +21,7 @@ Imports:
     Ramd,
     stagerunner,
     testthat,
-    director,
+    director (>= 0.3.0.4),
     statsUtils,
     mungebits,
     Matrix,
