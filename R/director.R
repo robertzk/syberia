@@ -272,7 +272,7 @@ routes_parser <- function() {
   }
 
   if (!is.list(output)) {
-    error("you should return a list (put it at the end of the file). ",
+    error("You should return a list (put it at the end of the file). ",
          "Currently, you have something of type ", sQuote(class(output)[1]), ".")
     # TODO: (RK) More informative message here.
   }
@@ -297,11 +297,11 @@ routes_parser <- function() {
       }
 
       if (is.character(controller)) {
-        routes <- director$cache_get("routes")
+        routes <- director$cache_get("routes") %||% list()
         new_route <- routes[[route]]
         new_route <- c(new_route, controller)
         routes[[route]] <- new_route
-        director$cache_set("routes", new_route)
+        director$cache_set("routes", routes)
 
         controller <- director$resource(file.path('lib', 'controllers', controller))
       } else if (is.function(controller)) controller <- list(parser = controller)
