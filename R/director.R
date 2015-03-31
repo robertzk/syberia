@@ -148,7 +148,7 @@ bootstrap_syberia_project <- function(project) {
   register_routes(project)
   register_tests(project)
   custom_bootstrap(project)
-  project$.cache$bootstrapped <- TRUE
+  project$cache_set("boostrapped", TRUE)
   project
 }
 
@@ -172,7 +172,7 @@ bootstrap_syberia_project <- function(project) {
 #'
 #' @inheritParams bootstrap_syberia_project
 custom_bootstrap <- function(project) {
-  if (project$exists('config/boot')) project$resource('config/boot')$value()
+  if (project$exists('config/boot')) project$resource('config/boot')
 }
 
 
@@ -199,7 +199,7 @@ register_routes <- function(project) {
   routes_path <- file.path('config', 'routes')
   if (project$exists(routes_path)) {
     project$register_parser(routes_path, routes_parser, overwrite = TRUE)
-    project$resource('config/routes')$value()
+    project$resource('config/routes')
   }
 }
 
@@ -285,8 +285,9 @@ routes_parser <- function() {
 
   # Only parse the routes file if it has changed, or the project has not
   # been bootstrapped.
-  if (resource_object$any_dependencies_modified() ||
-      !isTRUE(director$.cache$bootstrapped)) {
+  if (director$resource(resource, modification_tracker.touch = FALSE,
+                        dependency_tracker.return = "any_dependencies_modified") ||
+      !isTRUE(director$cache_get("bootstrapped"))) {
     lapply(names(output), function(route) {
       controller <- output[[route]]
       if (!is.character(controller) && !is.function(controller)) {
@@ -296,11 +297,13 @@ routes_parser <- function() {
       }
 
       if (is.character(controller)) {
-        director$.cache$routes[[route]] <- director$.cache$routes[[route]] %||% character(0)
-        director$.cache$routes[[route]] <- c(director$.cache$routes[[route]], controller)
+        routes <- director$cache_get("routes")
+        new_route <- routes[[route]]
+        new_route <- c(new_route, controller)
+        routes[[route]] <- new_route
+        director$cache_set("routes", new_route)
 
         controller <- director$resource(file.path('lib', 'controllers', controller))
-        controller <- controller$value()
       } else if (is.function(controller)) controller <- list(parser = controller)
 
       director$register_parser(route, controller$parser, cache = isTRUE(controller$cache))
@@ -328,9 +331,8 @@ default_tests_preprocessor <- function(resource_object, director, source_args, s
   }
 
   context(tested_resource)
-  tested_resource_object <- director$resource(tested_resource)
-  source_args$local$resource <-
-    function() tested_resource_object$value(recompile. = TRUE)
+  make_tested_resource <- function(...) director$resource(tested_resource, ...)
+  source_env$resource <- function() make_tested_resource(recompile. = TRUE)
   source()
 }
 
@@ -342,7 +344,7 @@ default_tests_preprocessor <- function(resource_object, director, source_args, s
 default_tests_environment_preprocessor <- function(director, source_args, source) {
   # Provide access to the director for people with hardcore test setup
   # and teardown hooks.
-  source_args$local$director <- director 
+  source_env$director <- director 
   source()
 }
 

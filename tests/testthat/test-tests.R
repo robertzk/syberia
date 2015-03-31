@@ -14,7 +14,7 @@ describe('One off testing', {
       })))),
     {
       p <- syberia_project(tempdir)
-      assert(p$resource('test/foo')$value())
+      assert(p$resource('test/foo'))
     })
   })
 
@@ -22,7 +22,7 @@ describe('One off testing', {
     within_file_structure(list(config = list('application.R',
         environments = list(test.R = 'd <- class(director)'))), {
       p <- syberia_project(tempdir)
-      expect_equal(as.character(p$resource('config/environments/test')$value()$d), 'director')
+      expect_equal(as.character(p$resource('config/environments/test')$d)[1], 'director')
     })
   })
 })
