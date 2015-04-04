@@ -56,7 +56,7 @@ ensure_no_global_variable_pollution <- function(expr, desc, check_options = FALS
   message <- function(vars, type = 'variables', action = 'removed') {
     msg <- paste("Some global", type, "were", action)
     if (!eval.parent(quote(missing_desc))) msg <- paste(msg, "while", desc)
-    msg <- paste0(msg, ": ", director:::colourise(paste(vars, collapse = ", "), 'red'))
+    msg <- paste0(msg, ": ", crayon::red(paste(vars, collapse = ", ")))
   }
 
   check_before_after <- function(before, after, type) {
@@ -73,7 +73,7 @@ ensure_no_global_variable_pollution <- function(expr, desc, check_options = FALS
     diffs <- vapply(before,
       function(name)! identical(old_options[[name]], new_options[[name]]), logical(1))
     stop("Some global options were modified: ",
-         director:::colourise(paste(names(which(diffs)), collapse = ", "), 'red'))
+         crayon::red(paste(names(which(diffs)), collapse = ", ")))
   }
 
   out

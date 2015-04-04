@@ -207,7 +207,7 @@ register_controllers <- function(project) {
     if (exists('preprocessor', envir = input, inherits = FALSE) &&
         !is.function(input$preprocessor))
       stop("The preprocessor defined in ",
-           sQuote(director:::colourise(resource, 'red')),
+           sQuote(crayon::red(resource)),
            " must be a function, but instead is of class ",
            sQuote(class(input$preprocessor[1])), call. = FALSE)
     list(parser = output, preprocessor = input$preprocessor,
@@ -255,8 +255,8 @@ register_tests <- function(project) {
 #' @seealso \code{bootstrap_syberia_project}. 
 routes_parser <- function() {
   error <- function(...) {
-    stop("In your ", director:::colourise("config/routes.R", "red"), " file in the ",
-         "syberia project at ", sQuote(director:::colourise(director$.root, 'blue')),
+    stop("In your ", crayon::red("config/routes.R"), " file in the ",
+         "syberia project at ", sQuote(crayon::blue(director$.root)),
          ' ', ..., call. = FALSE)
   }
 
@@ -280,7 +280,7 @@ routes_parser <- function() {
       controller <- output[[route]]
       if (!is.character(controller) && !is.function(controller)) {
         error("Every route must be a character or a function (your route ",
-              director:::colourise(sQuote(route), 'yellow'), " is of type ",
+              crayon::yellow(sQuote(route)), " is of type ",
               sQuote(class(controller)[1]), ")")
       }
 
@@ -311,7 +311,7 @@ default_tests_preprocessor <- function(resource_object, director, source_args, s
   tested_resource <- gsub("^test\\/", "", resource)
   if (!director$exists(tested_resource)) {
     # TODO: (RK) Figure out how this interacts with virtual resources.
-    #warning("You are testing ", sQuote(director:::colourise(tested_resource, "yellow")),
+    #warning("You are testing ", sQuote(crayon::yellow(tested_resource)),
     #        " but it does not exist in the project.\n", call. = FALSE, immediate = TRUE)
     #return(NULL)
   }
