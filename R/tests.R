@@ -157,9 +157,9 @@ test_hook <- function(project, type = 'setup') {
 
   test_environment_path <- 'config/environments/test'
   if (project$exists(test_environment_path)) {
-    # TODO: (RK) Fix director absolute file paths in $.filename and this hack
+    # TODO: (RK) Fix director absolute file paths in $filename and this hack
     filename <- director:::strip_root(project$root(),
-                                      project$.filename(test_environment_path))
+                                      project$filename(test_environment_path))
     hooks <- test_environment_config(project)[[type]] %||% list(force)
 
     # TODO: (RK) Maybe replace this with a new stageRunner method to check 
