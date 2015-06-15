@@ -6,8 +6,8 @@
 #' @param ... additional arguments to pass to \code{$run(...)} on the stageRunner.
 #'   For example, \code{to = 'some/key'}.
 #' @param fresh logical. Whether or not to use the cache. By default, \code{FALSE}.
-#' @param params list. Inject parameters into \code(modelenv). You will have to implement
-#'   these parameter's handling yourself.
+#' @param params list. Inject parameters into \code{modelenv}. You will have to implement
+#'   the handling of those parameters yourself.
 #'   For example, \code{run('some_file', params=list(invalidate_cache = TRUE))}.
 #' @param verbose logical. Whether or not to display messages. The default is
 #'   \code{TRUE}.

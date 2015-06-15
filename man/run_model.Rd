@@ -21,8 +21,8 @@ For example, \code{to = 'some/key'}.}
 \item{verbose}{logical. Whether or not to display messages. The default is
 \code{TRUE}.}
 
-\item{params}{list. Inject parameters into \code(modelenv). You will have to implement
-these parameter's handling yourself.
+\item{params}{list. Inject parameters into \code{modelenv}. You will have to implement
+the handling of those parameters yourself.
 For example, \code{run('some_file', params=list(invalidate_cache = TRUE))}.}
 }
 \description{
