@@ -5,7 +5,8 @@
 \title{Build a model using a data source from scratch.}
 \usage{
 run_model(key = syberiaStructure:::get_cache("last_model") \%||\%
-  getOption("syberia.default_model"), ..., fresh = FALSE, verbose = TRUE)
+  getOption("syberia.default_model"), ..., fresh = FALSE, verbose = TRUE,
+  params = list())
 }
 \arguments{
 \item{key}{a string or list. If the former, there must be a
@@ -19,6 +20,10 @@ For example, \code{to = 'some/key'}.}
 
 \item{verbose}{logical. Whether or not to display messages. The default is
 \code{TRUE}.}
+
+\item{params}{list. Inject parameters into \code(modelenv). You will have to implement
+these parameter's handling yourself.
+For example, \code{run('some_file', params=list(invalidate_cache = TRUE))}.}
 }
 \description{
 Build a model using a data source from scratch.
