@@ -102,11 +102,11 @@ run_model <- function(key = syberiaStructure:::get_cache('last_model') %||%
 
   if (coalesce_stagerunner) {
     message(crayon::yellow("Copying cached environments..."))
-    stagerunner <- construct_stage_runner(model_stages, modelenv = list2env(params))
+    stagerunner <- construct_stage_runner(model_stages, modelenv = list2env(setNames(params, names(params) %||% character(0))))
     stagerunner$coalesce(syberiaStructure:::get_cache('last_stagerunner'))
   } else if (!missing(key) || !is.stagerunner(
       stagerunner <- syberiaStructure:::get_cache('last_stagerunner'))) {
-    stagerunner <- construct_stage_runner(model_stages, modelenv = list2env(params))
+    stagerunner <- construct_stage_runner(model_stages, modelenv = list2env(setNames(params, names(params) %||% character(0))))
   }
   # TODO: (RK) Figure out a better wrapping mechanism for this
   if (!is.null(testrunner)) stagerunner$overlay(testrunner, 'tests')
