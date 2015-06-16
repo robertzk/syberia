@@ -1,17 +1,20 @@
 #' Build a model using a data source from scratch.
-#' 
+#'
 #' @param key a string or list. If the former, there must be a
 #'   file with name \code{model_stages} followed by \code{.r} so that syberia
 #'   can read the model configurations.
 #' @param ... additional arguments to pass to \code{$run(...)} on the stageRunner.
 #'   For example, \code{to = 'some/key'}.
 #' @param fresh logical. Whether or not to use the cache. By default, \code{FALSE}.
+#' @param params list. Inject parameters into \code{modelenv}. You will have to implement
+#'   the handling of those parameters yourself.
+#'   For example, \code{run('some_file', params=list(invalidate_cache = TRUE))}.
 #' @param verbose logical. Whether or not to display messages. The default is
 #'   \code{TRUE}.
 #' @export
 run_model <- function(key = syberiaStructure:::get_cache('last_model') %||%
                       getOption('syberia.default_model'),
-                      ..., fresh = FALSE, verbose = TRUE) {
+                      ..., fresh = FALSE, verbose = TRUE, params = list()) {
   # TODO: (RK) Remove this hack.
   if (file.exists(file.path(syberia_root(), 'config', 'routes.R'))) {
     # A director project!
@@ -39,7 +42,7 @@ run_model <- function(key = syberiaStructure:::get_cache('last_model') %||%
   # Used by syberiaStructure::syberia_resource
   syberiaStructure:::set_cache(parent.frame(), 'runtime/current_env')
 
-  model_stages <- 
+  model_stages <-
     #if (missing(key) && is.stagerunner(tmp <- active_runner())) tmp
     #if (missing(key)) get_cache('last_model')
     if (is.character(key)) {
@@ -57,7 +60,7 @@ run_model <- function(key = syberiaStructure:::get_cache('last_model') %||%
     else if (is.list(key)) key
     else if (is.stagerunner(key)) key
     else stop("Invalid model key")
-  
+
   if (is.null(src_file))  # TODO: (RK) Fix this, it may be unnecessary
     src_file <- syberiaStructure:::get_cache('last_model')
   if (is.null(root)) root <- syberia_root(src_file)
@@ -91,19 +94,19 @@ run_model <- function(key = syberiaStructure:::get_cache('last_model') %||%
 
   # Coalesce the stagerunner if model file updated, helper files updated,
   # *OR* any of its just-in-time resources (tests, lib/classifiers, etc) updated.
-  coalesce_stagerunner <- 
+  coalesce_stagerunner <-
     (#missing(key) && is.character(key) && # TODO: (RK) Figure out if this is necessary
       is.character(tmp <- syberiaStructure:::get_cache('last_model')) &&
       identical(display_file, tmp) &&
-      syberiaStructure:::get_cache('runtime/any_modified')) 
+      syberiaStructure:::get_cache('runtime/any_modified'))
 
   if (coalesce_stagerunner) {
     message(crayon::yellow("Copying cached environments..."))
-    stagerunner <- construct_stage_runner(model_stages)
+    stagerunner <- construct_stage_runner(model_stages, modelenv = list2env(setNames(params, names(params) %||% character(0))))
     stagerunner$coalesce(syberiaStructure:::get_cache('last_stagerunner'))
   } else if (!missing(key) || !is.stagerunner(
       stagerunner <- syberiaStructure:::get_cache('last_stagerunner'))) {
-    stagerunner <- construct_stage_runner(model_stages)
+    stagerunner <- construct_stage_runner(model_stages, modelenv = list2env(setNames(params, names(params) %||% character(0))))
   }
   # TODO: (RK) Figure out a better wrapping mechanism for this
   if (!is.null(testrunner)) stagerunner$overlay(testrunner, 'tests')
