@@ -1,3 +1,7 @@
+# Version 0.4.4.1
+
+* Small changes to bring compatibility with stagerunner 0.5.0
+
 # Version 0.4.2
 
 * Users can provide custom bootstrapping (i.e., things to do the first
@@ -10,7 +14,7 @@
 
 * This version was released in conjunction with version 0.2.0 of
   syberiaStages and version 0.2.0 of syberiaStructure. The addition
-  is the notion of Syberia IO "adapters". 
+  is the notion of Syberia IO "adapters".
 
   IO adapters are (reference class) objects that have a \code{read}
   and \code{write} method. By wrapping things in an adapter, you do not have to
@@ -23,7 +27,7 @@
 
 * `syberia_version` function for printing the current syberia version.
 
-* In `data_stage`, the mungebits are now called with `train_only`, which 
+* In `data_stage`, the mungebits are now called with `train_only`, which
   prevents them from getting trained so that the predict function does
   not accidentally run when re-running with the `run` helper method.
 
@@ -34,7 +38,7 @@
   function named `train` and `predict`.
 
 * When running a model, all of its helper files are also tracked for
-  modifications, so that the cached environment for each step can be loaded. 
+  modifications, so that the cached environment for each step can be loaded.
   If this happens, Syberia will print "Copying cached environments..." when
   running the model (to prevent confusion when it doesn't happen -- for example,
   if you forgot to save one of the helpers).
@@ -50,4 +54,3 @@
 
 * Better support for printing what models are running. The absolute file
   path will now be listed.
-
