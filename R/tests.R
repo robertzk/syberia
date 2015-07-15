@@ -16,7 +16,7 @@
 #' For example, creating a file \code{config/environments/test.R} with the code
 #' code \code{setup <- function(env) cat("Running all tests.")} will print a message
 #' before all the tests are run. The one parameter the function must take is an
-#' environment which will contain a single key, `director`, pointing to the 
+#' environment which will contain a single key, `director`, pointing to the
 #' `director` object coming from `syberia_project`.
 #'
 #' @param project director or character. The director for the syberia project.
@@ -41,7 +41,7 @@ test_project <- function(project = syberia_project(), base = '') {
   ensure_resources_have_tests(project, tests, ignore = ignored_test_paths)
 
   load_test_packages()
-  
+
   ensure_no_global_variable_pollution(check_options = TRUE, {
     test_hook(project, type = 'setup')$run() # Run the test setup hook stageRunner
 
@@ -55,10 +55,10 @@ test_project <- function(project = syberia_project(), base = '') {
       else { lapply }
     apply_function(tests, function(t) {
       ensure_no_global_variable_pollution(check_options = TRUE, {
-        single_setup$context$resource <- t
+        single_setup$.context$resource <- t
         single_setup$run()
         suppressMessages(project$resource(t)$value(recompile = TRUE))
-        single_teardown$context$resource <- t
+        single_teardown$.context$resource <- t
         single_teardown$run()
       }, desc = paste('running', t))
     })
@@ -161,7 +161,7 @@ test_hook <- function(project, type = 'setup') {
                                       project$.filename(test_environment_path))
     hooks <- test_environment_config(project)[[type]] %||% list(force)
 
-    # TODO: (RK) Maybe replace this with a new stageRunner method to check 
+    # TODO: (RK) Maybe replace this with a new stageRunner method to check
     # argument validity? In the future, stageRunner could maybe do more!
     colored_filename <- sQuote(crayon::blue(filename))
     if (!is.list(hooks) && !is.function(hooks) && !is.stagerunner(hooks)) {
@@ -199,5 +199,3 @@ test_environment_config <- function(project) {
   if (!project$exists(test_environment_path)) list()
   else project$resource(test_environment_path)$value()
 }
-
-
