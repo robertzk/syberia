@@ -71,10 +71,24 @@ ensure_no_global_variable_pollution <- function(expr, desc, check_options = FALS
 #'    its successive parent directories until a result other than \code{NULL}
 #'    is returned, which will be the final return value.
 #' @param error character or function. A string to error if \code{fn} returns
-#'    \code{NULL} on all parent directories, or a no-argument function to
-#'    execute.
+#'    \code{NULL} on all parent directories, or a one-argument function to
+#'    execute (the argument received will be the initial \code{filepath})
 #' @return The result of \code{fn} on the first parent directory of
 #'   \code{filepath} on which it is not \code{NULL}.
 traverse_parent_directories <- function(filepath, fn, error) {
+  stopifnot(is.character(filepath), length(filepath) == 1, !is.na(filepath))
+  stopifnot(is.function(fn), length(formals(fn)) >= 1)
+  stopifnot(is.character(error) || is.function(error))
+
+  path <- normalizePath(filepath)
+  ## As long as we have not hit the root directory, keep trying
+  while (!identical(dirname(path), path)) {
+    result <- fn(path)
+    if (!is.null(result)) return(result)
+    path <- dirname(path)
+  }
+
+  if (is.character(error)) stop(error)
+  else error(filepath)
 }
 
