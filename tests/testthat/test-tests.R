@@ -30,6 +30,7 @@ describe('One off testing', {
 describe('Running test_project', {
   test_that('it can run test_project on a simple project', {
     p <- syberia_project(file.path(getwd(), 'projects', 'simple_test'))
+    browser()
     assert(capture.output(test_project(p)))
   })
   
