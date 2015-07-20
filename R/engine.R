@@ -37,7 +37,40 @@ has_application_file <- function(filepath) {
 }
 
 build_engine <- function(filepath) {
-  "Thomas" # the engine
+  bootstrap_engine(director::director(filepath))
+}
+
+bootstrap_engine <- function(engine) {
+  if (isTRUE(engine$.cache$.bootstrapped)) return(engine)
+  engine$register_preprocessor('config/engines', engine_preprocessor)
+  engine$register_parser      ('config/engines', engine_parser)
+  if (engine$exists("config/engines")) engine$resource("config/engines")$value()
+  engine$.cache$bootstrapped <- TRUE
+  engine
+}
+
+engine_preprocessor <- function(source, source_args, preprocessor_output) {
+  preprocessor_output$engines <- new.env(parent = emptyenv())
+  source_args$local$engine    <- function(name, ...) {
+    preprocessor_output$engines[[name]] <- list(...)
+  }
+  source()
+}
+
+engine_parser <- function(director, preprocessor_output) {
+  for (engine in ls(preprocessor_output$engines, all = TRUE)) {
+    register_engine(director, engine, parse_engine(preprocessor_output$engines[[engine]]))
+  }
+}
+
+register_engine <- function(director, name, engine) {
+  # TODO: (RK) Replace with $engines private member after R6ing.
+  director$.cache$engines <- director$.cache$engines %||% new.env(parent = emptyenv())
+  director$.cache$engines[[name]] <- engine
+}
+
+parse_engine <- function(engine_parameters) {
+  list("Thomas", engine_parameters) # the engine 
 }
 
 quote( # Removed when director R6 class is included in Syberia.
@@ -47,6 +80,9 @@ syberia_engine_class <- R6::R6Class("syberia_engine",
     config = function() {
       # Read config/application.R
     }
+  ),
+  private = list(
+    engines = list()
   )
 )
 )
