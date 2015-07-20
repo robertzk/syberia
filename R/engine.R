@@ -24,6 +24,19 @@
 #' @return The \code{\link[director]{director}} object responsible for
 #'    managing the engine.
 syberia_engine <- function(filepath) {
+  traverse_parent_directories(normalizePath(filepath), function(filepath) {
+    if (has_application_file(filepath)) {
+      .syberia_env[[file]] <- .syberia_env[[file]] %||% build_engine(filepath)
+    }
+  }, error = sprintf("No syberia engine found at %s", sQuote(crayon::red(filepath))))
+}
 
+extensions <- c('.R', '.r', '/application.R', '/application.r')
+has_application_file <- function(filepath) {
+  any(file.exists(paste0(file.path(filepath, 'config', 'application'), extensions)))
+}
+
+build_engine <- function(filepath) {
+  "Thomas" # the engine
 }
 
