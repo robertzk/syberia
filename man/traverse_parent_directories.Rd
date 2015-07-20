@@ -16,8 +16,8 @@ its successive parent directories until a result other than \code{NULL}
 is returned, which will be the final return value.}
 
 \item{error}{character or function. A string to error if \code{fn} returns
-\code{NULL} on all parent directories, or a no-argument function to
-execute.}
+\code{NULL} on all parent directories, or a one-argument function to
+execute (the argument received will be the initial \code{filepath})}
 }
 \value{
 The result of \code{fn} on the first parent directory of
