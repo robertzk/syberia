@@ -57,3 +57,24 @@ ensure_no_global_variable_pollution <- function(expr, desc, check_options = FALS
   out
 }
 
+#' Perform an action repeatedly on parent directories until success or error.
+#' 
+#' Given a \code{fn}, we may wish to run it on a \code{filepath}, determine
+#' its success, and try again with the parent directory of \code{filepath},
+#' until we obtain result that is not \code{NULL}. If this does not occur for
+#' any parent directory, we halt with the string \code{error}.
+#'
+#' @param filepath character. The filepath to traverse along. The \code{fn}
+#'    function will be called with \code{filepath} and its parent directories
+#'    until it returns a result other than \code{NULL}.
+#' @param fn function. A one-argument function called on \code{filepath} or
+#'    its successive parent directories until a result other than \code{NULL}
+#'    is returned, which will be the final return value.
+#' @param error character or function. A string to error if \code{fn} returns
+#'    \code{NULL} on all parent directories, or a no-argument function to
+#'    execute.
+#' @return The result of \code{fn} on the first parent directory of
+#'   \code{filepath} on which it is not \code{NULL}.
+traverse_parent_directories <- function(filepath, fn, error) {
+}
+
