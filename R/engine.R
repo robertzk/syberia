@@ -40,3 +40,14 @@ build_engine <- function(filepath) {
   "Thomas" # the engine
 }
 
+quote( # Removed when director R6 class is included in Syberia.
+syberia_engine_class <- R6::R6Class(
+  inherit = director::director,
+  public = list(
+    config = function() {
+      # Read config/application.R
+    }
+  )
+)
+)
+

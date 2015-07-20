@@ -29,7 +29,8 @@ Imports:
     syberiaMungebits,
     syberiaStructure,
     syberiaStages,
-    objectdiff
+    objectdiff,
+    R6
 Suggests:
     pbapply,
     testthatsomemore,
