@@ -8,3 +8,6 @@
 #' @docType package
 #' @import testthat devtools crayon stringr memoise Matrix Ramd stagerunner statsUtils mungebits tundra syberiaMungebits syberiaStructure syberiaStages director objectdiff
 NULL
+
+## An environment used for caching some syberia-managed objects, like directors.
+.syberia_env <- new.env(parent = emptyenv())

@@ -17,6 +17,10 @@
 #'    file, the parent directories of \code{filepath} will be traversed
 #'    until such a file is found, or the function will error.
 #' @export
+#' @note The syberia package will maintain an internal cache of engines.
+#'    Therefore, calling \code{syberia_engine} twice will retrieve the
+#'    cached object. This cache is maintained in the \code{.syberia_env}
+#'    environment object in the syberia package namespace.
 #' @return The \code{\link[director]{director}} object responsible for
 #'    managing the engine.
 syberia_engine <- function(filepath) {

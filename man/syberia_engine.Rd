@@ -30,4 +30,10 @@ This object ensures that the engine cannot access resources outside of
 its domain, and allows insularity from other engines and the top-level
 project from which the engine will be used.
 }
+\note{
+The syberia package will maintain an internal cache of engines.
+   Therefore, calling \code{syberia_engine} twice will retrieve the
+   cached object. This cache is maintained in the \code{.syberia_env}
+   environment object in the syberia package namespace.
+}
 
