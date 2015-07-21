@@ -7,13 +7,10 @@
 syberia_engine(filepath)
 }
 \arguments{
-\item{filepath}{character or function. The root directory of the engine.
+\item{filepath}{character. The root directory of the engine.
 If this directory does not define a (relative) \code{"config/application.R"}
 file, the parent directories of \code{filepath} will be traversed
-until such a file is found, or the function will error. If
-\code{filepath} is a one-argument function, this function will be called
-with the path of a writeable temporary directory, and the resulting file
-structure will be used for the engine.}
+until such a file is found, or the function will error.}
 }
 \value{
 The \code{\link[director]{director}} object responsible for

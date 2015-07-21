@@ -84,8 +84,6 @@ engine_location_path <- function() {
   getOption("syberia.engine_location", "~/.R/.syberia/engines")
 }
 
-
-
 bootstrap_engine <- function(engine) {
   if (isTRUE(engine$.cache$.bootstrapped)) return(engine)
   engine$register_preprocessor('config/engines', engine_preprocessor)
