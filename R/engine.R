@@ -86,11 +86,18 @@ engine_location_path <- function() {
 
 bootstrap_engine <- function(engine) {
   if (isTRUE(engine$.cache$.bootstrapped)) return(engine)
+  engine$register_preprocessor('config/boot',    boot_preprocessor)
   engine$register_preprocessor('config/engines', engine_preprocessor)
   engine$register_parser      ('config/engines', engine_parser)
   if (engine$exists("config/engines")) engine$resource("config/engines")$value()
+  if (engine$exists("config/boot")) engine$resource("config/boot")$value()
   engine$.cache$bootstrapped <- TRUE
   engine
+}
+
+boot_preprocessor <- function(source, source_args, director) {
+  source_args$local$director <- director
+  source()
 }
 
 engine_preprocessor <- function(source, source_args, preprocessor_output) {
@@ -105,12 +112,24 @@ engine_parser <- function(director, preprocessor_output) {
   for (engine in ls(preprocessor_output$engines, all = TRUE)) {
     register_engine(director, engine, parse_engine(preprocessor_output$engines[[engine]]))
   }
+
+  if (exists(".onAttach", envir = input, inherits = FALSE)) {
+    director$.cache$.onAttach <- input$.onAttach
+    environment(director$.cache$.onAttach) <- list2env(
+      list(director = director),
+      parent = environment(director$.cache$.onAttach)
+    )
+  }
 }
 
 register_engine <- function(director, name, engine) {
   # TODO: (RK) Replace with $engines private member after R6ing.
   director$.cache$engines <- director$.cache$engines %||% new.env(parent = emptyenv())
   director$.cache$engines[[name]] <- engine
+
+  if (is.element(".onAttach", names(engine$.cache))) {
+    engine$.cache$.onAttach(director)
+  }
 }
 
 parse_engine <- function(engine_parameters) {
@@ -139,6 +158,12 @@ parse_engine.github <- function(engine_parameters) {
       status <- system2("git", c("clone", sprintf("git@github.com:%s", repo), filepath))
       stopifnot(status == 0)
     })
+}
+
+parse_engine.local <- function(engine_parameters) {
+  path <- engine_parameters$path %||% stop("Please provide an engine path")
+  if (!file.exists(path)) stop("The path ", sQuote(path), " does not exist.")
+  path
 }
 
 pre_engine <- function(prefix, builder) {
