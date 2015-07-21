@@ -12,8 +12,8 @@
 #' its domain, and allows insularity from other engines and the top-level
 #' project from which the engine will be used.
 #'
-#' @param filepath character. The root directory of the engine. If this
-#'    directory does not define a (relative) \code{"config/application.R"} 
+#' @param filepath character. The root directory of the engine.
+#'    If this directory does not define a (relative) \code{"config/application.R"} 
 #'    file, the parent directories of \code{filepath} will be traversed
 #'    until such a file is found, or the function will error.
 #' @export
@@ -24,6 +24,14 @@
 #' @return The \code{\link[director]{director}} object responsible for
 #'    managing the engine.
 syberia_engine <- function(filepath) {
+  UseMethod("syberia_engine")
+}
+
+syberia_engine.pre_engine <- function(filepath) {
+  build_engine(filepath)
+}
+
+syberia_engine.character <- function(filepath) {
   traverse_parent_directories(normalizePath(filepath), function(filepath) {
     if (has_application_file(filepath)) {
       .syberia_env[[filepath]] <- .syberia_env[[filepath]] %||% build_engine(filepath)
@@ -36,9 +44,47 @@ has_application_file <- function(filepath) {
   any(file.exists(paste0(file.path(filepath, 'config', 'application'), extensions)))
 }
 
-build_engine <- function(filepath) {
-  bootstrap_engine(director::director(filepath))
+build_engine <- function(buildable) {
+  UseMethod("build_engine")
 }
+
+build_engine.pre_engine <- function(buildable) {
+  dir <- engine_dir(buildable$prefix)
+  if (!file.exists(dir)) buildable$builder(dir)
+  syberia_engine(dir)
+}
+
+build_engine.character <- function(buildable) {
+  bootstrap_engine(director::director(buildable))
+}
+
+engine_dir <- function(dir) {
+  file.path(engine_location(), dir)
+}
+
+engine_location <- function() {
+  path <- engine_location_path()
+  if (!file.exists(path)) {
+    if (!dir.create(path, FALSE, TRUE)) {
+      stop(sprintf(paste0("Syberia needs a directory in which to place the code for ",
+           "dependencies. Please ensure %s is writable, or set a ",
+           "different path in the %s environment variable or ",
+           "the %s global option (using %s)."),
+           sQuote(crayon::red(path)),
+           sQuote(crayon::yellow("SYBERIA_ENGINE_LOCATION")),
+           sQuote(crayon::yellow("syberia.engine_location")),
+           sQuote(crayon::magenta("options(syberia.engine_location = 'some/dir')"))))
+    }
+  }
+  path
+}
+
+engine_location_path <- function() {
+  Sys.getenv("SYBERIA_ENGINE_LOCATION") %|||%
+  getOption("syberia.engine_location", "~/.R/.syberia/engines")
+}
+
+
 
 bootstrap_engine <- function(engine) {
   if (isTRUE(engine$.cache$.bootstrapped)) return(engine)
@@ -70,7 +116,35 @@ register_engine <- function(director, name, engine) {
 }
 
 parse_engine <- function(engine_parameters) {
-  list("Thomas", engine_parameters) # the engine 
+  engine_parameters$type <- engine_parameters$type %||% "github"
+
+  if (!is.simple_string(engine_parameters$type)) {
+    stop(sprintf("When defining an engine, please provide a string for the %s",
+                 sQuote("type")), call. = FALSE)
+  }
+
+  parser <- paste0("parse_engine.", engine_parameters$type)
+  if (!exists(parser, envir = getNamespace("syberia"), inherits = FALSE)) {
+    stop(sprintf("Cannot load an engine of type %s", 
+                 sQuote(crayon::red(engine_parameters$type))))
+  }
+  syberia_engine(get(parser, envir = getNamespace("syberia"))(engine_parameters))
+}
+
+parse_engine.github <- function(engine_parameters) {
+  repo    <- engine_parameters$repo %||% engine_parameters$repository
+  version <- engine_parameters$version %||% "master"
+  stopifnot(is.simple_string(repo))
+
+  pre_engine(prefix = file.path("github", repo, version),
+    builder = function(filepath) {
+      status <- system2("git", c("clone", sprintf("git@github.com:%s", repo), filepath))
+      stopifnot(status == 0)
+    })
+}
+
+pre_engine <- function(prefix, builder) {
+  structure(list(prefix = prefix, builder = builder), class = "pre_engine")
 }
 
 quote( # Removed when director R6 class is included in Syberia.

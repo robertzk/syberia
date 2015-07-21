@@ -1,4 +1,9 @@
-`%||%` <- function(x, y) if (is.null(x)) y else x
+`%||%`   <- function(x, y) if (is.null(x)) y else x
+`%|||%`  <- function(x, y) if (is.falsy(x)) y else x
+is.falsy <- function(x) {
+  identical(x, NULL) || identical(x, FALSE) || identical(x, "") ||
+  length(x) == 0 || identical(x, 0)
+}
 
 #' Fetch the current Syberia version.
 #' @export
@@ -90,5 +95,13 @@ traverse_parent_directories <- function(filepath, fn, error) {
 
   if (is.character(error)) stop(error)
   else error(filepath)
+}
+
+order_by_key <- function(list) {
+  list[order(names(list))]
+}
+
+is.simple_string <- function(obj) {
+  is.character(obj) && length(obj) == 1 && !is.na(obj) && nzchar(obj)
 }
 
