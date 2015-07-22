@@ -4,7 +4,7 @@
 \alias{ensure_resources_have_tests}
 \title{Check that all mandatory tested resources have tests.}
 \usage{
-ensure_resources_have_tests(project, tests = project$find(base = "test/"),
+ensure_resources_have_tests(project, tests = project$find(base = "test"),
   ignore = character(0))
 }
 \arguments{

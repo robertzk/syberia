@@ -4,13 +4,15 @@
 \alias{syberia_engine}
 \title{Bootstrap a Syberia engine.}
 \usage{
-syberia_engine(filepath)
+syberia_engine(filepath, ...)
 }
 \arguments{
 \item{filepath}{character. The root directory of the engine.
 If this directory does not define a (relative) \code{"config/application.R"}
 file, the parent directories of \code{filepath} will be traversed
 until such a file is found, or the function will error.}
+
+\item{...}{Additional arguments used internally.}
 }
 \value{
 The \code{\link[director]{director}} object responsible for

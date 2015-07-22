@@ -16,6 +16,7 @@
 #'    If this directory does not define a (relative) \code{"config/application.R"} 
 #'    file, the parent directories of \code{filepath} will be traversed
 #'    until such a file is found, or the function will error.
+#' @param ... Additional arguments used internally.
 #' @export
 #' @note The syberia package will maintain an internal cache of engines.
 #'    Therefore, calling \code{syberia_engine} twice will retrieve the
@@ -23,18 +24,20 @@
 #'    environment object in the syberia package namespace.
 #' @return The \code{\link[director]{director}} object responsible for
 #'    managing the engine.
-syberia_engine <- function(filepath) {
+syberia_engine <- function(filepath, ...) {
   UseMethod("syberia_engine")
 }
 
-syberia_engine.pre_engine <- function(filepath) {
+syberia_engine.pre_engine <- function(filepath, ...) {
   build_engine(filepath)
 }
 
-syberia_engine.character <- function(filepath) {
+syberia_engine.character <- function(filepath, cache = TRUE) {
   traverse_parent_directories(normalizePath(filepath), function(filepath) {
-    if (has_application_file(filepath)) {
+    if (isTRUE(cache) && has_application_file(filepath)) {
       .syberia_env[[filepath]] <- .syberia_env[[filepath]] %||% build_engine(filepath)
+    } else {
+      build_engine(filepath)
     }
   }, error = sprintf("No syberia engine found at %s", sQuote(crayon::red(filepath))))
 }
@@ -51,7 +54,7 @@ build_engine <- function(buildable) {
 build_engine.pre_engine <- function(buildable) {
   dir <- engine_dir(buildable$prefix)
   if (!file.exists(dir)) buildable$builder(dir)
-  syberia_engine(dir)
+  syberia_engine(dir, cache = FALSE)
 }
 
 build_engine.character <- function(buildable) {
@@ -129,7 +132,8 @@ register_engine <- function(director, name, engine) {
   if (!director$cache_exists("engines")) {
     director$cache_set("engines", new.env(parent = emptyenv()))
   }
-  director$cache_get("engines")[[name]] <- engine
+  env <- director$cache_get("engines")
+  env[[name]] <- engine
 
   if (engine$cache_exists(".onAttach")) {
     engine$cache_get(".onAttach")(director)
@@ -149,7 +153,8 @@ parse_engine <- function(engine_parameters) {
     stop(sprintf("Cannot load an engine of type %s", 
                  sQuote(crayon::red(engine_parameters$type))))
   }
-  syberia_engine(get(parser, envir = getNamespace("syberia"))(engine_parameters))
+  syberia_engine(get(parser, envir = getNamespace("syberia"))(engine_parameters),
+                 cache = FALSE)
 }
 
 parse_engine.github <- function(engine_parameters) {
