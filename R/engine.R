@@ -95,14 +95,14 @@ bootstrap_engine <- function(engine) {
   engine
 }
 
-boot_preprocessor <- function(source, source_args, director) {
-  source_args$local$director <- director
+boot_preprocessor <- function(source, source_env, director) {
+  source_env$director <- director
   source()
 }
 
-engine_preprocessor <- function(source, source_args, preprocessor_output) {
+engine_preprocessor <- function(source, source_env, preprocessor_output) {
   preprocessor_output$engines <- new.env(parent = emptyenv())
-  source_args$local$engine    <- function(name, ...) {
+  source_env$engine    <- function(name, ...) {
     preprocessor_output$engines[[name]] <- list(...)
   }
   source()
@@ -219,17 +219,16 @@ print.syberia_engine <- function(x, ...) {
   print(x$director)
 }
 
-quote( # Removed when director R6 class is included in Syberia.
 syberia_engine_class <- R6::R6Class("syberia_engine",
-  inherit = director::director,
+  inherit = environment(director::director)$director_,
   public = list(
     config = function() {
       # Read config/application.R
+      browser()
     }
   ),
   private = list(
     engines = list()
   )
-)
 )
 
