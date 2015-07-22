@@ -90,7 +90,7 @@ bootstrap_engine <- function(engine) {
   engine$register_preprocessor('config/engines', engine_preprocessor)
   engine$register_parser      ('config/engines', engine_parser)
   if (engine$exists("config/engines")) engine$resource("config/engines")
-  if (engine$exists("config/boot")) engine$resource("config/boot")
+  if (engine$exists("config/boot"))    engine$resource("config/boot")
   engine$cache_set("bootstrapped", TRUE)
   engine
 }
