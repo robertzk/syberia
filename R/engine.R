@@ -85,13 +85,13 @@ engine_location_path <- function() {
 }
 
 bootstrap_engine <- function(engine) {
-  if (isTRUE(engine$.cache$.bootstrapped)) return(engine)
+  if (isTRUE(engine$cache_get("bootstrapped"))) return(engine)
   engine$register_preprocessor('config/boot',    boot_preprocessor)
   engine$register_preprocessor('config/engines', engine_preprocessor)
   engine$register_parser      ('config/engines', engine_parser)
-  if (engine$exists("config/engines")) engine$resource("config/engines")$value()
-  if (engine$exists("config/boot")) engine$resource("config/boot")$value()
-  engine$.cache$bootstrapped <- TRUE
+  if (engine$exists("config/engines")) engine$resource("config/engines")
+  if (engine$exists("config/boot")) engine$resource("config/boot")
+  engine$cache_set("bootstrapped", TRUE)
   engine
 }
 
@@ -114,21 +114,25 @@ engine_parser <- function(director, preprocessor_output) {
   }
 
   if (exists(".onAttach", envir = input, inherits = FALSE)) {
-    director$.cache$.onAttach <- input$.onAttach
-    environment(director$.cache$.onAttach) <- list2env(
+    onAttach <- input$.onAttach
+    environment(onAttach) <- list2env(
       list(director = director),
-      parent = environment(director$.cache$.onAttach)
+      parent = environment(onAttach)
     )
+    director$cache_set(".onAttach", onAttach)
   }
+  NULL
 }
 
 register_engine <- function(director, name, engine) {
   # TODO: (RK) Replace with $engines private member after R6ing.
-  director$.cache$engines <- director$.cache$engines %||% new.env(parent = emptyenv())
-  director$.cache$engines[[name]] <- engine
+  if (!director$cache_exists("engines")) {
+    director$cache_set("engines", new.env(parent = emptyenv()))
+  }
+  director$cache_get("engines")[[name]] <- engine
 
-  if (is.element(".onAttach", names(engine$.cache))) {
-    engine$.cache$.onAttach(director)
+  if (engine$cache_exists(".onAttach")) {
+    engine$cache_get(".onAttach")(director)
   }
 }
 
@@ -185,8 +189,8 @@ syberia_engine_exists <- function(engine) {
   force(engine)
   function(...) {
     if (!engine[['director']]$exists(...)) {
-      for (subengine in ls(engine[['director']]$.cache$engines, all = TRUE)) {
-        if (engine[['director']]$.cache$engines[[subengine]]$exists(...)) {
+      for (subengine in ls(engine[['director']]$cache_get("engines"), all = TRUE)) {
+        if (engine[['director']]$cache_get("engines")[[subengine]]$exists(...)) {
           return(TRUE)
         }
       }
@@ -199,8 +203,8 @@ syberia_engine_resource <- function(engine) {
   force(engine)
   function(name, ...) {
     if (!engine[['director']]$exists(name)) {
-      for (subengine in ls(engine[['director']]$.cache$engines, all = TRUE)) {
-        subdirector <- engine[['director']]$.cache$engines[[subengine]]
+      for (subengine in ls(engine[['director']]$cache_get("engines"), all = TRUE)) {
+        subdirector <- engine[['director']]$cache_get("engines")[[subengine]]
         if (subdirector$exists(name)) {
           return(subdirector$resource(name, ...))
         }
