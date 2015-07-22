@@ -297,11 +297,11 @@ routes_parser <- function() {
       }
 
       if (is.character(controller)) {
-        routes <- director$cache_get("routes")
+        routes <- director$cache_get("routes") %||% list()
         new_route <- routes[[route]]
         new_route <- c(new_route, controller)
         routes[[route]] <- new_route
-        director$cache_set("routes", new_route)
+        director$cache_set("routes", routes)
 
         controller <- director$resource(file.path('lib', 'controllers', controller))
       } else if (is.function(controller)) controller <- list(parser = controller)
