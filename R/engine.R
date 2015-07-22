@@ -102,7 +102,7 @@ boot_preprocessor <- function(source, source_env, director) {
 
 engine_preprocessor <- function(source, source_env, preprocessor_output) {
   preprocessor_output$engines <- new.env(parent = emptyenv())
-  source_env$engine    <- function(name, ...) {
+  source_env$engine <- function(name, ...) {
     preprocessor_output$engines[[name]] <- list(...)
   }
   source()
