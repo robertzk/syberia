@@ -58,7 +58,8 @@ build_engine.pre_engine <- function(buildable) {
 }
 
 build_engine.character <- function(buildable) {
-  bootstrap_engine(director::director(buildable))
+  # bootstrap_engine(director::director(buildable))
+  bootstrap_engine(syberia_engine_class$new(buildable))
 }
 
 engine_dir <- function(dir) {
@@ -135,9 +136,12 @@ register_engine <- function(director, name, engine) {
   env <- director$cache_get("engines")
   env[[name]] <- engine
 
+  director$register_engine(name, engine)
+
   if (engine$cache_exists(".onAttach")) {
     engine$cache_get(".onAttach")(director)
   }
+
 }
 
 parse_engine <- function(engine_parameters) {
@@ -178,62 +182,119 @@ parse_engine.local <- function(engine_parameters) {
 pre_engine <- function(prefix, builder) {
   structure(list(prefix = prefix, builder = builder), class = "pre_engine")
 }
+#
+#syberia_engine_instance <- function(director) {
+#  structure(list(director = director), class = "syberia_engine")
+#}
+#
+##' @export
+#`$.syberia_engine` <- function(engine, method) {
+#  if (identical(method, "exists")) syberia_engine_exists(engine)
+#  else if (identical(method, "resource")) syberia_engine_resource(engine)
+#  else eval.parent(bquote(`$`(.(substitute(engine))[['director']], .(method))))
+#}
+#
+#syberia_engine_exists <- function(engine) {
+#  force(engine)
+#  function(...) {
+#    if (!engine[['director']]$exists(...)) {
+#      for (subengine in ls(engine[['director']]$cache_get("engines"), all = TRUE)) {
+#        if (engine[['director']]$cache_get("engines")[[subengine]]$exists(...)) {
+#          return(TRUE)
+#        }
+#      }
+#    }
+#    FALSE
+#  }
+#}
+#
+#syberia_engine_resource <- function(engine) {
+#  force(engine)
+#  function(name, ...) {
+#    if (!engine[['director']]$exists(name)) {
+#      for (subengine in ls(engine[['director']]$cache_get("engines"), all = TRUE)) {
+#        subdirector <- engine[['director']]$cache_get("engines")[[subengine]]
+#        if (subdirector$exists(name)) {
+#          return(subdirector$resource(name, ...))
+#        }
+#      }
+#    }
+#    engine$resource(name, ...)
+#  }
+#}
+#
+##' @export
+#print.syberia_engine <- function(x, ...) {
+#  print(x$director)
+#}
 
-syberia_engine_instance <- function(director) {
-  structure(list(director = director), class = "syberia_engine")
-}
+syberia_engine_class <- R6::R6Class("syberia_engine",
+  portable = TRUE,
+  inherit = director:::director_, #environment(director::director)$director_,
+  public = list(
+    .parent  = NULL,
+    .engines = list(),
+    .set_parent = function(parent) { self$.parent <<- parent },
 
-#' @export
-`$.syberia_engine` <- function(engine, method) {
-  if (identical(method, "exists")) syberia_engine_exists(engine)
-  else if (identical(method, "resource")) syberia_engine_resource(engine)
-  else eval.parent(bquote(`$`(.(substitute(engine))[['director']], .(method))))
-}
+    register_engine = function(name, engine) {
+      stopifnot(is(engine, "syberia_engine"))
+      self$.engines[[name]] <<- engine
+      # TODO: (RK) Only set parent if mounted!
+      engine$.set_parent(self)
+    },
 
-syberia_engine_exists <- function(engine) {
-  force(engine)
-  function(...) {
-    if (!engine[['director']]$exists(...)) {
-      for (subengine in ls(engine[['director']]$cache_get("engines"), all = TRUE)) {
-        if (engine[['director']]$cache_get("engines")[[subengine]]$exists(...)) {
+    resource = function(name, ..., parent. = TRUE, children. = TRUE, exclude. = NULL) {
+      ## Check the parent engines for resource existence.
+      if (isTRUE(parent.) && !is.null(self$.parent)) {
+        if (self$.parent$exists(name, parent. = TRUE, children. = TRUE, exclude. = list(self))) {
+          return(self$.parent$resource(name, ...))
+        }
+      }
+
+      ## Check the current engines for resource existence.
+      if (super$exists(name)) return(super$resource(name, ...))
+
+      ## Check the subengines for resource existence.
+      if (isTRUE(children.)) {
+        for (engine in self$.engines) {
+          if (!any(vapply(exclude., identical, logical(1), engine))) {
+            if (engine$exists(name, parent. = TRUE, children. = TRUE, exclude. = list(self))) {
+              return(engine$resource(name, ...))
+            }
+          }
+        }
+      }
+
+      ## Force trigger an error using the self director.
+      super$resource(name, ...)
+    },
+
+    exists = function(resource, ..., parent. = TRUE, children. = TRUE, exclude. = NULL) {
+      ## Check the parent engines for resource existence.
+      if (isTRUE(parent.) && !is.null(self$.parent)) {
+        if (self$.parent$exists(resource, ..., parent. = TRUE, children. = TRUE, exclude. = list(self))) {
           return(TRUE)
         }
       }
-    }
-    FALSE
-  }
-}
 
-syberia_engine_resource <- function(engine) {
-  force(engine)
-  function(name, ...) {
-    if (!engine[['director']]$exists(name)) {
-      for (subengine in ls(engine[['director']]$cache_get("engines"), all = TRUE)) {
-        subdirector <- engine[['director']]$cache_get("engines")[[subengine]]
-        if (subdirector$exists(name)) {
-          return(subdirector$resource(name, ...))
+      ## Check the current engines for resource existence.
+      if (super$exists(resource, ...)) return(TRUE)
+
+      ## Check the subengines for resource existence.
+      if (isTRUE(children.)) {
+        for (engine in self$.engines) {
+          if (!any(vapply(exclude., identical, logical(1), engine))) {
+            if (engine$exists(resource, ..., parent. = TRUE, children. = TRUE, exclude. = list(self))) {
+              return(TRUE)
+            }
+          }
         }
       }
-    }
-    engine$resource(name, ...)
-  }
-}
 
-#' @export
-print.syberia_engine <- function(x, ...) {
-  print(x$director)
-}
-
-syberia_engine_class <- R6::R6Class("syberia_engine",
-  inherit = environment(director::director)$director_,
-  public = list(
-    config = function() {
-      # Read config/application.R
-      browser()
+      FALSE
     }
   ),
   private = list(
-    engines = list()
   )
 )
 

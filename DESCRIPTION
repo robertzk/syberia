@@ -30,7 +30,7 @@ Imports:
     syberiaStructure,
     syberiaStages,
     objectdiff,
-    R6
+    R6 (>= 2.1.0)
 Suggests:
     pbapply,
     testthatsomemore,
