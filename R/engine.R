@@ -230,6 +230,14 @@ pre_engine <- function(prefix, builder) {
 #print.syberia_engine <- function(x, ...) {
 #  print(x$director)
 #}
+should_exclude <- function(condition, engine) {
+  UseMethod("should_exclude")
+}
+
+should_exclude.syberia_engine <- identical
+should_exclude.character <- function(condition, engine) {
+  identical(condition, engine$root())
+}
 
 syberia_engine_class <- R6::R6Class("syberia_engine",
   portable = TRUE,
@@ -248,7 +256,7 @@ syberia_engine_class <- R6::R6Class("syberia_engine",
     resource = function(name, ..., parent. = TRUE, children. = TRUE, exclude. = NULL) {
       ## Check the parent engines for resource existence.
       if (isTRUE(parent.) && !is.null(self$.parent)) {
-        if (self$.parent$exists(name, parent. = TRUE, children. = TRUE, exclude. = list(self))) {
+        if (self$.parent$exists(name, parent. = TRUE, children. = TRUE, exclude. = list(self$root()))) {
           return(self$.parent$resource(name, ...))
         }
       }
@@ -261,8 +269,8 @@ syberia_engine_class <- R6::R6Class("syberia_engine",
         for (engine in self$.engines) {
           if (isTRUE(engine$mount)) {
             engine <- engine$engine
-            if (!any(vapply(exclude., identical, logical(1), engine))) {
-              if (engine$exists(name, parent. = FALSE, children. = TRUE)) {
+            if (!any(vapply(exclude., should_exclude, logical(1), engine))) {
+              if (engine$exists(name, parent. = FALSE, children. = TRUE, exclude. = exclude.)) {
                 return(engine$resource(name, ...))
               }
             }
@@ -277,7 +285,7 @@ syberia_engine_class <- R6::R6Class("syberia_engine",
     exists = function(resource, ..., parent. = TRUE, children. = TRUE, exclude. = NULL) {
       ## Check the parent engines for resource existence.
       if (isTRUE(parent.) && !is.null(self$.parent)) {
-        if (self$.parent$exists(resource, ..., parent. = TRUE, children. = TRUE, exclude. = list(self))) {
+        if (self$.parent$exists(resource, ..., parent. = TRUE, children. = TRUE, exclude. = list(self$root()))) {
           return(TRUE)
         }
       }
@@ -290,8 +298,8 @@ syberia_engine_class <- R6::R6Class("syberia_engine",
         for (engine in self$.engines) {
           if (isTRUE(engine$mount)) {
             engine <- engine$engine
-            if (!any(vapply(exclude., identical, logical(1), engine))) {
-              if (engine$exists(resource, ..., parent. = FALSE, children. = TRUE)) {
+            if (!any(vapply(exclude., should_exclude, logical(1), engine))) {
+              if (engine$exists(resource, ..., parent. = FALSE, children. = TRUE, exclude. = exclude.)) {
                 return(TRUE)
               }
             }
