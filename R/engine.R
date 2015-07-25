@@ -113,8 +113,11 @@ engine_preprocessor <- function(source, source_env, preprocessor_output) {
 }
 
 engine_parser <- function(director, preprocessor_output) {
+  if (isTRUE(director$cache_get("bootstrapped"))) return()
+
   for (engine in ls(preprocessor_output$engines, all = TRUE)) {
-    register_engine(director, engine, parse_engine(preprocessor_output$engines[[engine]]))
+    register_engine(director, engine, parse_engine(preprocessor_output$engines[[engine]]),
+                    mount = isTRUE(preprocessor_output$engines[[engine]]$mount))
   }
 
   if (exists(".onAttach", envir = input, inherits = FALSE)) {
@@ -128,7 +131,7 @@ engine_parser <- function(director, preprocessor_output) {
   NULL
 }
 
-register_engine <- function(director, name, engine) {
+register_engine <- function(director, name, engine, mount = FALSE) {
   # TODO: (RK) Replace with $engines private member after R6ing.
   if (!director$cache_exists("engines")) {
     director$cache_set("engines", new.env(parent = emptyenv()))
@@ -136,7 +139,7 @@ register_engine <- function(director, name, engine) {
   env <- director$cache_get("engines")
   env[[name]] <- engine
 
-  director$register_engine(name, engine)
+  director$register_engine(name, engine, mount = mount)
 
   if (engine$cache_exists(".onAttach")) {
     engine$cache_get(".onAttach")(director)
@@ -236,11 +239,10 @@ syberia_engine_class <- R6::R6Class("syberia_engine",
     .engines = list(),
     .set_parent = function(parent) { self$.parent <<- parent },
 
-    register_engine = function(name, engine) {
+    register_engine = function(name, engine, mount = FALSE) {
       stopifnot(is(engine, "syberia_engine"))
-      self$.engines[[name]] <<- engine
-      # TODO: (RK) Only set parent if mounted!
-      engine$.set_parent(self)
+      self$.engines[[name]] <<- list(engine = engine, mount = isTRUE(mount))
+      if (isTRUE(mount)) engine$.set_parent(self)
     },
 
     resource = function(name, ..., parent. = TRUE, children. = TRUE, exclude. = NULL) {
@@ -257,9 +259,12 @@ syberia_engine_class <- R6::R6Class("syberia_engine",
       ## Check the subengines for resource existence.
       if (isTRUE(children.)) {
         for (engine in self$.engines) {
-          if (!any(vapply(exclude., identical, logical(1), engine))) {
-            if (engine$exists(name, parent. = TRUE, children. = TRUE, exclude. = list(self))) {
-              return(engine$resource(name, ...))
+          if (isTRUE(engine$mount)) {
+            engine <- engine$engine
+            if (!any(vapply(exclude., identical, logical(1), engine))) {
+              if (engine$exists(name, parent. = FALSE, children. = TRUE)) {
+                return(engine$resource(name, ...))
+              }
             }
           }
         }
@@ -283,9 +288,12 @@ syberia_engine_class <- R6::R6Class("syberia_engine",
       ## Check the subengines for resource existence.
       if (isTRUE(children.)) {
         for (engine in self$.engines) {
-          if (!any(vapply(exclude., identical, logical(1), engine))) {
-            if (engine$exists(resource, ..., parent. = TRUE, children. = TRUE, exclude. = list(self))) {
-              return(TRUE)
+          if (isTRUE(engine$mount)) {
+            engine <- engine$engine
+            if (!any(vapply(exclude., identical, logical(1), engine))) {
+              if (engine$exists(resource, ..., parent. = FALSE, children. = TRUE)) {
+                return(TRUE)
+              }
             }
           }
         }
