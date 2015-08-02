@@ -253,16 +253,16 @@ syberia_engine_class <- R6::R6Class("syberia_engine",
       if (isTRUE(mount)) engine$.set_parent(self)
     },
 
-    resource = function(name, ..., parent. = TRUE, children. = TRUE, exclude. = NULL) {
+    resource = function(name, ..., parent. = TRUE, children. = TRUE, exclude. = NULL, defining_environment. = parent.frame()) {
       ## Check the parent engines for resource existence.
       if (isTRUE(parent.) && !is.null(self$.parent)) {
         if (self$.parent$exists(name, parent. = TRUE, children. = TRUE, exclude. = list(self$root()))) {
-          return(self$.parent$resource(name, ...))
+          return(self$.parent$resource(name, ..., defining_environment. = defining_environment.))
         }
       }
 
       ## Check the current engines for resource existence.
-      if (super$exists(name)) return(super$resource(name, ...))
+      if (super$exists(name)) return(super$resource(name, ..., defining_environment. = defining_environment.))
 
       ## Check the subengines for resource existence.
       if (isTRUE(children.)) {
@@ -271,7 +271,7 @@ syberia_engine_class <- R6::R6Class("syberia_engine",
             engine <- engine$engine
             if (!any(vapply(exclude., should_exclude, logical(1), engine))) {
               if (engine$exists(name, parent. = FALSE, children. = TRUE, exclude. = exclude.)) {
-                return(engine$resource(name, ...))
+                return(engine$resource(name, ..., defining_environment. = defining_environment.))
               }
             }
           }
@@ -279,7 +279,7 @@ syberia_engine_class <- R6::R6Class("syberia_engine",
       }
 
       ## Force trigger an error using the self director.
-      super$resource(name, ...)
+      super$resource(name, ..., defining_environment. = defining_environment.)
     },
 
     exists = function(resource, ..., parent. = TRUE, children. = TRUE, exclude. = NULL) {
