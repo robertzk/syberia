@@ -14,17 +14,13 @@ Authors@R: c(person("Robert", "Krzyzanowski",
 Depends:
     R (>= 3.0.0)
 Imports:
-    devtools,
     crayon,
-    memoise,
-    stringr,
     Ramd,
     stagerunner,
     testthat,
     director (>= 0.3.0.4),
     statsUtils,
     mungebits,
-    Matrix,
     tundra,
     syberiaMungebits,
     syberiaStructure,
