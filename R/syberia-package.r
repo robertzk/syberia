@@ -6,7 +6,7 @@
 #'
 #' @name syberia
 #' @docType package
-#' @import testthat devtools crayon stringr memoise Matrix Ramd stagerunner statsUtils mungebits tundra syberiaMungebits syberiaStructure syberiaStages director objectdiff R6
+#' @import testthat Ramd stagerunner statsUtils mungebits tundra syberiaMungebits syberiaStructure syberiaStages director objectdiff R6
 NULL
 
 ## An environment used for caching some syberia-managed objects, like directors.
