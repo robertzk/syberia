@@ -3,7 +3,6 @@ packages:
     name: Rcpp
     version: 0.12.0
     repo: RCppCore/Rcpp
-    unload: true
   -
     name: productivus
     version: 0.1.1

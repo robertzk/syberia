@@ -6,7 +6,6 @@ manual_box <- function(package_list) {
         utils::packageVersion(pkg$name) != package_version(pkg$version)) {
           message('Installing ', pkg$name, ', version ', pkg$version)
           devtools::install_github(pkg$repo, ref = ref, subdir = pkg$subdir)
-          if (pkg$unload == 'true') unloadNamespace(pkg$name)
       }
     })
   )
