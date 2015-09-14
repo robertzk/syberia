@@ -13,4 +13,6 @@ install_syberia <- function() {
     package_list <- yaml::yaml.load(packagefile("packages.yml", read = TRUE))
     invisible(manual_box(package_list))
   })
+  message('Congratulations! To use syberia call ',
+    crayon::red('library(syberia)'), ' or add it to your ~/.Rprofile\n')
 }
