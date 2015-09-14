@@ -46,6 +46,10 @@ packages:
     version: 0.2.3
     repo: robertzk/syberiaMungebits
   -
+    name: AWS.tools
+    repo: avantcredit/aws-tools
+    version: 0.1.0
+  -
     name: s3mpi
     version: 0.2.8
     repo: robertzk/s3mpi
