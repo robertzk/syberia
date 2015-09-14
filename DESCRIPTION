@@ -1,12 +1,13 @@
-Package: syberia
+Package: syberia.io
 Type: Package
-Title: Syberia
-Version: 0.4.4.1
+Title: Syberia Install
+Version: 0.0.1
 Description: Syberia provides an opinionated unified framework for
     fast iteration on classifier development and deployment. It is
     founded on convention over configuration and aims to solve the
     problems of classifier-specific data preparation and
-    classifier-specific modeling parameters.
+    classifier-specific modeling parameters. This package provides
+    easy installation of syberia on your machine.
 Author: Robert Krzyzanowski <technoguyrob@gmail.com>
 Maintainer: Robert Krzyzanowski <technoguyrob@gmail.com>
 Authors@R: c(person("Robert", "Krzyzanowski",
@@ -15,26 +16,10 @@ Depends:
     R (>= 3.0.0)
 Imports:
     devtools,
-    memoise,
-    stringr,
     testthat,
-    Ramd,
-    stagerunner (>= 0.5.0),
-    director,
-    statsUtils,
-    mungebits,
-    Matrix,
-    tundra,
-    syberiaMungebits,
-    syberiaStructure,
-    syberiaStages,
-    objectdiff
+    yaml
 Suggests:
-    pbapply,
-    testthat,
-    testthatsomemore,
-    knitr
-VignetteBuilder: knitr
+    testthatsomemore
 License: MIT
 LazyData: true
 Roxygen: list(wrap = FALSE)
