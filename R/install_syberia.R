@@ -8,7 +8,7 @@ install_syberia <- function() {
     if (!"bettertrace" %in% utils::installed.packages()[,1]) devtools::install_github('robertzk/bettertrace')
     library(bettertrace);
     if (!require(Ramd)) devtools::install_github("robertzk/Ramd")
-    Ramd::packages("magrittr", "RJSONIO", "lubridate", "plyr", "timeDate", "arules", "AUC", "base64enc", "pROC", "rjson", "crayon", "yaml")
+    Ramd::packages("magrittr", "RJSONIO", "lubridate", "plyr", "timeDate", "arules", "AUC", "base64enc", "pROC", "rjson", "crayon", "yaml", "Rcpp")
 
     package_list <- yaml::yaml.load(packagefile("packages.yml", read = TRUE))
     invisible(manual_box(package_list))
