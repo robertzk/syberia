@@ -1,5 +1,10 @@
 packages:
   -
+    name: purrr
+    version: 0.0.0.9000
+    repo: hadley/purrr
+    ref: 5aca81a431307594a0cf24530bed7e3e134a1325
+  -
     name: productivus
     version: 0.1.1
     repo: robertzk/productivus
