@@ -9,4 +9,5 @@ Syberia is a framework for building, debugging, testing, and deploying classifie
 ```r
 library(devtools)
 install_github('robertzk/syberia@install')
+syberia.io::install_syberia()
 ```
