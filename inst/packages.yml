@@ -62,6 +62,10 @@ packages:
     version: 0.4.4.1
     repo: robertzk/syberia
   -
+    name: testthatsomemore
+    version: 0.2.4
+    repo: robertzk/testthatsomemore
+  -
     name: lockbox
     version: 0.1.10
     repo: robertzk/lockbox
