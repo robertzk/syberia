@@ -28,10 +28,12 @@ syberia_engine <- function(filepath, ...) {
   UseMethod("syberia_engine")
 }
 
+#' @export
 syberia_engine.pre_engine <- function(filepath, ...) {
   build_engine(filepath)
 }
 
+#' @export
 syberia_engine.character <- function(filepath, cache = TRUE) {
   traverse_parent_directories(normalizePath(filepath), function(filepath) {
     if (isTRUE(cache) && has_application_file(filepath)) {
@@ -47,16 +49,19 @@ has_application_file <- function(filepath) {
   any(file.exists(paste0(file.path(filepath, 'config', 'application'), extensions)))
 }
 
+#' @export
 build_engine <- function(buildable) {
   UseMethod("build_engine")
 }
 
+#' @export
 build_engine.pre_engine <- function(buildable) {
   dir <- engine_dir(buildable$prefix)
   if (!file.exists(dir)) buildable$builder(dir)
   syberia_engine(dir, cache = FALSE)
 }
 
+#' @export
 build_engine.character <- function(buildable) {
   # bootstrap_engine(director::director(buildable))
   bootstrap_engine(syberia_engine_class$new(buildable))
@@ -231,8 +236,6 @@ pre_engine <- function(prefix, builder) {
 #  print(x$director)
 #}
 
-#' Whether to exclude a resource from being processed by an engine.
-#'
 #' @param condition logical. Some condition.
 #' @param engine syberia_engine. Engine object.
 #' @export
