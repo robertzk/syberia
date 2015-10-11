@@ -230,11 +230,20 @@ pre_engine <- function(prefix, builder) {
 #print.syberia_engine <- function(x, ...) {
 #  print(x$director)
 #}
+
+#' Whether to exclude a resource from being processed by an engine.
+#'
+#' @param condition logical. Some condition.
+#' @param engine syberia_engine. Engine object.
+#' @export
 should_exclude <- function(condition, engine) {
   UseMethod("should_exclude")
 }
 
-should_exclude.syberia_engine <- identical
+#' @export
+should_exclude.syberia_engine <- function(...) { identical(...) }
+
+#' @export
 should_exclude.character <- function(condition, engine) {
   identical(condition, engine$root())
 }
