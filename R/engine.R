@@ -195,7 +195,7 @@ pre_engine <- function(prefix, builder) {
 #  structure(list(director = director), class = "syberia_engine")
 #}
 #
-##' @export
+
 #`$.syberia_engine` <- function(engine, method) {
 #  if (identical(method, "exists")) syberia_engine_exists(engine)
 #  else if (identical(method, "resource")) syberia_engine_resource(engine)
@@ -231,11 +231,12 @@ pre_engine <- function(prefix, builder) {
 #  }
 #}
 #
-##' @export
 #print.syberia_engine <- function(x, ...) {
 #  print(x$director)
 #}
 
+#' Whether to exclude a syberia engine from being used for resourcing.
+#'
 #' @param condition logical. Some condition.
 #' @param engine syberia_engine. Engine object.
 #' @export
