@@ -34,7 +34,11 @@ syberia_engine.pre_engine <- function(filepath, ...) {
 }
 
 #' @export
-syberia_engine.character <- function(filepath, cache = TRUE) {
+syberia_engine.character <- function(filepath, ...) {
+  syberia_engine_character(filepath, ...)
+}
+
+syberia_engine_character <- function(filepath, cache = TRUE) {
   traverse_parent_directories(normalizePath(filepath), function(filepath) {
     if (isTRUE(cache) && has_application_file(filepath)) {
       .syberia_env[[filepath]] <- .syberia_env[[filepath]] %||% build_engine(filepath)
@@ -49,6 +53,9 @@ has_application_file <- function(filepath) {
   any(file.exists(paste0(file.path(filepath, 'config', 'application'), extensions)))
 }
 
+#' Build a syberia engine.
+#'
+#' @param buildable character. A file path from which to build the engine.
 #' @export
 build_engine <- function(buildable) {
   UseMethod("build_engine")
