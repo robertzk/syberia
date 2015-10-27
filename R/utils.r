@@ -1,4 +1,10 @@
+#' Non-null selection operator.
+#'
+#' @param x ANY. An R object. If \code{NULL}, return \code{y}.
+#' @param y ANY. An R object. If x is \code{NULL}, return \code{y}.
+#' @export
 `%||%`   <- function(x, y) if (is.null(x)) y else x
+
 `%|||%`  <- function(x, y) if (is.falsy(x)) y else x
 is.falsy <- function(x) {
   identical(x, NULL) || identical(x, FALSE) || identical(x, "") ||
