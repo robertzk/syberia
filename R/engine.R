@@ -38,7 +38,7 @@ syberia_engine.character <- function(filepath, cache = TRUE) {
   traverse_parent_directories(normalizePath(filepath), function(filepath) {
     if (isTRUE(cache) && has_application_file(filepath)) {
       .syberia_env[[filepath]] <- .syberia_env[[filepath]] %||% build_engine(filepath)
-    } else {
+    } else if (has_application_file(filepath)) {
       build_engine(filepath)
     }
   }, error = sprintf("No syberia engine found at %s", sQuote(crayon::red(filepath))))

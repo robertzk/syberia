@@ -3,7 +3,10 @@ library(testthatsomemore)
 
 describe("Invalid inputs", {
   test_that("it errors when an non-engine directory is passed", {
-    expect_error(syberia_engine(tempfile()), "No syberia engine")
+    dir <- tempfile()
+    unlink(dir, TRUE, TRUE)
+    dir.create(dir)
+    expect_error(syberia_engine(dir), "No syberia engine")
   })
 
   test_that("it can't find the engine if application.R is misspelled", {
