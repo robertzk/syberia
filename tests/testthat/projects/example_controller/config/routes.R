@@ -4,6 +4,7 @@ list(
   director = "director",
   args = "args",
   source_env = "source_env",
-  names = "names"
+  names = "names",
+  preprocessor_output = "preprocessor_output"
 )
 

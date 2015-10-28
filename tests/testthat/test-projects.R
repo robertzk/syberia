@@ -61,5 +61,10 @@ describe("Project example_controller", {
     expect_equal(syberia_engine("projects/example_controller")$resource("names"),
                  list(resource_name = "names", filename = file, prefilename = file))
   })
+
+  test_that("it has access to the preprocessor_output", {
+    expect_equal(syberia_engine("projects/example_controller")$resource("preprocessor_output"),
+                 list(hello = "world"))
+  })
 })
 
