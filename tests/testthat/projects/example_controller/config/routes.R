@@ -3,6 +3,7 @@ list(
   simple_preprocessor = "simple_preprocessor",
   director = "director",
   args = "args",
-  source_env = "source_env"
+  source_env = "source_env",
+  names = "names"
 )
 

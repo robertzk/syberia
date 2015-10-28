@@ -55,5 +55,11 @@ describe("Project example_controller", {
     expect_equal(syberia_engine("projects/example_controller")$resource("source_env"),
                  list(a = 1))
   })
+
+  test_that("it has access to the resource and file name", {
+    file <- normalizePath(file.path(getwd(), "projects", "example_controller", "names.R"))
+    expect_equal(syberia_engine("projects/example_controller")$resource("names"),
+                 list(resource_name = "names", filename = file, prefilename = file))
+  })
 })
 
