@@ -12,8 +12,15 @@ describe("Project example1", {
   })
 
   test_that("it can load a secondary resource", {
-    expect_equal(syberia_engine("projects/engines1/example")$resource("example_resource"),
+    expect_equal(syberia_engine("projects/engines1/main")$resource("example_resource"),
                  "example_resource")
+  })
+})
+
+describe("Project example2", {
+  test_that("it can overwrite an earlier resource", {
+    expect_equal(syberia_engine("projects/engines2/main")$resource("example_resource"),
+                 "overwritten")
   })
 })
 
