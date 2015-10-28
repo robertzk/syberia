@@ -66,5 +66,13 @@ describe("Project example_controller", {
     expect_equal(syberia_engine("projects/example_controller")$resource("preprocessor_output"),
                  list(hello = "world"))
   })
+
+  # TODO: (RK) Add tests for dependency modification.
+})
+
+describe("Project two_engines", {
+  test_that("it can simultaneously use two engines", {
+    assert(syberia_engine("projects/two_engines/main"))
+  })
 })
 
