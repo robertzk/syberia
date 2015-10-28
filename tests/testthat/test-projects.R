@@ -29,5 +29,10 @@ describe("Project example_controller", {
     expect_equal(syberia_engine("projects/example_controller")$resource("example"),
                  list(first = 1, second = 2))
   })
+
+  test_that("it can apply a simple controller with a preprocessor", {
+    expect_equal(syberia_engine("projects/example_controller")$resource("simple_preprocessor"),
+                 list(first = 1, second = 2))
+  })
 })
 
