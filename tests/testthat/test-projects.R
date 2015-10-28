@@ -39,5 +39,21 @@ describe("Project example_controller", {
     dir <- file.path(getwd(), "projects", "example_controller")
     expect_equal(syberia_engine("projects/example_controller")$resource("director"), dir)
   })
+
+  test_that("it has access to the director object", {
+    # TODO: (RK) This will break if we pass o = 1 instead of a = 1
+    # See line 25 of resource-parser.R in director. We need to *capture*
+    # the list(...) as early as possible and pass it as an argument along
+    # the resource tower or we will run into partial argument matching
+    # and have some pretty weird heisenbugs if there is a collision with
+    # any of the arguments in the tower chain.
+    expect_equal(syberia_engine("projects/example_controller")$resource("args", a = 1, b = 2, d = 3),
+                 list(a = 1, b = 2, d = 3))
+  })
+
+  test_that("it has access to the sourcing environment", {
+    expect_equal(syberia_engine("projects/example_controller")$resource("source_env"),
+                 list(a = 1))
+  })
 })
 
