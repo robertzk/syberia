@@ -34,5 +34,10 @@ describe("Project example_controller", {
     expect_equal(syberia_engine("projects/example_controller")$resource("simple_preprocessor"),
                  list(first = 1, second = 2))
   })
+
+  test_that("it has access to the director object", {
+    dir <- file.path(getwd(), "projects", "example_controller")
+    expect_equal(syberia_engine("projects/example_controller")$resource("director"), dir)
+  })
 })
 
