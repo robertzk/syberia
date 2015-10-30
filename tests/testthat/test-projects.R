@@ -105,3 +105,13 @@ describe("Project double_snake", {
   })
 })
 
+describe("Project conflicting_double_snake", {
+  test_that("it can detect resource conflicts through chains of engines", {
+    expect_error(syberia_engine("projects/conflicting_double_snake/main"),
+                 "conflicting resources")
+    expect_error(syberia_engine("projects/conflicting_double_snake/main"),
+                 "engine_resource")
+                
+  })
+})
+
