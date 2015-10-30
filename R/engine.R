@@ -105,8 +105,10 @@ bootstrap_engine <- function(engine) {
   engine$register_preprocessor('config/boot',    boot_preprocessor)
   engine$register_preprocessor('config/engines', engine_preprocessor)
   engine$register_parser      ('config/engines', engine_parser)
-  if (engine$exists("config/engines")) engine$resource("config/engines")
-  if (engine$exists("config/boot"))    engine$resource("config/boot")
+  
+  exists <- function(...) engine$exists(..., parent. = FALSE, children. = FALSE)
+  if (exists("config/engines")) engine$resource("config/engines")
+  if (exists("config/boot"))    engine$resource("config/boot")
   engine$cache_set("bootstrapped", TRUE)
   engine
 }
@@ -156,7 +158,6 @@ register_engine <- function(director, name, engine, mount = FALSE) {
   if (engine$cache_exists(".onAttach")) {
     engine$cache_get(".onAttach")(director)
   }
-
 }
 
 parse_engine <- function(engine_parameters) {
