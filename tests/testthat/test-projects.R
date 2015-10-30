@@ -115,3 +115,9 @@ describe("Project conflicting_double_snake", {
   })
 })
 
+describe("Project diamond_with_a_tail", {
+  test_that("it can follow a diamond down to a base through a parent of base", {
+    expect_equal(syberia_engine("projects/diamond_with_a_tail/main")$resource("common_resource"),
+                 "we share so much in common")
+  })
+})
