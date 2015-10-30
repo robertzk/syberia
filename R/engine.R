@@ -109,6 +109,9 @@ bootstrap_engine <- function(engine) {
   exists <- function(...) engine$exists(..., parent. = FALSE, children. = FALSE)
   if (exists("config/engines")) engine$resource("config/engines")
   if (exists("config/boot"))    engine$resource("config/boot")
+  # Check for duplicate resources in mounted child engines.
+  #if (basename(engine$root()) == "main") browser()
+  engine$find(check_duplicates. = TRUE, children. = TRUE, tag_engine. = TRUE)
   engine$cache_set("bootstrapped", TRUE)
   engine
 }
@@ -303,6 +306,48 @@ syberia_engine_class <- R6::R6Class("syberia_engine",
       super$resource(name, ..., defining_environment. = defining_environment.)
     },
 
+    find = function(..., parent. = FALSE, children. = FALSE, exclude. = NULL,
+                    check_duplicates. = FALSE, tag_engine. = FALSE) {
+      ## Check the parent engines for resources.
+      resources <- character(0)
+      if (isTRUE(parent.) && !is.null(self$.parent)) {
+        resources <- self$.parent$find(..., parent. = TRUE, children. = TRUE, exclude. = list(self$root()))
+      }
+
+      ## Check the current engines for resources.
+      self_resources <- super$find(...)
+      if (is.character(tag_engine.)) {
+        names(self_resources) <- rep(tag_engine., length(self_resources))
+      }
+      resources <- c(self_resources, resources)
+      resources <- resources[!duplicated(resources)]
+
+      ## Check the subengines for resources.
+      children_resources <- vector("list", length(self$.engines))
+      if (isTRUE(children.)) {
+        for (i in seq_along(self$.engines)) {
+          name   <- names(self$.engines)[i]
+          engine <- self$.engines[[i]]
+          if (isTRUE(engine$mount)) {
+            engine <- engine$engine
+            if (!any(vapply(exclude., should_exclude, logical(1), engine))) {
+              tag <- if (!identical(tag_engine., FALSE)) name else FALSE
+              children_resources[[i]] <- engine$find(..., parent. = FALSE,
+                children. = TRUE, exclude. = exclude., tag_engine. = tag)
+              names(children_resources)[i] <- name
+            }
+          }
+        }
+      }
+
+      if (isTRUE(check_duplicates.)) {
+        children_resources <- Filter(Negate(is.null), children_resources)
+        detect_duplicate_resources(children_resources)
+      }
+      resources <- c(recursive = TRUE, c(unname(children_resources), list(resources)))
+      resources[!duplicated(resources)]
+    },
+
     exists = function(resource, ..., parent. = TRUE, children. = TRUE, exclude. = NULL) {
       ## Check the parent engines for resource existence.
       if (isTRUE(parent.) && !is.null(self$.parent)) {
@@ -334,4 +379,39 @@ syberia_engine_class <- R6::R6Class("syberia_engine",
   private = list(
   )
 )
+
+detect_duplicate_resources <- function(resource_list) {
+  if (length(unique(c(recursive = TRUE, resource_list))) !=
+      sum(vapply(resource_list, length, numeric(1)))) {
+    # Allow for comparison of engine-resource pairs.
+    engined_resource_list <- lapply(resource_list, function(resources) {
+      setNames(Map(paste, names(resources), resources, sep = "\1"), resources)
+    })
+
+    pairs <- combn(length(resource_list), 2)
+    conflict_list <- Filter(Negate(is.null), apply(pairs, 2, function(pair) {
+      same_subengine <- engined_resource_list[[pair[1]]][
+        engined_resource_list[[pair[1]]] %in% engined_resource_list[[pair[2]]]]
+      common <- setdiff(intersect(resource_list[[pair[1]]], resource_list[[pair[2]]]),
+                        names(same_subengine))
+      if (length(common) > 0) {
+        list(
+          engines   = names(resource_list)[pair],
+          resources = common
+        )
+      }
+    }))
+
+    if (length(conflict_list) > 0L) {
+      conflicts <- do.call(paste, lapply(conflict_list, function(conflict) {
+        paste0("\n\nEngine ", crayon::red(conflict$engines[1]), " and ",
+               crayon::red(conflict$engines[2]), " share:\n",
+          paste(collapse = "\n", paste(" *", vapply(conflict$resources, crayon::yellow, character(1)))))
+      }))
+
+      stop("Mounted child engines have conflicting resources. Please mount ",
+           "at a different root or remove the conflicts: ", conflicts, "\n\n")
+    }
+  }
+}
 

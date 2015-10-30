@@ -74,5 +74,18 @@ describe("Project two_engines", {
   test_that("it can simultaneously use two engines", {
     assert(syberia_engine("projects/two_engines/main"))
   })
+
+  test_that("it can fetch a resource from one engine", {
+    expect_equal(syberia_engine("projects/two_engines/main")$resource("example_resource"),
+                 "example_resource1")
+  })
+})
+
+describe("Project conflicting_resources", {
+  test_that("it can detect resource conflicts in mounted engines", {
+    expect_error(syberia_engine("projects/conflicting_resources/main"),
+                 "conflicting resources")
+                
+  })
 })
 
