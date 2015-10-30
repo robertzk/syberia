@@ -110,7 +110,6 @@ bootstrap_engine <- function(engine) {
   if (exists("config/engines")) engine$resource("config/engines")
   if (exists("config/boot"))    engine$resource("config/boot")
   # Check for duplicate resources in mounted child engines.
-  #if (basename(engine$root()) == "main") browser()
   engine$find(check_duplicates. = TRUE, children. = TRUE, tag_engine. = TRUE)
   engine$cache_set("bootstrapped", TRUE)
   engine

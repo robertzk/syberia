@@ -89,3 +89,10 @@ describe("Project conflicting_resources", {
   })
 })
 
+describe("Project snake", {
+  test_that("it can follow an engine chain", {
+    expect_equal(syberia_engine("projects/snake/main")$resource("engine_resource"),
+                 "down in the deep")
+  })
+})
+
