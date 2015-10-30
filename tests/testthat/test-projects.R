@@ -96,3 +96,12 @@ describe("Project snake", {
   })
 })
 
+describe("Project double_snake", {
+  test_that("it can follow parallel engine chains", {
+    expect_equal(syberia_engine("projects/double_snake/main")$resource("engine_resource"),
+                 "down in the deep")
+    expect_equal(syberia_engine("projects/double_snake/main")$resource("addon_resource"),
+                 "welcome to the jungle")
+  })
+})
+
