@@ -280,7 +280,8 @@ syberia_engine_class <- R6::R6Class("syberia_engine",
       ## Check the parent engines for resource existence.
       if (isTRUE(parent.) && !is.null(self$.parent)) {
         if (self$.parent$exists(name, parent. = TRUE, children. = TRUE, exclude. = list(self$root()))) {
-          return(self$.parent$resource(name, ..., defining_environment. = defining_environment.))
+          return(self$.parent$resource(name, exclude. = list(self$root()), ...,
+                                       defining_environment. = defining_environment.))
         }
       }
 
@@ -294,7 +295,9 @@ syberia_engine_class <- R6::R6Class("syberia_engine",
             engine <- engine$engine
             if (!any(vapply(exclude., should_exclude, logical(1), engine))) {
               if (engine$exists(name, parent. = FALSE, children. = TRUE, exclude. = exclude.)) {
-                return(engine$resource(name, ..., defining_environment. = defining_environment.))
+                return(engine$resource(name, parent. = FALSE, children. = TRUE,
+                                       exclude. = c(engine$root(), exclude.),
+                                       ..., defining_environment. = defining_environment.))
               }
             }
           }
