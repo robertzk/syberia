@@ -122,3 +122,9 @@ describe("Project diamond_with_a_tail", {
   })
 })
 
+describe("Project nested_controller", {
+  test_that("it can use a nested controller", {
+    expect_equal(syberia_engine("projects/nested_controller/main")$resource("blorp/boop"), "blarp")
+  })
+})
+
