@@ -1,13 +1,6 @@
 context("syberia projects")
 library(testthatsomemore)
 
-describe("Project two_nested_controllers", {
-  test_that("it can use two nested controllers", {
-    expect_equal(syberia_engine("projects/two_nested_controllers/main")$resource("blorp/boop"),
-                 "hello world")
-  })
-})
-
 describe("Project example1", {
   test_that("it can load the syberia engine representing example1", {
     assert(syberia_engine("projects/engines1/main"))
@@ -136,6 +129,20 @@ describe("Project nested_controller", {
 
   test_that("it can introduce new controllers", {
     expect_equal(syberia_engine("projects/nested_controller/main")$resource("floop/flap"), "florp")
+  })
+})
+
+describe("Project two_nested_controllers", {
+  test_that("it can use two nested controllers", {
+    expect_equal(syberia_engine("projects/two_nested_controllers/main")$resource("blorp/boop"),
+                 "hello world")
+  })
+})
+
+describe("Project hybrid_resourcing", {
+  test_that("it can imbue a utility engine with a controller", {
+    expect_equal(syberia_engine("projects/hybrid_resourcing/main")$resource("blorp/boop"),
+                 "hello world")
   })
 })
 
