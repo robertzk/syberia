@@ -126,5 +126,9 @@ describe("Project nested_controller", {
   test_that("it can use a nested controller", {
     expect_equal(syberia_engine("projects/nested_controller/main")$resource("blorp/boop"), "blarp")
   })
+
+  test_that("it can introduce new controllers", {
+    expect_equal(syberia_engine("projects/nested_controller/main")$resource("floop/flap"), "florp")
+  })
 })
 
