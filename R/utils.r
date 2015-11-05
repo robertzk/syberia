@@ -42,8 +42,8 @@ normalized_filename <- function(filename) {
 #' 
 #' @param expr expression. The R expression to evaluate
 #' @param desc character. A string to add to "you modified global 
-#' @param check_options logical. Whether to check if any global options were changed.
 #'   variables while [\code{desc} goes here]".
+#' @param check_options logical. Whether to check if any global options were changed.
 ensure_no_global_variable_pollution <- function(expr, desc, check_options = FALSE) {
   if (isTRUE(check_options)) old_options <- options()
   before <- ls(globalenv())
