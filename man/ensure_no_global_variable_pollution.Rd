@@ -9,10 +9,10 @@ ensure_no_global_variable_pollution(expr, desc, check_options = FALSE)
 \arguments{
 \item{expr}{expression. The R expression to evaluate}
 
-\item{desc}{character. A string to add to "you modified global}
-
-\item{check_options}{logical. Whether to check if any global options were changed.
+\item{desc}{character. A string to add to "you modified global
 variables while [\code{desc} goes here]".}
+
+\item{check_options}{logical. Whether to check if any global options were changed.}
 }
 \description{
 If any global variables are removed or created, it will
