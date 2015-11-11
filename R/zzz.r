@@ -10,5 +10,12 @@
   makeActiveBinding('run', function() run_model, .GlobalEnv)
 
   addTaskCallback(auto_run)
-}
 
+  tryCatch(syberia_project(), error = function(e) {
+    if (grepl("invalid 'path'", conditionMessage(e), fixed = TRUE)) {
+      message("...Call `syberia_project()` from within a Syberia directory to get started.")
+    } else {
+      stop(e)
+    }
+  })
+}
