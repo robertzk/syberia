@@ -1,0 +1,5 @@
+engine("utility1", type = "local",
+       path = normalizePath(file.path(root(), "..", "utility1")), mount = FALSE)
+
+engine("utility2", type = "local",
+       path = normalizePath(file.path(root(), "..", "utility2")), mount = FALSE)
