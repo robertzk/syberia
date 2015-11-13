@@ -136,7 +136,9 @@ engine_parser <- function(director, preprocessor_output) {
                     mount = isTRUE(preprocessor_output$engines[[engine]]$mount))
   }
 
-  if (exists(".onAttach", envir = input, inherits = FALSE)) {
+  ## When we use `devtools::load_all` on director, it loads a symbol called
+  ## `exists`; we use explicit base namespacing to prevent conflicts during development.
+  if (base::exists(".onAttach", envir = input, inherits = FALSE)) {
     onAttach <- input$.onAttach
     environment(onAttach) <- list2env(
       list(director = director),
