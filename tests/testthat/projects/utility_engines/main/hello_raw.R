@@ -1,2 +1,2 @@
-resource("hello")
+resource("hello2")
 

@@ -7,7 +7,8 @@ describe("A simple non-mounted utility engine", {
   })
 
   test_that("it cannot load a resource from another non-mounted engine without direct specification", {
-    expect_error(syberia_engine("projects/utility_engines/main")$resource("hello_raw"), "Cannot")
+    expect_error(syberia_engine("projects/utility_engines/main")$resource("hello_raw"),
+                 "Cannot find resource")
   })
 })
 
