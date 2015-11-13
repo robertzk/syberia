@@ -215,7 +215,7 @@ register_routes <- function(project) {
 register_controllers <- function(project) {
   controllers_path <- file.path('lib', 'controllers')
   project$register_parser(controllers_path, function() {
-    if (exists('preprocessor', envir = input, inherits = FALSE) &&
+    if (base::exists('preprocessor', envir = input, inherits = FALSE) &&
         !is.function(input$preprocessor))
       stop("The preprocessor defined in ",
            sQuote(crayon::red(resource)),

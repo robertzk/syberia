@@ -173,7 +173,9 @@ parse_engine <- function(engine_parameters) {
   }
 
   parser <- paste0("parse_engine.", engine_parameters$type)
-  if (!exists(parser, envir = getNamespace("syberia"), inherits = FALSE)) {
+  ## When we use `devtools::load_all` on director, it loads a symbol called
+  ## `exists`; we use explicit base namespacing to prevent conflicts during development.
+  if (!base::exists(parser, envir = getNamespace("syberia"), inherits = FALSE)) {
     stop(sprintf("Cannot load an engine of type %s", 
                  sQuote(crayon::red(engine_parameters$type))))
   }
