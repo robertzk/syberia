@@ -15,6 +15,11 @@ describe("Utility engines on a mounted engine", {
     expect_error(syberia_engine("projects/mounted_engine_with_utilities/main")$resource("hello_raw"),
                  "Cannot find resource")
   })
+
+  test_that("one cannot access utility sub-engines", {
+    expect_error(syberia_engine("projects/mounted_engine_with_utilities/main")$resource("hello"),
+                 "Cannot find resource")
+  })
 })
 
 describe("A simple non-mounted utility engine", {
