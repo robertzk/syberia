@@ -278,7 +278,29 @@ syberia_engine_class <- R6::R6Class("syberia_engine",
       if (isTRUE(mount)) engine$.set_parent(self)
     },
 
-    resource = function(name, ..., parent. = TRUE, children. = TRUE, exclude. = NULL, defining_environment. = parent.frame()) {
+    resource = function(name, ..., parent. = TRUE, children. = TRUE,
+                        exclude. = NULL, defining_environment. = parent.frame(),
+                        engine) {
+      if (!missing(engine)) {
+        if (!is.simple_string(engine)) {
+          stop("When sourcing a resource, please pass a string to the ",
+               sQuote("engine"), " parameter.")
+        }
+        if (!is.element(engine, names(self$.engines))) {
+          stop("There is no engine called ", sQuote(engine), ".")
+        }
+        engine_obj <- self$.engines[[engine]]$engine
+        if (isTRUE(engine_obj$mount)) {
+          stop("Explicit engine specification during resource sourcing is ",
+               "only allowed on unmounted engines. The ", sQuote(engine), 
+               " engine is a mounted engine.")
+        }
+        if (!engine_obj$exists(name, ..., parent. = FALSE)) {
+          stop("No resource ", sQuote(name), " in engine ", sQuote(engine), ".")
+        }
+        return(engine_obj$resource(name, ..., parent. = FALSE))
+      }
+
       ## Check the parent engines for resource existence.
       if (isTRUE(parent.) && !is.null(self$.parent)) {
         if (self$.parent$exists(name, parent. = TRUE, children. = TRUE, exclude. = list(self$root()))) {
