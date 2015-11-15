@@ -11,4 +11,11 @@ describe("two mounted engines with two distinct utility engines, one each", {
   })
 })
 
+describe("two mounted engines with common utility enigne", {
+  test_that("it can combine resources created from two mounted engines, each consuming a common utility engine resource", {
+    engine <- syberia_engine(file.path("projects", "two_mounted_engines_with_one_utility", "main"))
+    expect_equal(engine$resource("hello_world"), "hello world")
+  })
+})
+
 
