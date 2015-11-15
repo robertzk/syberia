@@ -1,5 +1,11 @@
 language: c
+git:
+  submodules: false
+# Use sed to replace the SSH URL with the public URL, then initialize submodules
+# http://stackoverflow.com/questions/15674064/github-submodule-access-rights-travis-ci
 before_install:
+- sed -i 's/git@github.com:/https:\/\/github.com\//' .gitmodules
+- git submodule update --init --recursive
 - curl -OL http://raw.github.com/craigcitro/r-travis/master/scripts/travis-tool.sh
 - chmod 755 ./travis-tool.sh
 - "./travis-tool.sh bootstrap"
