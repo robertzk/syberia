@@ -35,4 +35,4 @@ VignetteBuilder: knitr
 License: GPL (>= 2)
 LazyData: true
 Roxygen: list(wrap = FALSE)
-RoxygenNote: 4.1.1.9001
+RoxygenNote: 5.0.1
