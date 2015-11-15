@@ -1,5 +1,6 @@
 #' Non-null selection operator.
 #'
+#' @name infix_or
 #' @param x ANY. An R object. If \code{NULL}, return \code{y}.
 #' @param y ANY. An R object. If x is \code{NULL}, return \code{y}.
 #' @export
