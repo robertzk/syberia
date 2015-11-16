@@ -4,11 +4,11 @@
 \alias{test_project}
 \title{Run all tests in a syberia project.}
 \usage{
-test_project(project = syberia_project(), base = "")
+test_project(project = syberia_engine(), base = "")
 }
 \arguments{
 \item{project}{director or character. The director for the syberia project.
-If a \code{character}, it will be passed to \code{syberia_project} first.}
+If a \code{character}, it will be passed to \code{syberia_engine} first.}
 
 \item{base}{character. Any subdirectory to test specifically. By default,
 the empty string \code{''} which means "test everything".}
@@ -37,9 +37,9 @@ For example, creating a file \code{config/environments/test.R} with the code
 code \code{setup <- function(env) cat("Running all tests.")} will print a message
 before all the tests are run. The one parameter the function must take is an
 environment which will contain a single key, `director`, pointing to the 
-`director` object coming from `syberia_project`.
+`director` object coming from `syberia_engine`.
 }
 \seealso{
-\code{\link{syberia_project}}
+\code{\link{syberia_engine}}
 }
 

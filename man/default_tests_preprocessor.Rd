@@ -4,14 +4,14 @@
 \alias{default_tests_preprocessor}
 \title{The default preprocessor for syberia tests.}
 \usage{
-default_tests_preprocessor(resource_object, director, source_args, source)
+default_tests_preprocessor(resource, director, source_env, source)
 }
 \arguments{
-\item{resource_object}{directorResource}
+\item{resource}{character}
 
 \item{director}{director}
 
-\item{source_args}{list}
+\item{source_env}{list}
 
 \item{source}{function}
 }
