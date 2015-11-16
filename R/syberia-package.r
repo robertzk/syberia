@@ -11,3 +11,4 @@ NULL
 
 ## An environment used for caching some syberia-managed objects, like directors.
 .syberia_env <- new.env(parent = emptyenv())
+

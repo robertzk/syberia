@@ -4,7 +4,7 @@
 \alias{syberia_engine}
 \title{Bootstrap a Syberia engine.}
 \usage{
-syberia_engine(filepath = getwd(), ...)
+syberia_engine(filepath = getwd(), ..., root. = TRUE)
 }
 \arguments{
 \item{filepath}{character. The root directory of the engine.

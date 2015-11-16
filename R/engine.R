@@ -25,8 +25,20 @@
 #'    environment object in the syberia package namespace.
 #' @return The \code{\link[director]{director}} object responsible for
 #'    managing the engine.
-syberia_engine <- function(filepath = getwd(), ...) {
-  syberia_engine_(filepath, ...)
+syberia_engine <- function(filepath = getwd(), ..., root. = TRUE) {
+  project <- syberia_engine_(filepath, ...)
+  if (isTRUE(root.)) {
+    .syberia_env$active_project <- project
+  }
+  project
+}
+
+#' The current active Syberia project.
+#'
+#' @return A \code{syberia_engine} object or \code{NULL}.
+#' @export
+active_project <- function() {
+  .syberia_env$active_project
 }
 
 syberia_engine_ <- function(filepath, ...) {
@@ -68,7 +80,7 @@ build_engine <- function(buildable) {
 build_engine.pre_engine <- function(buildable) {
   dir <- engine_dir(buildable$prefix)
   if (!file.exists(dir)) buildable$builder(dir)
-  syberia_engine(dir, cache = FALSE)
+  syberia_engine(dir, cache = FALSE, root. = FALSE)
 }
 
 #' @export
@@ -183,7 +195,7 @@ parse_engine <- function(engine_parameters) {
                  sQuote(crayon::red(engine_parameters$type))))
   }
   syberia_engine(get(parser, envir = getNamespace("syberia"))(engine_parameters),
-                 cache = FALSE)
+                 cache = FALSE, root. = FALSE)
 }
 
 parse_engine.github <- function(engine_parameters) {
