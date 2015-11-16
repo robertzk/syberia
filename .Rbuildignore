@@ -1,7 +1,5 @@
  .travis.yml
-data/.DS_Store
 ..Rcheck
 .git
 .gitignore
-.travis.yml
 NEWS.md
