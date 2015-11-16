@@ -26,6 +26,7 @@
 #' @return The \code{\link[director]{director}} object responsible for
 #'    managing the engine.
 syberia_engine <- function(filepath = getwd(), ...) {
+  force(filepath)
   UseMethod("syberia_engine")
 }
 
