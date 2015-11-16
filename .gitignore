@@ -8,3 +8,4 @@ syberia.Rproj
 ..Rcheck
 *.Rcheck
 *.tar.gz
+.DS_Store
