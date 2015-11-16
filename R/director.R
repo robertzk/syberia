@@ -317,11 +317,11 @@ routes_parser <- function() {
 
 #' The default preprocessor for syberia tests.
 #'
-#' @param resource_object directorResource
+#' @param resource character
 #' @param director director
-#' @param source_args list
+#' @param source_env list
 #' @param source function
-default_tests_preprocessor <- function(resource_object, director, source_args, source) {
+default_tests_preprocessor <- function(resource, director, source_env, source) {
   tested_resource <- gsub("^test\\/", "", resource)
   if (!director$exists(tested_resource)) {
     # TODO: (RK) Figure out how this interacts with virtual resources.

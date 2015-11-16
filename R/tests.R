@@ -17,19 +17,19 @@
 #' code \code{setup <- function(env) cat("Running all tests.")} will print a message
 #' before all the tests are run. The one parameter the function must take is an
 #' environment which will contain a single key, `director`, pointing to the 
-#' `director` object coming from `syberia_project`.
+#' `director` object coming from `syberia_engine`.
 #'
 #' @param project director or character. The director for the syberia project.
-#'    If a \code{character}, it will be passed to \code{syberia_project} first.
+#'    If a \code{character}, it will be passed to \code{syberia_engine} first.
 #' @param base character. Any subdirectory to test specifically. By default,
 #'    the empty string \code{''} which means "test everything".
-#' @seealso \code{\link{syberia_project}}
+#' @seealso \code{\link{syberia_engine}}
 #' @export
 #' @return \code{TRUE} if all tests pass or will error otherwise. Note this
 #'    function uses \code{pblapply} from the \code{pbapply} package to
 #'    represent progress.
-test_project <- function(project = syberia_project(), base = '') {
-  if (is.character(project)) project <- syberia_project(project)
+test_project <- function(project = syberia_engine(), base = '') {
+  if (is.character(project)) project <- syberia_engine(project)
   test_path <- file.path(project$root(), 'test')
   tests <- project$find(base = gsub("\\/$", "", file.path('test', base)))
 
