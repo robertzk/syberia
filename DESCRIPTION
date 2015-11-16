@@ -22,24 +22,24 @@ Depends:
     R (>= 3.0.0)
 Imports:
     crayon,
+    director (>= 0.3.0.4),
+    mungebits,
+    objectdiff,
+    R6,
     Ramd,
     stagerunner,
-    testthat,
-    director (>= 0.3.0.4),
     statsUtils,
-    mungebits,
-    tundra,
     syberiaMungebits,
-    syberiaStructure,
     syberiaStages,
-    objectdiff,
-    R6
+    syberiaStructure,
+    testthat,
+    tundra
 Suggests:
     bettertrace,
     devtools,
+    knitr
     pbapply,
     testthatsomemore,
-    knitr
 VignetteBuilder: knitr
 License: GPL (>= 2)
 LazyData: true
