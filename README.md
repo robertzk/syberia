@@ -36,6 +36,28 @@ deploying as a REST service.
 The timeline for future engines and information about how
 to contribute is listed at the [Syberia roadmap](http://syberia.io/roadmap).
 
+## Installation
+
+To get started right away, try out the minimal
+[example syberia project](https://github.com/syberia/example.sy):
+
+```
+# Run this from your command line terminal.
+git clone git@github.com:syberia/example.sy.git && cd example.sy && R
+```
+
+This will open an R console (installing dependencies for the first time may take a while;
+for troubleshooting see the [troubleshooting guide](http://syberia.io/trouble)).
+You can then type:
+
+```r
+run("example1")
+model$predict(iris[1:5, ]) # The first five scores from a trained classifier.
+# [1] 5.005686 4.757667 4.773923 4.890092 5.055138
+```
+
+For more detailed instructions, see the [installation guide](http://syberia.io/install).
+
 ## Packages
 
 Syberia relies on the following supplemental packages:
