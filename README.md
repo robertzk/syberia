@@ -58,6 +58,8 @@ model$predict(iris[1:5, ]) # The first five scores from a trained classifier.
 
 For more detailed instructions, see the [installation guide](http://syberia.io/install).
 
+![Minimal syberia example](inst/images/syberia_example.png)
+
 ## Packages
 
 Syberia relies on the following supplemental packages:
