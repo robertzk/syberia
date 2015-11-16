@@ -92,7 +92,7 @@ traverse_parent_directories <- function(filepath, fn, error) {
   stopifnot(is.function(fn), length(formals(fn)) >= 1)
   stopifnot(is.character(error) || is.function(error))
 
-  path <- normalizePath(filepath)
+  path <- normalizePath(filepath, mustWork = FALSE)
   ## As long as we have not hit the root directory, keep trying
   while (!identical(dirname(path), path)) {
     result <- fn(path)

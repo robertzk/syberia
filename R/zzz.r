@@ -12,3 +12,4 @@
   # But when the user calls library(syberia), this will work.
   try(syberia_project(), silent = TRUE)
 }
+

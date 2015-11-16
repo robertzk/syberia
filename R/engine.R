@@ -41,6 +41,11 @@ active_project <- function() {
   .syberia_env$active_project
 }
 
+#' @rdname active_project
+#' @name project
+#' @export
+makeActiveBinding("project", function() active_project(), env = environment())
+
 syberia_engine_ <- function(filepath, ...) {
   UseMethod("syberia_engine_", filepath)
 }
@@ -54,7 +59,7 @@ syberia_engine_.character <- function(filepath, ...) {
 }
 
 syberia_engine_character <- function(filepath, cache = TRUE) {
-  traverse_parent_directories(normalizePath(filepath), function(filepath) {
+  traverse_parent_directories(normalizePath(filepath, mustWork = FALSE), function(filepath) {
     if (isTRUE(cache) && has_application_file(filepath)) {
       .syberia_env[[filepath]] <- .syberia_env[[filepath]] %||% build_engine(filepath)
     } else if (has_application_file(filepath)) {
