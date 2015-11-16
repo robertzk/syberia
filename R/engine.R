@@ -46,6 +46,13 @@ active_project <- function() {
 #' @export
 makeActiveBinding("project", function() active_project(), env = environment())
 
+#' Compile a resource in the active syberia project.
+#'
+#' @seealso \code{\link{active_project}}
+#' @name resource
+#' @export
+makeActiveBinding("resource", function() active_project()$resource, env = environment())
+
 syberia_engine_ <- function(filepath, ...) {
   UseMethod("syberia_engine_", filepath)
 }
