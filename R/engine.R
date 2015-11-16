@@ -26,17 +26,18 @@
 #' @return The \code{\link[director]{director}} object responsible for
 #'    managing the engine.
 syberia_engine <- function(filepath = getwd(), ...) {
-  force(filepath)
-  UseMethod("syberia_engine")
+  syberia_engine_(filepath, ...)
 }
 
-#' @export
-syberia_engine.pre_engine <- function(filepath, ...) {
+syberia_engine_ <- function(filepath, ...) {
+  UseMethod("syberia_engine_", filepath)
+}
+
+syberia_engine_.pre_engine <- function(filepath, ...) {
   build_engine(filepath)
 }
 
-#' @export
-syberia_engine.character <- function(filepath, ...) {
+syberia_engine_.character <- function(filepath, ...) {
   syberia_engine_character(filepath, ...)
 }
 
