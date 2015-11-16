@@ -35,6 +35,8 @@ Imports:
     objectdiff,
     R6
 Suggests:
+    bettertrace,
+    devtools,
     pbapply,
     testthatsomemore,
     knitr
