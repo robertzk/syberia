@@ -1,3 +1,13 @@
+# Version 0.5.1
+
+* A complete re-write of the original Syberia that incorporates
+  the new concept of **engines**, the core re-usable structural unit across
+  different Syberia project (similar to
+  [Rails engines](http://guides.rubyonrails.org/engines.html)). All
+  usages of `syberia_project` should be replaced with `syberia_engine`.
+  The main bootstrapping logic that defines the convention in `config/routes`,
+  `lib` and `test` have been moved to the [base engine](https://github.com/syberia/base.sy).
+
 # Version 0.4.3
 
 * A wide collection of legacy functions and helpers were removed.
