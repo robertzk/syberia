@@ -2,15 +2,22 @@ Package: syberia
 Type: Package
 Title: Syberia
 Version: 0.5.0.9001
-Description: Syberia provides an opinionated unified framework for
-    fast iteration on classifier development and deployment. It is
-    founded on convention over configuration and aims to solve the
-    problems of classifier-specific data preparation and
-    classifier-specific modeling parameters.
-Author: Robert Krzyzanowski <technoguyrob@gmail.com>
-Maintainer: Robert Krzyzanowski <technoguyrob@gmail.com>
+Description: Syberia is a meta-framework for R that allows for on-the-fly
+    creation of concrete frameworks for constructing arbitrary software.
+    In its current formulation, the modeling engine provides an opiniated
+    framework for developing production-ready machine learning classifiers in R.
+    The more general vision for Syberia is still in progress, but aims
+    to unify the currently disparate realms of R packages, script codebases,
+    Shiny dashboards, R web apps, and reproducible analysis. In the
+    viewpoint of the author, R is syntactic sugar around LISP, which
+    enables arbitrary computation; Syberia is an attempt to support this
+    conjecture by allowing the construction of arbitrary software 
+    projects within the R programming language, thereby finally outgrowing
+    its long-overdue misconception as a statistical tool.
+Author: Robert Krzyzanowski <rkrzyzanowski@gmail.com>
+Maintainer: Robert Krzyzanowski <rkrzyzanowski@gmail.com>
 Authors@R: c(person("Robert", "Krzyzanowski",
-    email = "technoguyrob@gmail.com", role = c("aut", "cre")))
+    email = "rkrzyzanowski@gmail.com", role = c("aut", "cre")))
 Depends:
     R (>= 3.0.0)
 Imports:
