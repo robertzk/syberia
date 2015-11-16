@@ -26,4 +26,7 @@ conjecture by allowing the construction of arbitrary software
 projects within the R programming language, thereby finally outgrowing
 its long-overdue misconception as a statistical tool.
 }
+\author{
+Robert Krzyzanowski
+}
 

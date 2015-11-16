@@ -21,6 +21,7 @@
 #'
 #' @name syberia;
 #' @docType package
+#' @author Robert Krzyzanowski
 #' @import testthat Ramd stagerunner statsUtils mungebits tundra syberiaMungebits syberiaStructure syberiaStages director objectdiff R6
 NULL
 
