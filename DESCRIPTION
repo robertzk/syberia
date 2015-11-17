@@ -37,9 +37,9 @@ Imports:
 Suggests:
     bettertrace,
     devtools,
-    knitr
+    knitr,
     pbapply,
-    testthatsomemore,
+    testthatsomemore
 VignetteBuilder: knitr
 License: GPL (>= 2)
 LazyData: true

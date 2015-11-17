@@ -14,6 +14,9 @@ until such a file is found, or the function will error.
 By default, the current directory.}
 
 \item{...}{Additional arguments used internally.}
+
+\item{root.}{logical. Whether or not this is a root-level engine,
+by default \code{TRUE}.}
 }
 \value{
 The \code{\link[director]{director}} object responsible for

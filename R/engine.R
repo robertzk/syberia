@@ -18,6 +18,8 @@
 #'    until such a file is found, or the function will error.
 #'    By default, the current directory.
 #' @param ... Additional arguments used internally.
+#' @param root. logical. Whether or not this is a root-level engine,
+#'    by default \code{TRUE}.
 #' @export
 #' @note The syberia package will maintain an internal cache of engines.
 #'    Therefore, calling \code{syberia_engine} twice will retrieve the
