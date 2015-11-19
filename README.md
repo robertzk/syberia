@@ -113,6 +113,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ### Authors
 
-Syberia was created at [Avant](https://github.com/avantcredit)
-by Robert Krzyzanowski, rob@robertzk.com.
+Syberia was originally created at [Avant](https://github.com/avantcredit)
+by Robert Krzyzanowski, rob@robertzk.com. Additional contributors
+include Ryland Ely, Peter Hurford, Elaine Lee, Tong Lu, and Kirill Sevastyanenko.
 
