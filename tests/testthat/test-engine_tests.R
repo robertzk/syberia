@@ -1,0 +1,12 @@
+# Beware. Here lie meta-tests.
+context("test_engine")
+
+bag_of_objects <- list(force, 1, NULL, "foo", list(), new.env())
+
+describe("invalid inputs", {
+  lapply(Filter(Negate(is.character), bag_of_objects), function(object) {
+    expect_error(test_engine(object), "Please pass a")
+  })
+})
+
+

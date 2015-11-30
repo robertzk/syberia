@@ -33,7 +33,7 @@ test_engine <- function(engine = syberia_engine(), base = "test") {
   }
 
   if (!is(engine, "syberia_engine")) {
-    m("test_engine_type_error")
+    stop(m("test_engine_type_error"))
   }
 }
 
