@@ -30,7 +30,6 @@
 #'    represent progress.
 test_project <- function(project = syberia_engine(), base = '') {
   if (is.character(project)) project <- syberia_engine(project)
-  test_path <- file.path(project$root(), 'test')
   tests <- project$find(base = gsub("\\/$", "", file.path('test', base)))
 
   ignored_tests <- file.path('test', test_environment_config(project)$ignored_tests %||% character(0))

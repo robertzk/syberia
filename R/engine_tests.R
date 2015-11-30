@@ -27,7 +27,9 @@
 #' @return \code{TRUE} if all tests pass or will error otherwise. Note this
 #'    function uses \code{pblapply} from the pbapply package to
 #'    represent progress if available.
-test_engine <- function(engine = syberia_engine(), base = "test") {
+test_engine <- function(engine = syberia_engine(), base = "test",
+                        config = file.path("config", "environments", "test"),
+                        ignored_tests = ignored_tests_from_config(engine, base, config)) {
   if (is.character(engine)) {
     engine <- syberia_engine(engine)
   }
@@ -35,5 +37,35 @@ test_engine <- function(engine = syberia_engine(), base = "test") {
   if (!is(engine, "syberia_engine")) {
     stop(m("test_engine_type_error"))
   }
+
+  force(ignored_tests)
+  tests <- find_tests(engine, base, ignored_tests)
+
+  # TODO: (RK) Actually run the tests.
+}
+
+find_tests <- function(engine, base, ignored_tests) {
+  all_tests <- engine$find(children. = FALSE, base = gsub("\\/$", "", base)) 
+  tests     <- Filter(function(x) !any_is_substring_of(x, ignored_tests), all_tests)
+  ignored_test_paths <- setdiff(all_tests, tests)
+
+  list(
+    active  = tests,
+    ignored = setdiff(all_tests, tests)
+  )
+}
+
+test_environment_config <- function(engine, path = file.path("config", "environments", "test")) {
+  if (!engine$exists(path, children. = FALSE)) {
+    list()
+  } else {
+    engine$resource(path, children. = FALSE)
+  }
+}
+
+ignored_tests_from_config <- function(engine, base, config) {
+  file.path(base,
+    test_environment_config(engine, config)$ignored_tests %||% character(0)
+  )
 }
 
