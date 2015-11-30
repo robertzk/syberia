@@ -33,7 +33,8 @@ Imports:
     syberiaStages,
     syberiaStructure,
     testthat,
-    tundra
+    tundra,
+    whisker
 Suggests:
     bettertrace,
     devtools,
