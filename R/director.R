@@ -32,8 +32,8 @@ syberia_project <- local({
 #'
 #' The initial parsers that are derived from the syberia configuration
 #' directory (\code{"config/"}) will be added to the director object here.
-#' In particular, the \code{"config/routes.R"} file should specify the 
-#' controllers for various resource types, which will reside in 
+#' In particular, the \code{"config/routes.R"} file should specify the
+#' controllers for various resource types, which will reside in
 #' \code{"lib/controllers"} and be simple files with one function without
 #' any arguments. This function will have the following present
 #' when executed:
@@ -44,7 +44,7 @@ syberia_project <- local({
 #'     resource, then this will be the non-idempotent version. An
 #'     idempotent resource is a file which is located in a directory whose
 #'     name is the same as the filename without extension.
-#'    
+#'
 #'     For example, \code{"models/infection/infection.R"} is an idempotent resource
 #'     because the \code{"infection.R"} file is present in the \code{"infection"}
 #'     directory and--ignoring file extension--they are identical. This kind of
@@ -79,7 +79,7 @@ syberia_project <- local({
 #'     value's \code{$value} key. Thus, if you had a file \code{"model.R"} with code
 #'     \code{column <- 'Sepal.Length'; lm(iris$Sepal.Width ~ iris[[column]])}
 #'     then we can access the \code{lm} model using \code{source('model.R')$value}.
-#'     
+#'
 #'     This "file return value" is precisely the \code{output} that is available
 #'     to the controller for a resource.}
 #'
@@ -100,7 +100,7 @@ syberia_project <- local({
 #'            'data'            = 'data')}
 #'
 #' where we have two kinds of resources: classifiers and data sources.
-#' 
+#'
 #' It is up to you how to define what these resources "do". The
 #' \code{lib/classifiers} and \code{data} directories (in the root of your
 #' syberia project) can have arbitrary code, and the \code{resource},
@@ -144,7 +144,7 @@ bootstrap_syberia_project <- function(project) {
 #' Run custom bootstrapping and startup actions.
 #'
 #' When a syberia project is first loaded, it is "bootstrapped" by performing
-#' several startup procedures: registering the config/application file, 
+#' several startup procedures: registering the config/application file,
 #' registering the controllers, registering the routes, and setting up
 #' the tests so that \code{test_project} works correctly. The user
 #' can specify additional actions to perform using \code{custom_bootstrap}
@@ -238,7 +238,7 @@ register_tests <- function(project) {
 #' should contain a list whose names give the route prefixes and whose
 #' values are the controller names for parsing resources that begin with
 #' these prefixes. For example, if the file contains
-#' 
+#'
 #' \code{list('models' = 'models', 'lib/adapters' = 'adapters')}
 #'
 #' then files in the directory \code{"models"} (relative to the root of the
@@ -252,7 +252,7 @@ register_tests <- function(project) {
 #' See the function \code{bootstrap_syberia_project} to understand what
 #' things are available in a controller function.
 #'
-#' @seealso \code{bootstrap_syberia_project}. 
+#' @seealso \code{bootstrap_syberia_project}.
 routes_parser <- function() {
   error <- function(...) {
     stop("In your ", crayon::red("config/routes.R"), " file in the ",
@@ -307,7 +307,8 @@ routes_parser <- function() {
 #' @param director director
 #' @param source_args list
 #' @param source function
-default_tests_preprocessor <- function(resource_object, director, source_args, source) {
+#' @param resource character
+default_tests_preprocessor <- function(resource_object, director, source_args, source, resource) {
   tested_resource <- gsub("^test\\/", "", resource)
   if (!director$exists(tested_resource)) {
     # TODO: (RK) Figure out how this interacts with virtual resources.
@@ -318,8 +319,13 @@ default_tests_preprocessor <- function(resource_object, director, source_args, s
 
   context(tested_resource)
   tested_resource_object <- director$resource(tested_resource)
-  source_args$local$resource <-
-    function() tested_resource_object$value(recompile. = TRUE)
+  source_args$local$resource <- function(path) {
+    if (missing(path)) {
+      tested_resource_object$value(recompile. = TRUE)
+    } else {
+      director$resource(path)
+    }
+  }
   source()
 }
 
@@ -331,7 +337,6 @@ default_tests_preprocessor <- function(resource_object, director, source_args, s
 default_tests_environment_preprocessor <- function(director, source_args, source) {
   # Provide access to the director for people with hardcore test setup
   # and teardown hooks.
-  source_args$local$director <- director 
+  source_args$local$director <- director
   source()
 }
-

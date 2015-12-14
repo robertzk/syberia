@@ -1,3 +1,7 @@
+# Version 0.4.4.3
+
+* Allow `resource` to be called in tests to fetch other resources.
+
 # Version 0.4.4.1
 
 * Small changes to bring compatibility with stagerunner 0.5.0
