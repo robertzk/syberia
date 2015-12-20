@@ -65,7 +65,7 @@ test_environment_config <- function(engine, path = file.path("config", "environm
 
 ignored_tests_from_config <- function(engine, base, config) {
   file.path(base,
-    test_environment_config(engine, config)$ignored_tests %||% character(0)
+    (test_environment_config(engine, config)$ignored_tests) %||% character(0)
   )
 }
 
