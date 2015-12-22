@@ -7,6 +7,7 @@
 test_engine(engine = syberia_engine(), base = "test",
   config = file.path("config", "environments", "test"),
   ignored_tests = ignored_tests_from_config(engine, base, config),
+  optional_tests = optional_tests_from_config(engine, base, config),
   required = TRUE)
 }
 \arguments{
@@ -21,6 +22,10 @@ by default \code{"config/environments/test"}.}
 
 \item{ignored_tests}{character. The list of tests to ignore, by default
 the local variable \code{ignored_tests} extracted from the configuration
+resource specific by the \code{config} parameter.}
+
+\item{optional_tests}{character. The list of tests to ignore, by default
+the local variable \code{optional_tests} extracted from the configuration
 resource specific by the \code{config} parameter.}
 
 \item{required}{logical. Whether or not all tests are required to have resources,

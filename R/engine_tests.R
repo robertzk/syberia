@@ -31,7 +31,6 @@
 #'    the local variable \code{optional_tests} extracted from the configuration
 #'    resource specific by the \code{config} parameter.
 #' @param required logical. Whether or not all tests are required to have resources,
-#' @param required logical. Whether or not all tests are required to have resources,
 #'    by default \code{TRUE}. If \code{TRUE}, the \code{ignored_tests}
 #'    resources will not be required to have an accompanying test.
 #' @seealso \code{\link{syberia_engine}}
@@ -66,6 +65,8 @@ test_engine <- function(engine = syberia_engine(), base = "test",
 #'
 #' @param engine syberia_engine. The engine to run the tests on.
 #' @param tests character. The character vector of resources to test.
+#' @param ... Additional arguments to pass to \code{find_test_hook}.
+#' @return The testthat result summary for this one test run.
 test_resources <- function(engine, tests, ...) {
   ensure_test_packages()
 
@@ -106,10 +107,12 @@ ensure_test_packages <- function() {
 #'
 #' @param engine syberia_engine. The engine to run the test on.
 #' @param resource character. The resource to test.
-#' @param setup. A \code{\link[stagerunner::stageRunner]{stageRunner}} to
+#' @param setup stageRunner. A \code{\link[stagerunner]{stageRunner}} to
 #'    execute setup hooks for this test.
-#' @param teardown. A \code{\link[stagerunner::stageRunner]{stageRunner}} to
+#' @param teardown stageRunner. A \code{\link[stagerunner]{stageRunner}} to
 #'    execute teardown hooks for this test.
+#' @param reporter reporter. A testthat reporter object. 
+#' @return The testthat result summary for this one test run.
 test_resource <- function(engine, resource, setup, teardown, reporter) {
   result <- NULL
 
@@ -144,12 +147,13 @@ test_resource <- function(engine, resource, setup, teardown, reporter) {
 #' The seed environment for the stageRunner will contain the director object
 #' of the relevant project in the key \code{director}.
 #'
-#' @param project director or character. The director for the syberia project.
+#' @param engine syberia_engine. The director for the syberia project.
 #' @param type character. Must be \code{'setup'} or \code{'teardown'}, the former
 #'   being the default.
+#' @param config character. The resource used to fetch configuration.
 #' @seealso \code{\link{test_project}}
 #' @return a stageRunner that will run the relevant setup or teardown hook(s).
-find_test_hook <- function(engine, type = "setup", base, config) {
+find_test_hook <- function(engine, type = "setup", config) {
   if (!is(engine, "syberia_engine")) {
     stop("To fetch the ", type, " hook for a project, please pass in a syberia_engine ",
          "object (the syberia_engine for the syberia project). Instead I got ",
@@ -199,6 +203,8 @@ find_test_hook <- function(engine, type = "setup", base, config) {
 #' @param engine syberia_engine. The engine to check.
 #' @param tests character. The tests to check. Must be a list with keys
 #'     \code{"active"} and \code{"ignored"}.
+#' @param optional character. A character vector of optional tests.
+#' @return Nothing, but error if not all resources have tests.
 ensure_resources_are_tested <- function(engine, tests, optional) {
   without_builtin_resources <- function(resources) {
     ## We exclude the `config` and `test` directories.
