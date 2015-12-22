@@ -31,7 +31,8 @@ resource specific by the \code{config} parameter.}
 
 \item{required}{logical. Whether or not all tests are required to have resources,
 by default \code{TRUE}. If \code{TRUE}, the \code{ignored_tests}
-resources will not be required to have an accompanying test.}
+resources will not be required to have an accompanying test. It is highly
+recommended that all your projects have full test coverage.}
 
 \item{reporter}{character. The testthat package test reporter to use. The
 options are \code{c("check", "list", "summary", "minimal", "multi", "rstudio",

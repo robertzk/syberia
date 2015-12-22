@@ -113,7 +113,8 @@
 #'    resource specific by the \code{config} parameter.
 #' @param required logical. Whether or not all tests are required to have resources,
 #'    by default \code{TRUE}. If \code{TRUE}, the \code{ignored_tests}
-#'    resources will not be required to have an accompanying test.
+#'    resources will not be required to have an accompanying test. It is highly
+#'    recommended that all your projects have full test coverage.
 #' @param reporter character. The testthat package test reporter to use. The
 #'    options are \code{c("check", "list", "summary", "minimal", "multi", "rstudio",
 #'    "silent", "stop", "tap", "teamcity")}, with the default being \code{"summary"}.
@@ -137,8 +138,13 @@ test_engine <- function(engine = syberia_engine(), base = "test",
   }
 
   force(ignored_tests)
+  ## We will try to identify the resources to test by grabbing all
+  ## non-test (i.e., not in the `test` directory) resources from the engine
+  ## and also excluding those given by `ignored_tests`.
   tests <- find_tests(engine, base, ignored_tests)
 
+  ## If testing is required for the engine (i.e., every resource needs
+  ## an accompanying test) fail unless the condition is satisfied.
   if (isTRUE(required)) {
     ensure_resources_are_tested(engine, tests, optional_tests, base)
   }
@@ -154,33 +160,32 @@ test_engine <- function(engine = syberia_engine(), base = "test",
 #' @param reporter character. The test reporter to use.
 #' @return The testthat result summary for this one test run.
 test_resources <- function(engine, tests, ..., reporter) {
+  ## We ensure testthat and testthatsomemore are installed.
   ensure_test_packages()
 
+  ## The testthat package does not export `find_reporter`, so we
+  ## grab it [with a trick](https://stat.ethz.ch/R-manual/R-devel/library/base/html/ns-reflect.html).
   reporter <- getNamespace("testthat")$find_reporter(reporter)
+  ## We are mimicking [testthat's `test_files`](https://github.com/hadley/testthat/blob/6cdd17cab674175297e16e12ac5ed29266534390/R/test-files.r#L43).
   reporter$start_reporter()
 
   results <- NULL
+  ## We would like to error if any global options have been modified,
+  ## or global variables introduced.
+  ## 
+  ## Syberia resources should be stateless and not modify global options!
   ensure_no_global_variable_pollution(check_options = TRUE, {
     setup_hook <- find_test_hook(engine, type = "setup", ...)
     if (!is.null(setup_hook)) setup_hook$run()
 
-    if (requireNamespace("pbapply", quietly = TRUE)) {
-      old_pboptions <- options("pboptions")
-      on.exit(options(old_pboptions))
-      apply_function <- pbapply::pblapply
-    } else {
-      apply_function <- lapply
-    }
-
     single_setup    <- find_test_hook(engine, type = "single_setup", ...)
     single_teardown <- find_test_hook(engine, type = "single_teardown", ...)
-
-    results <-
-      apply_function(tests, test_resource, engine = engine, reporter = reporter,
-                     setup = single_setup, teardown = single_teardown)
+    results <- lapply(tests, test_resource, engine = engine, reporter = reporter,
+                      setup = single_setup, teardown = single_teardown)
   })
 
   reporter$end_reporter()
+  ## Again mimicking [testthat](https://github.com/hadley/testthat/blob/6cdd17cab674175297e16e12ac5ed29266534390/R/test-files.r#L50).
   invisible(getNamespace("testthat")$testthat_results(results))
 }
 
@@ -202,6 +207,7 @@ ensure_test_packages <- function() {
 test_resource <- function(engine, resource, setup, teardown, reporter) {
   result <- NULL
 
+  ## Each resource itself should not add global variables or pollute options.
   ensure_no_global_variable_pollution(check_options = TRUE, {
     if (!missing(setup) && !is.null(setup)) {
       setup$.context$resource <- resource
@@ -218,6 +224,9 @@ test_resource <- function(engine, resource, setup, teardown, reporter) {
       teardown$.context$resource <- resource
       teardown$run()
     }
+  ## The `desc` parameters allows us to be specific when we fail:
+  ## it will inform the user the name of the resource that created a global
+  ## variable or modified a global option.
   }, desc = paste("running", resource))
 
   result
@@ -241,9 +250,7 @@ test_resource <- function(engine, resource, setup, teardown, reporter) {
 #' @return a stageRunner that will run the relevant setup or teardown hook(s).
 find_test_hook <- function(engine, type = "setup", config) {
   if (!is(engine, "syberia_engine")) {
-    stop("To fetch the ", type, " hook for a project, please pass in a syberia_engine ",
-         "object (the syberia_engine for the syberia project). Instead I got ",
-         "an object of class ", class(engine)[1])
+    stop(m("test_hook_not_engine", type = type, klass = class(engine)[1L]), call. = FALSE)
   }
 
   hooks <- value_from_config(engine, config, type)
@@ -253,17 +260,11 @@ find_test_hook <- function(engine, type = "setup", config) {
   # argument validity? In the future, stageRunner could maybe do more!
   colored_filename <- sQuote(crayon::blue(config))
   if (!is.list(hooks) && !is.function(hooks) && !stagerunner::is.stagerunner(hooks)) {
-    browser()
-    stop("Test ", type, " hooks must be a function or a list of functions.\n\nIn ",
-         colored_filename, ", ensure that ",
-         "you have ", sQuote(crayon::yellow(paste0(type, ' <- some_function'))),
-         " as right now it's an object of class ",
-         sQuote(crayon::red(class(hooks)[1])), call. = FALSE)
+    stop(m("test_hook_invalid_format", type = type, filename = colored_filename,
+           klass = class(hooks)[1L]), call. = FALSE)
   }
 
-  if (!is.list(hooks)) {
-    hooks <- list(hooks)
-  }
+  if (!is.list(hooks)) { hooks <- list(hooks) }
 
   all_have_correct_arity <- stagerunner::is.stagerunner(hooks) ||
     all(rapply(hooks, how = "unlist", function(hook) {
@@ -271,11 +272,8 @@ find_test_hook <- function(engine, type = "setup", config) {
     }))
 
   if (!all_have_correct_arity) {
-    stop("Test ", type, " hooks must all be functions that take at least one ",
-         "argument.\n\nThe first argument will be an environment that has one ",
-         "key, ", sQuote("director"), ". In ", colored_filename,
-         " ensure your ", sQuote(crayon::yellow(type)),
-         " local variable meets this constraint.", call. = FALSE)
+    stop(m("test_hook_arity_error", type = type, filename = colored_filename,
+           type = type), call. = FALSE)
   }
 
   # Do not give access to global environment to ensure modularity.
@@ -301,6 +299,7 @@ ensure_resources_are_tested <- function(engine, tests, optional, base = "test") 
   }
 
   without_optional_resources <- function(resources) {
+    ## `optional` resources are actually substring matches!
     Filter(function(resource) !any_is_substring_of(resources, optional), resources)
   }
 
@@ -327,6 +326,11 @@ find_tests <- function(engine, base, ignored_tests) {
   )
 }
 
+## We don't expect this to change after the project is loaded, so we can memoise
+## the results (store them internally so we don't have to recompute).
+## By default, we will fetch the test configuration from
+## `config/environments/test`, but the location of the configuration file
+## itself is configurable (see the `config` parameter to `test_engine`).
 test_environment_configuration <- memoise::memoise(
   function(engine, path = file.path("config", "environments", "test")) {
     if (!engine$exists(path, children. = FALSE)) {
@@ -337,12 +341,23 @@ test_environment_configuration <- memoise::memoise(
   }
 )
 
+## If the configuration file, usually `config/environments/test.R`,
+## has a local variable `ignored_tests`, the tests of the 
+## character vector of resource names will not be executed.
+## This is useful when certain tests are broken or under development.
 ignored_tests_from_config <- function(engine, base, config) {
   file.path(base, 
     value_from_config(engine, config, "ignored_tests") %||% character(0)
   )
 }
 
+## If the configuration file, usually `config/environments/test.R`,
+## has a local variable `optional_tests`, the character vector of resource
+## names will not be executed. This is useful when certain resources
+## were never expected to have tests, such as those representing network
+## connections, constants, or other things that don't really make sense to test.
+##
+## Use with caution!
 optional_tests_from_config <- function(engine, base, config) {
   file.path(base, 
     value_from_config(engine, config, "optional_tests") %||% character(0)

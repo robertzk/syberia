@@ -5,6 +5,28 @@ messages <- list(
   test_engine_type_error = c(
     "Please pass a ", sQuote(crayon::yellow("syberia_engine")), " object ",
     "to the ", sQuote(crayon::yellow("test_engine")), " function."
+  ),
+  
+  test_hook_no_engine = c(
+    "To fetch the {{{type}}} hook for a project, please pass in a syberia_engine ",
+    "object (the syberia_engine for the syberia project). Instead I got ",
+    "an object of class {{{klass}}}."
+  ),
+
+  test_hook_invalid_format = c(
+    "Test {{{type}}} hooks must be a function or a list of functions.\n\nIn ",
+    "{{{filename}}}, ensure that ",
+    "you have ", sQuote(crayon::yellow("{{{type}}} <- some_function")),
+    " as right now it's an object of class ",
+    sQuote(crayon::red("{{{klass}}}"))
+  ),
+
+  test_hook_arity_error = c(
+    "Test {{{type}}} hooks must all be functions that take at least one ",
+    "argument.\n\nThe first argument will be an environment that has one ",
+    "key, ", sQuote("project"), ". In {{{filename}}}",
+    " ensure your ", sQuote(crayon::yellow("{{{type}}}")),
+    " local variable meets this constraint."
   )
 )
 
