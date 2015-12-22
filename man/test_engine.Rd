@@ -8,7 +8,8 @@ test_engine(engine = syberia_engine(), base = "test",
   config = file.path("config", "environments", "test"),
   ignored_tests = ignored_tests_from_config(engine, base, config),
   optional_tests = optional_tests_from_config(engine, base, config),
-  required = TRUE)
+  required = TRUE, reporter = c("summary", "check", "list", "minimal",
+  "multi", "rstudio", "silent", "stop", "tap", "teamcity")[1L])
 }
 \arguments{
 \item{engine}{syberia_engine. The syberia engine to test.
@@ -31,6 +32,10 @@ resource specific by the \code{config} parameter.}
 \item{required}{logical. Whether or not all tests are required to have resources,
 by default \code{TRUE}. If \code{TRUE}, the \code{ignored_tests}
 resources will not be required to have an accompanying test.}
+
+\item{reporter}{character. The testthat package test reporter to use. The
+options are \code{c("check", "list", "summary", "minimal", "multi", "rstudio",
+"silent", "stop", "tap", "teamcity")}, with the default being \code{"summary"}.}
 }
 \value{
 \code{TRUE} if all tests pass or will error otherwise. Note this

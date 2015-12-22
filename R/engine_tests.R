@@ -20,13 +20,15 @@
 ## into helper files as your resource becomes more complex.
 ##
 ## Here is an example test. You can look at the accompanying
+## [helper project](http://github.com/syberia/syberia/tree/master/tests/testthat/projects/test_calculation_pi).
 # TODO: (RK) Check this is the correct link.
-## [helper project](http://github.com/syberia/syberia/tree/tests/testthat/projects/test_calculation_pi).
 ##
 ## ```r
 ## # calculations/pi.R
 ## # Compute pi using a series: http://functions.wolfram.com/Constants/Pi/06/01/01/
-## Reduce(`+`, 4 * vapply(seq_len(1000) - 1, function(k) { (-1)^k / (2 * k + 1) }, double(1)))
+## Reduce(`+`, 4 * vapply(seq_len(1000) - 1, function(k) {
+##   (-1)^k / (2 * k + 1)
+## }, double(1)))
 ##
 ## # test/calculations/pi.R
 ## test_that("the calculation is close to pi", {
@@ -49,6 +51,34 @@
 ## project is working as intended. For example, the author has found it useful
 ## to add checks for `README.md` files in all directories to encourage
 ## the team to always add documentation (or else your test suite breaks!).
+##
+## To add a test setup hook, simply place a function or a list of functions
+## into the `setup` local variable in the file `config/environments/test.R`
+## (note this is controlled by the `config` parameter to `test_engine`.
+## Additional hooks are `teardown` (for when the test suite finishes),
+## `single_setup` (every time a test runs), and `single_teardown` (every
+## time a test finishes). Any functions or lists of functions passed to
+## these locals should have only one argument: the received value will be
+## an environment containing the key `resource`, a string representing the
+## current resource being tested, and the key `project`, pointing to the
+## `syberia_engine` object for the project (or engine).
+##
+## For example, one could include the following configuration file in a syberia
+## project.
+##
+## ```r
+## # config/environments/test.R
+## setup    <- function(env) { cat("Beginning test suite!\n") }
+## teardown <- function(env) { cat("Ending test suite!\n") }
+## single_setup    <- function(env) {
+##   cat(paste("Testing resource", env$resource, "\n")) }
+## single_teardown <- function(env) {
+##   cat(paste("Tested resource", env$resource,  "\n")) }
+## ```
+## 
+## Running `test_engine(...)` on this project will cause the first message
+## to be printed, then the last two to alternate between each test,
+## before finally wrapping up with the second message.
 #' Run all tests in a syberia project or engine.
 #'
 #' The tests that will be run are all those in the \code{test} subdirectory
@@ -84,6 +114,9 @@
 #' @param required logical. Whether or not all tests are required to have resources,
 #'    by default \code{TRUE}. If \code{TRUE}, the \code{ignored_tests}
 #'    resources will not be required to have an accompanying test.
+#' @param reporter character. The testthat package test reporter to use. The
+#'    options are \code{c("check", "list", "summary", "minimal", "multi", "rstudio",
+#'    "silent", "stop", "tap", "teamcity")}, with the default being \code{"summary"}.
 #' @seealso \code{\link{syberia_engine}}
 #' @export
 #' @return \code{TRUE} if all tests pass or will error otherwise. Note this
@@ -93,7 +126,8 @@ test_engine <- function(engine = syberia_engine(), base = "test",
                         config = file.path("config", "environments", "test"),
                         ignored_tests = ignored_tests_from_config(engine, base, config),
                         optional_tests = optional_tests_from_config(engine, base, config),
-                        required = TRUE) {
+                        required = TRUE, reporter = c("summary", "check", "list",
+                          "minimal", "multi", "rstudio", "silent", "stop", "tap", "teamcity")[1L]) {
   if (is.character(engine)) {
     engine <- syberia_engine(engine)
   }
@@ -109,7 +143,7 @@ test_engine <- function(engine = syberia_engine(), base = "test",
     ensure_resources_are_tested(engine, tests, optional_tests, base)
   }
 
-  test_resources(engine, tests$active, config)
+  test_resources(engine, tests$active, config, reporter = reporter)
 }
 
 #' Run the tests on a given set of resources.
@@ -117,11 +151,12 @@ test_engine <- function(engine = syberia_engine(), base = "test",
 #' @param engine syberia_engine. The engine to run the tests on.
 #' @param tests character. The character vector of resources to test.
 #' @param ... Additional arguments to pass to \code{find_test_hook}.
+#' @param reporter character. The test reporter to use.
 #' @return The testthat result summary for this one test run.
-test_resources <- function(engine, tests, ...) {
+test_resources <- function(engine, tests, ..., reporter) {
   ensure_test_packages()
 
-  reporter <- getNamespace("testthat")$find_reporter("summary")
+  reporter <- getNamespace("testthat")$find_reporter(reporter)
   reporter$start_reporter()
 
   results <- NULL
@@ -244,7 +279,7 @@ find_test_hook <- function(engine, type = "setup", config) {
   }
 
   # Do not give access to global environment to ensure modularity.
-  hook_env <- list2env(list(director = engine), parent = parent.env(globalenv()))
+  hook_env <- list2env(list(project = engine), parent = parent.env(globalenv()))
   stagerunner::stageRunner(hook_env, hooks)
 }
 

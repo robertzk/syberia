@@ -4,7 +4,7 @@
 \alias{test_resources}
 \title{Run the tests on a given set of resources.}
 \usage{
-test_resources(engine, tests, ...)
+test_resources(engine, tests, ..., reporter)
 }
 \arguments{
 \item{engine}{syberia_engine. The engine to run the tests on.}
@@ -12,6 +12,8 @@ test_resources(engine, tests, ...)
 \item{tests}{character. The character vector of resources to test.}
 
 \item{...}{Additional arguments to pass to \code{find_test_hook}.}
+
+\item{reporter}{character. The test reporter to use.}
 }
 \value{
 The testthat result summary for this one test run.
