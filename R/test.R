@@ -246,7 +246,7 @@ test_resource <- function(engine, resource, setup, teardown, reporter) {
 #' @param type character. Must be \code{'setup'} or \code{'teardown'}, the former
 #'   being the default.
 #' @param config character. The resource used to fetch configuration.
-#' @seealso \code{\link{test_project}}
+#' @seealso \code{\link{test_engine}}
 #' @return a stageRunner that will run the relevant setup or teardown hook(s).
 find_test_hook <- function(engine, type = "setup", config) {
   if (!is(engine, "syberia_engine")) {

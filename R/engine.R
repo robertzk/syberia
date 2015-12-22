@@ -35,6 +35,9 @@ syberia_engine <- function(filepath = getwd(), ..., root. = TRUE) {
   project
 }
 
+#' @export
+syberia_project <- syberia_engine
+
 #' The current active Syberia project.
 #'
 #' @return A \code{syberia_engine} object or \code{NULL}.

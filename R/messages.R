@@ -57,4 +57,3 @@ m <- function(name, ...) {
   do.call(whisker::whisker.render, list(msg(name), list(...)))
 }
 
-
