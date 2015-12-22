@@ -23,6 +23,10 @@ describe("passing tests", {
   test_that("it passes with a simple example test", {
     testthatsomemore::assert(test_engine("projects/test_simple_find"))
   })
+
+  test_that("it passes with a calculation of pi", {
+    testthatsomemore::assert(test_engine("projects/test_calculation_pi"))
+  })
 })
 
 describe("failing tests", {
