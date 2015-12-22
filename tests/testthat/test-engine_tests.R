@@ -1,5 +1,6 @@
 # Beware. Here lie meta-tests.
 context("test_engine")
+library(testthatsomemore)
 
 bag_of_objects <- list(force, 1, NULL, "foo", list(), new.env())
 
@@ -16,6 +17,16 @@ describe("missing tests", {
     expect_error(test_engine("projects/engines1/main"), "Tests are missing")
     expect_error(test_engine("projects/engines1/main"), "main_resource")
   })
+})
+
+describe("passing tests", {
+  test_that("it passes with a simple example test", {
+    testthatsomemore::assert(test_engine("projects/test_simple_find"))            
+  })
+})
+
+describe("failing tests", {
+
 })
 
 
