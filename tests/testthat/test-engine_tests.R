@@ -21,12 +21,24 @@ describe("missing tests", {
 
 describe("passing tests", {
   test_that("it passes with a simple example test", {
-    testthatsomemore::assert(test_engine("projects/test_simple_find"))            
+    testthatsomemore::assert(test_engine("projects/test_simple_find"))
   })
 })
 
 describe("failing tests", {
+  has_failed_test <- function(test_summary) {
+    any(vapply(test_summary, function(summand) {
+      any(vapply(summand[[1L]]$results, function(result) {
+        identical(result$passed, FALSE)
+      }, logical(1)))
+    }, logical(1)))
+  }
 
+  test_that("it fails with a simple example test", {
+    # TODO: (RK) Prevent test suite reporter mangling.
+    sink(tempfile()); on.exit(sink())
+    expect_true(has_failed_test(test_engine("projects/simple_test_failure")))
+  })
 })
 
 
