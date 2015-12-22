@@ -67,7 +67,9 @@ test_engine <- function(engine = syberia_engine(), base = "test",
 #'     \code{"active"} and \code{"ignored"}.
 ensure_resources_are_tested <- function(engine, tests, optional) {
   without_builtin_resources <- function(resources) {
-    Filter(function(resource) substring(resource, 1, 7) != "config/", resources)
+    ## We exclude the `config` and `test` directories.
+    resources[substring(resources, 1, 7) != "config/" &
+              substring(resources, 1, 5) != "test/"]
   }
 
   without_optional_resources <- function(resources) {
