@@ -1,7 +1,7 @@
 Package: syberia
 Type: Package
 Title: Syberia
-Version: 0.5.0.9001
+Version: 0.6.0.9000
 Description: Syberia is a meta-framework for R that allows for on-the-fly
     creation of concrete frameworks for constructing arbitrary software.
     In its current formulation, the modeling engine provides an opiniated
@@ -17,7 +17,7 @@ Description: Syberia is a meta-framework for R that allows for on-the-fly
 Author: Robert Krzyzanowski <rkrzyzanowski@gmail.com>
 Maintainer: Robert Krzyzanowski <rkrzyzanowski@gmail.com>
 Authors@R: c(person("Robert", "Krzyzanowski",
-    email = "rkrzyzanowski@gmail.com", role = c("aut", "cre")))
+    email = "rob@syberia.com", role = c("aut", "cre")))
 Depends:
     R (>= 3.0.0)
 Imports:
