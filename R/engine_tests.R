@@ -27,6 +27,10 @@
 #' @param ignored_tests character. The list of tests to ignore, by default
 #'    the local variable \code{ignored_tests} extracted from the configuration
 #'    resource specific by the \code{config} parameter.
+#' @param optional_tests character. The list of tests to ignore, by default
+#'    the local variable \code{optional_tests} extracted from the configuration
+#'    resource specific by the \code{config} parameter.
+#' @param required logical. Whether or not all tests are required to have resources,
 #' @param required logical. Whether or not all tests are required to have resources,
 #'    by default \code{TRUE}. If \code{TRUE}, the \code{ignored_tests}
 #'    resources will not be required to have an accompanying test.
@@ -38,6 +42,7 @@
 test_engine <- function(engine = syberia_engine(), base = "test",
                         config = file.path("config", "environments", "test"),
                         ignored_tests = ignored_tests_from_config(engine, base, config),
+                        optional_tests = optional_tests_from_config(engine, base, config),
                         required = TRUE) {
   if (is.character(engine)) {
     engine <- syberia_engine(engine)
@@ -50,10 +55,36 @@ test_engine <- function(engine = syberia_engine(), base = "test",
   force(ignored_tests)
   tests <- find_tests(engine, base, ignored_tests)
 
-  ensure_resources_have_tests
+  ensure_resources_are_tested(engine, tests, optional_tests)
 
   # TODO: (RK) Actually run the tests.
 }
+
+#' Check that all mandatory tested resources have tests.
+#'
+#' @param engine syberia_engine. The engine to check.
+#' @param tests character. The tests to check. Must be a list with keys
+#'     \code{"active"} and \code{"ignored"}.
+ensure_resources_are_tested <- function(engine, tests, optional) {
+  without_builtin_resources <- function(resources) {
+    Filter(function(resource) substring(resource, 1, 7) != "config/", resources)
+  }
+
+  without_optional_resources <- function(resources) {
+    Filter(function(resource) !any_is_substring_of(resources, optional), resources)
+  }
+
+  all_resources <- without_optional_resources(without_builtin_resources(engine$find()))
+
+  # Error if any resources don't have tests.
+  necessary_tests <- file.path("test", all_resources)
+  missing_tests   <- setdiff(necessary_tests, c(tests$active, tests$ignored))
+  if (length(missing_tests) > 0L) {
+    stop(call. = FALSE, "Tests are missing for the following resources:\n\n",
+         crayon::red(paste(gsub("^test/", "", missing_tests), collapse = "\n")))
+  }
+}
+  
 
 find_tests <- function(engine, base, ignored_tests) {
   all_tests <- engine$find(children. = FALSE, base = gsub("\\/$", "", base)) 
@@ -66,17 +97,27 @@ find_tests <- function(engine, base, ignored_tests) {
   )
 }
 
-test_environment_configuration <- function(engine, path = file.path("config", "environments", "test")) {
-  if (!engine$exists(path, children. = FALSE)) {
-    list()
-  } else {
-    engine$resource(path, children. = FALSE)
+test_environment_configuration <- memoise::memoise(
+  function(engine, path = file.path("config", "environments", "test")) {
+    if (!engine$exists(path, children. = FALSE)) {
+      list()
+    } else {
+      engine$resource(path, children. = FALSE)
+    }
   }
-}
+)
 
 ignored_tests_from_config <- function(engine, base, config) {
+  value_from_config(engine, base, config, "ignored_tests")
+}
+
+optional_tests_from_config <- function(engine, base, config) {
+  value_from_config(engine, base, config, "optional_tests")
+}
+
+value_from_config <- function(engine, base, config, value) {
   file.path(base,
-    (test_environment_configuration(engine, config)$ignored_tests) %||% character(0)
+    (test_environment_configuration(engine, config)[[value]]) %||% character(0)
   )
 }
 

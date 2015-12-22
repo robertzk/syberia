@@ -23,6 +23,7 @@ Depends:
 Imports:
     crayon,
     director (>= 0.3.0.4),
+    memoise,
     mungebits,
     objectdiff,
     R6,
