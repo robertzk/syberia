@@ -59,14 +59,14 @@ test_engine <- function(engine = syberia_engine(), base = "test",
     ensure_resources_are_tested(engine, tests, optional_tests)
   }
 
-  test_resources(engine, tests$active)
+  test_resources(engine, tests$active, base, config)
 }
 
 #' Run the tests on a given set of resources.
 #'
 #' @param engine syberia_engine. The engine to run the tests on.
 #' @param tests character. The character vector of resources to test.
-test_resources <- function(engine, tests) {
+test_resources <- function(engine, tests, ...) {
   ensure_test_packages()
 
   reporter <- getNamespace("testthat")$find_reporter("summary")
@@ -74,7 +74,8 @@ test_resources <- function(engine, tests) {
 
   results <- NULL
   ensure_no_global_variable_pollution(check_options = TRUE, {
-    find_test_hook(project, type = "setup")$run()
+    setup_hook <- find_test_hook(project, type = "setup", ...)
+    if (!is.null(setup_hook)) setup_hook$run()
 
     if (requireNamespace("pbapply", quietly = TRUE)) {
       old_pboptions <- options("pboptions")
@@ -84,8 +85,8 @@ test_resources <- function(engine, tests) {
       apply_function <- lapply
     }
 
-    single_setup <- find_test_hook(engine, type = "single_setup")
-    single_teardown <- find_test_hook(engine, type = "single_teardown")
+    single_setup <- find_test_hook(engine, type = "single_setup", ...)
+    single_teardown <- find_test_hook(engine, type = "single_teardown", ...)
 
     results <-
       apply_function(tests, test_resource, engine = engine, reporter = reporter,
@@ -113,7 +114,7 @@ test_resource <- function(engine, resource, setup, teardown, reporter) {
   result <- NULL
 
   ensure_no_global_variable_pollution(check_options = TRUE, {
-    if (!missing(setup)) {                                      
+    if (!missing(setup) && !is.null(setup)) {
       setup$.context$resource <- resource
       setup$run()
     }
@@ -124,7 +125,7 @@ test_resource <- function(engine, resource, setup, teardown, reporter) {
     }
     result <- suppressMessages(do.call(project$resource, call_args))
 
-    if (!missing(teardown)) {
+    if (!missing(teardown) && !is.null(teardown)) {
       teardown$.context$resource <- resource
       teardown$run()
     }
@@ -148,48 +149,48 @@ test_resource <- function(engine, resource, setup, teardown, reporter) {
 #'   being the default.
 #' @seealso \code{\link{test_project}}
 #' @return a stageRunner that will run the relevant setup or teardown hook(s).
-find_test_hook <- function(engine, type = 'setup') {
-  if (!is.director(engine)) {
-    stop("To fetch the ", type, " hook for a project, please pass in a director ",
-         "object (the director for the syberia project). Instead I got ",
+find_test_hook <- function(engine, type = "setup", base, config) {
+  if (!is(engine, "syberia_engine")) {
+    stop("To fetch the ", type, " hook for a project, please pass in a syberia_engine ",
+         "object (the syberia_engine for the syberia project). Instead I got ",
          "an object of class ", class(engine)[1])
   }
 
-  test_environment_path <- 'config/environments/test'
-  if (engine$exists(test_environment_path)) {
-    # TODO: (RK) Fix director absolute file paths in $.filename and this hack
-    filename <- director:::strip_root(engine$root(),
-                                      engine$filename(test_environment_path))
-    hooks <- test_environment_config(engine)[[type]] %||% list(force)
+  hooks <- value_from_config(engine, config, type)
+  if (is.null(hooks)) return(NULL)
 
-    # TODO: (RK) Maybe replace this with a new stageRunner method to check 
-    # argument validity? In the future, stageRunner could maybe do more!
-    colored_filename <- sQuote(crayon::blue(filename))
-    if (!is.list(hooks) && !is.function(hooks) && !is.stagerunner(hooks)) {
-      stop("Test ", type, " hooks must be a function or a list of functions.\n\nIn ",
-           colored_filename, ", ensure that ",
-           "you have ", sQuote(crayon::yellow(paste0(type, ' <- some_function'))),
-           " as right now it's an object of class ",
-           sQuote(crayon::red(class(hooks)[1])), call. = FALSE)
-    }
-    if (!is.list(hooks)) hooks <- list(hooks)
+  # TODO: (RK) Maybe replace this with a new stageRunner method to check 
+  # argument validity? In the future, stageRunner could maybe do more!
+  colored_filename <- sQuote(crayon::blue(config))
+  if (!is.list(hooks) && !is.function(hooks) && !stagerunner::is.stagerunner(hooks)) {
+    browser()
+    stop("Test ", type, " hooks must be a function or a list of functions.\n\nIn ",
+         colored_filename, ", ensure that ",
+         "you have ", sQuote(crayon::yellow(paste0(type, ' <- some_function'))),
+         " as right now it's an object of class ",
+         sQuote(crayon::red(class(hooks)[1])), call. = FALSE)
+  }
 
-    all_have_correct_arity <- is.stagerunner(hooks) || all(rapply(hooks, how = 'unlist',
-      function(hook) is.function(hook) && length(formals(hook)) > 0))
-    if (!all_have_correct_arity) {
-      stop("Test ", type, " hooks must all be functions that take at least one ",
-           "argument.\n\nThe first argument will be an environment that has one ",
-           "key, ", sQuote('director'), ". In ", colored_filename,
-           " ensure your ", sQuote(crayon::yellow(type)),
-           " local variable meets this constraint.", call. = FALSE)
-    }
+  if (!is.list(hooks)) {
+    hooks <- list(hooks)
+  }
 
-    # Do not give access to global environment to ensure modularity.
-    hook_env <- new.env(parent = parent.env(globalenv()))
-    hook_env$director <- engine
+  all_have_correct_arity <- stagerunner::is.stagerunner(hooks) ||
+    all(rapply(hooks, how = "unlist", function(hook) {
+      is.function(hook) && length(formals(hook)) > 0
+    }))
 
-    stageRunner(hook_env, hooks)
-  } else stageRunner(new.env(), list(force))
+  if (!all_have_correct_arity) {
+    stop("Test ", type, " hooks must all be functions that take at least one ",
+         "argument.\n\nThe first argument will be an environment that has one ",
+         "key, ", sQuote("director"), ". In ", colored_filename,
+         " ensure your ", sQuote(crayon::yellow(type)),
+         " local variable meets this constraint.", call. = FALSE)
+  }
+
+  # Do not give access to global environment to ensure modularity.
+  hook_env <- list2env(list(director = engine), parent = parent.env(globalenv()))
+  stagerunner::stageRunner(hook_env, hooks)
 }
 
  
@@ -243,16 +244,18 @@ test_environment_configuration <- memoise::memoise(
 )
 
 ignored_tests_from_config <- function(engine, base, config) {
-  value_from_config(engine, base, config, "ignored_tests")
+  file.path(base, 
+    value_from_config(engine, config, "ignored_tests") %||% character(0)
+  )
 }
 
 optional_tests_from_config <- function(engine, base, config) {
-  value_from_config(engine, base, config, "optional_tests")
+  file.path(base, 
+    value_from_config(engine, config, "optional_tests") %||% character(0)
+  )
 }
 
-value_from_config <- function(engine, base, config, value) {
-  file.path(base,
-    (test_environment_configuration(engine, config)[[value]]) %||% character(0)
-  )
+value_from_config <- function(engine, config, value) {
+  test_environment_configuration(engine, config)[[value]]
 }
 
