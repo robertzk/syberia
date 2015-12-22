@@ -1,3 +1,54 @@
+## Like any good development framework, Syberia offers built-in support for
+## testing. The primary unit of development in Syberia is the *engine*.
+## All Syberia projects are composed of a collection of engines (each
+## potentially depending on vanilla R packages).
+##
+## This function allows one to run all the *tests* associated with the engine.
+## By default, the files in the `test` directory of the engine are considered
+## tests, and all other files are non-tests.
+##
+## The convention is straightforward:
+## if you have a Syberia resource `a/b/c` off the root of the project, you
+## should have an accompanying test in `test/a/b/c`. Note we leave out the
+## `.R` extension as the resource may be an *idempotent* or *non-idempotent*
+## resource. 
+##
+## Idempotent resources are `.R` files in a directory with the same name
+## as the file without extension. For example, `test/a/b/c/c.R` would be an
+## idempotent resource, and helper files like `test/a/b/c/helper.R` would be
+## invisible to the Syberia engine: this encourages clean design and separation
+## into helper files as your resource becomes more complex.
+##
+## Here is an example test. You can look at the accompanying
+# TODO: (RK) Check this is the correct link.
+## [helper project](http://github.com/syberia/syberia/tree/tests/testthat/projects/test_calculation_pi).
+##
+## ```r
+## # calculations/pi.R
+## # Compute pi using a series: http://functions.wolfram.com/Constants/Pi/06/01/01/
+## Reduce(`+`, 4 * vapply(seq_len(1000) - 1, function(k) { (-1)^k / (2 * k + 1) }, double(1)))
+##
+## # test/calculations/pi.R
+## test_that("the calculation is close to pi", {
+##   # Note we have access to the testthat package.
+##   expect_less_than(abs(resource() - 3.1415926), 1e-3)
+## })
+## ```
+## 
+## We can execute the test using `test_engine(root)` where `root` is the string
+## representing the directory the above files are contained in.
+##
+## Note that Syberia provides the `resource` helper to fetch the current resource
+## being tested. You could pass a first argument to fetch another resource,
+## but if you leave it empty, the default will always be the resource corresponding
+## to the tested resources. Thus, if you are in `test/calculations/pi`, calling
+## `resource()` will build you `calculations/pi`.
+## 
+## It is possible to add test setup and teardown hooks. This means that before
+## the test suite runs, you can add additional conditions to ensure your
+## project is working as intended. For example, the author has found it useful
+## to add checks for `README.md` files in all directories to encourage
+## the team to always add documentation (or else your test suite breaks!).
 #' Run all tests in a syberia project or engine.
 #'
 #' The tests that will be run are all those in the \code{test} subdirectory
