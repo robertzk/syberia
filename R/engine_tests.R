@@ -67,6 +67,12 @@ test_engine <- function(engine = syberia_engine(), base = "test",
 #' @param engine syberia_engine. The engine to run the tests on.
 #' @param tests character. The character vector of resources to test.
 test_resources <- function(engine, tests) {
+  ensure_test_packages()
+
+  reporter <- getNamespace("testthat")$find_reporter("summary")
+  reporter$start_reporter()
+
+  results <- NULL
   ensure_no_global_variable_pollution(check_options = TRUE, {
     find_test_hook(project, type = "setup")$run()
 
@@ -81,11 +87,18 @@ test_resources <- function(engine, tests) {
     single_setup <- find_test_hook(engine, type = "single_setup")
     single_teardown <- find_test_hook(engine, type = "single_teardown")
 
-    apply_function(tests, test_resource, engine = engine,
-                   setup = single_setup, teardown = single_teardown)
+    results <-
+      apply_function(tests, test_resource, engine = engine, reporter = reporter,
+                     setup = single_setup, teardown = single_teardown)
   })
 
-  invisible(TRUE)
+  reporter$end_reporter()
+  invisible(getNamespace("testthat")$testthat_results(results))
+}
+
+ensure_test_packages <- function() {
+  ensure_installed("testthat")
+  ensure_testthatsomemore()
 }
 
 #' Run the tests for a single resource.
@@ -96,20 +109,28 @@ test_resources <- function(engine, tests) {
 #'    execute setup hooks for this test.
 #' @param teardown. A \code{\link[stagerunner::stageRunner]{stageRunner}} to
 #'    execute teardown hooks for this test.
-test_resource <- function(engine, resource, setup, teardown) {
+test_resource <- function(engine, resource, setup, teardown, reporter) {
+  result <- NULL
+
   ensure_no_global_variable_pollution(check_options = TRUE, {
     if (!missing(setup)) {                                      
       setup$.context$resource <- resource
       setup$run()
     }
 
-    suppressMessages(project$resource(resource, recompile = TRUE, recompile. = TRUE))
+    call_args <- list(resource, recompile = TRUE, recompile. = TRUE)
+    if (!missing(reporter)) {
+      call_args$reporter <- reporter
+    }
+    result <- suppressMessages(do.call(project$resource, call_args))
 
     if (!missing(teardown)) {
       teardown$.context$resource <- resource
       teardown$run()
     }
   }, desc = paste("running", resource))
+
+  result
 }
 
 #' Fetch the test setup or teardown hook, if any exists.
