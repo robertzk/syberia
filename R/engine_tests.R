@@ -55,11 +55,123 @@ test_engine <- function(engine = syberia_engine(), base = "test",
   force(ignored_tests)
   tests <- find_tests(engine, base, ignored_tests)
 
-  ensure_resources_are_tested(engine, tests, optional_tests)
+  if (isTRUE(required)) {
+    ensure_resources_are_tested(engine, tests, optional_tests)
+  }
 
-  # TODO: (RK) Actually run the tests.
+  test_resources(engine, tests$active)
 }
 
+#' Run the tests on a given set of resources.
+#'
+#' @param engine syberia_engine. The engine to run the tests on.
+#' @param tests character. The character vector of resources to test.
+test_resources <- function(engine, tests) {
+  ensure_no_global_variable_pollution(check_options = TRUE, {
+    find_test_hook(project, type = "setup")$run()
+
+    if (requireNamespace("pbapply", quietly = TRUE)) {
+      old_pboptions <- options("pboptions")
+      on.exit(options(old_pboptions))
+      apply_function <- pbapply::pblapply
+    } else {
+      apply_function <- lapply
+    }
+
+    single_setup <- find_test_hook(engine, type = "single_setup")
+    single_teardown <- find_test_hook(engine, type = "single_teardown")
+
+    apply_function(tests, test_resource, engine = engine,
+                   setup = single_setup, teardown = single_teardown)
+  })
+
+  invisible(TRUE)
+}
+
+#' Run the tests for a single resource.
+#'
+#' @param engine syberia_engine. The engine to run the test on.
+#' @param resource character. The resource to test.
+#' @param setup. A \code{\link[stagerunner::stageRunner]{stageRunner}} to
+#'    execute setup hooks for this test.
+#' @param teardown. A \code{\link[stagerunner::stageRunner]{stageRunner}} to
+#'    execute teardown hooks for this test.
+test_resource <- function(engine, resource, setup, teardown) {
+  ensure_no_global_variable_pollution(check_options = TRUE, {
+    if (!missing(setup)) {                                      
+      setup$.context$resource <- resource
+      setup$run()
+    }
+
+    suppressMessages(project$resource(resource, recompile = TRUE, recompile. = TRUE))
+
+    if (!missing(teardown)) {
+      teardown$.context$resource <- resource
+      teardown$run()
+    }
+  }, desc = paste("running", resource))
+}
+
+#' Fetch the test setup or teardown hook, if any exists.
+#'
+#' The resource \code{config/environments/test} should contain a local variable
+#' \code{setup} or \code{teardown} that has a function or list of functions to
+#' be incorporated into a stageRunner that will run the actual test setup
+#' or teardown.
+#'
+#' The seed environment for the stageRunner will contain the director object
+#' of the relevant project in the key \code{director}.
+#'
+#' @param project director or character. The director for the syberia project.
+#' @param type character. Must be \code{'setup'} or \code{'teardown'}, the former
+#'   being the default.
+#' @seealso \code{\link{test_project}}
+#' @return a stageRunner that will run the relevant setup or teardown hook(s).
+find_test_hook <- function(engine, type = 'setup') {
+  if (!is.director(engine)) {
+    stop("To fetch the ", type, " hook for a project, please pass in a director ",
+         "object (the director for the syberia project). Instead I got ",
+         "an object of class ", class(engine)[1])
+  }
+
+  test_environment_path <- 'config/environments/test'
+  if (engine$exists(test_environment_path)) {
+    # TODO: (RK) Fix director absolute file paths in $.filename and this hack
+    filename <- director:::strip_root(engine$root(),
+                                      engine$filename(test_environment_path))
+    hooks <- test_environment_config(engine)[[type]] %||% list(force)
+
+    # TODO: (RK) Maybe replace this with a new stageRunner method to check 
+    # argument validity? In the future, stageRunner could maybe do more!
+    colored_filename <- sQuote(crayon::blue(filename))
+    if (!is.list(hooks) && !is.function(hooks) && !is.stagerunner(hooks)) {
+      stop("Test ", type, " hooks must be a function or a list of functions.\n\nIn ",
+           colored_filename, ", ensure that ",
+           "you have ", sQuote(crayon::yellow(paste0(type, ' <- some_function'))),
+           " as right now it's an object of class ",
+           sQuote(crayon::red(class(hooks)[1])), call. = FALSE)
+    }
+    if (!is.list(hooks)) hooks <- list(hooks)
+
+    all_have_correct_arity <- is.stagerunner(hooks) || all(rapply(hooks, how = 'unlist',
+      function(hook) is.function(hook) && length(formals(hook)) > 0))
+    if (!all_have_correct_arity) {
+      stop("Test ", type, " hooks must all be functions that take at least one ",
+           "argument.\n\nThe first argument will be an environment that has one ",
+           "key, ", sQuote('director'), ". In ", colored_filename,
+           " ensure your ", sQuote(crayon::yellow(type)),
+           " local variable meets this constraint.", call. = FALSE)
+    }
+
+    # Do not give access to global environment to ensure modularity.
+    hook_env <- new.env(parent = parent.env(globalenv()))
+    hook_env$director <- engine
+
+    stageRunner(hook_env, hooks)
+  } else stageRunner(new.env(), list(force))
+}
+
+ 
 #' Check that all mandatory tested resources have tests.
 #'
 #' @param engine syberia_engine. The engine to check.
