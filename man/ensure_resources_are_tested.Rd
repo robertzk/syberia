@@ -4,7 +4,7 @@
 \alias{ensure_resources_are_tested}
 \title{Check that all mandatory tested resources have tests.}
 \usage{
-ensure_resources_are_tested(engine, tests, optional)
+ensure_resources_are_tested(engine, tests, optional, base = "test")
 }
 \arguments{
 \item{engine}{syberia_engine. The engine to check.}
@@ -13,6 +13,9 @@ ensure_resources_are_tested(engine, tests, optional)
 \code{"active"} and \code{"ignored"}.}
 
 \item{optional}{character. A character vector of optional tests.}
+
+\item{base}{character. The directory containing tests in the project, by
+default \code{"test"}.}
 }
 \value{
 Nothing, but error if not all resources have tests.
