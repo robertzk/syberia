@@ -75,7 +75,7 @@ test_project <- function(project = syberia_engine(), base = '') {
 load_test_packages <- function() {
   Ramd::packages('testthat')
   if (!is.element('testthatsomemore', installed.packages()[,1])) {
-    install.packages('robertzk/testthatsomemore')
+    devtools::install_github('robertzk/testthatsomemore')
   }
 }
 
