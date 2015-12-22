@@ -41,4 +41,9 @@ describe("failing tests", {
   })
 })
 
+describe("setup hook", {
+  test_that("it fails with a setup hook failure", {
+    expect_error(test_engine("projects/test_simple_setup_failure"), "setup test hook failed")
+  })
+})
 
