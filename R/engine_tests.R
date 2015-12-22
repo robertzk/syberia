@@ -126,7 +126,7 @@ test_resources <- function(engine, tests, ...) {
 
   results <- NULL
   ensure_no_global_variable_pollution(check_options = TRUE, {
-    setup_hook <- find_test_hook(project, type = "setup", ...)
+    setup_hook <- find_test_hook(engine, type = "setup", ...)
     if (!is.null(setup_hook)) setup_hook$run()
 
     if (requireNamespace("pbapply", quietly = TRUE)) {
@@ -177,7 +177,7 @@ test_resource <- function(engine, resource, setup, teardown, reporter) {
     if (!missing(reporter)) {
       call_args$reporter <- reporter
     }
-    result <- suppressMessages(do.call(project$resource, call_args))
+    result <- suppressMessages(do.call(engine$resource, call_args))
 
     if (!missing(teardown) && !is.null(teardown)) {
       teardown$.context$resource <- resource
