@@ -11,4 +11,11 @@ describe("invalid inputs", {
   })
 })
 
+describe("missing tests", {
+  test_that("it fails due to missing tests for the engines1 project", {
+    expect_error(test_engine("projects/engines1/main"), "Tests are missing")
+    expect_error(test_engine("projects/engines1/main"), "main_resource")
+  })
+})
+
 
