@@ -106,10 +106,10 @@ test_engine <- function(engine = syberia_engine(), base = "test",
   tests <- find_tests(engine, base, ignored_tests)
 
   if (isTRUE(required)) {
-    ensure_resources_are_tested(engine, tests, optional_tests)
+    ensure_resources_are_tested(engine, tests, optional_tests, base)
   }
 
-  test_resources(engine, tests$active, base, config)
+  test_resources(engine, tests$active, config)
 }
 
 #' Run the tests on a given set of resources.
@@ -137,7 +137,7 @@ test_resources <- function(engine, tests, ...) {
       apply_function <- lapply
     }
 
-    single_setup <- find_test_hook(engine, type = "single_setup", ...)
+    single_setup    <- find_test_hook(engine, type = "single_setup", ...)
     single_teardown <- find_test_hook(engine, type = "single_teardown", ...)
 
     results <-
@@ -255,12 +255,14 @@ find_test_hook <- function(engine, type = "setup", config) {
 #' @param tests character. The tests to check. Must be a list with keys
 #'     \code{"active"} and \code{"ignored"}.
 #' @param optional character. A character vector of optional tests.
+#' @param base character. The directory containing tests in the project, by
+#'     default \code{"test"}.
 #' @return Nothing, but error if not all resources have tests.
-ensure_resources_are_tested <- function(engine, tests, optional) {
+ensure_resources_are_tested <- function(engine, tests, optional, base = "test") {
   without_builtin_resources <- function(resources) {
     ## We exclude the `config` and `test` directories.
     resources[substring(resources, 1, 7) != "config/" &
-              substring(resources, 1, 5) != "test/"]
+              substring(resources, 1, 5) != paste0(base, "/")]
   }
 
   without_optional_resources <- function(resources) {
@@ -270,11 +272,11 @@ ensure_resources_are_tested <- function(engine, tests, optional) {
   all_resources <- without_optional_resources(without_builtin_resources(engine$find()))
 
   # Error if any resources don't have tests.
-  necessary_tests <- file.path("test", all_resources)
+  necessary_tests <- file.path(base, all_resources)
   missing_tests   <- setdiff(necessary_tests, c(tests$active, tests$ignored))
   if (length(missing_tests) > 0L) {
     stop(call. = FALSE, "Tests are missing for the following resources:\n\n",
-         crayon::red(paste(gsub("^test/", "", missing_tests), collapse = "\n")))
+         crayon::red(paste(gsub(paste0("^", base, "/"), "", missing_tests), collapse = "\n")))
   }
 }
   
