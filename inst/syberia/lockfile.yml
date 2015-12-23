@@ -1,0 +1,134 @@
+packages:
+  -
+    name: readr
+    repo: hadley/readr
+    version: 0.1.0
+    ref: v0.1.0
+  -
+    name: fortunes
+    version: 1.5.2
+    repo: cran/fortunes
+    ref: 1.5-2
+  -
+    name: cowsay
+    version: 0.3.2.9500
+    repo: sckott/cowsay
+    ref: 8b0e80ebb9782601842fcb25a832c6528cd628ca
+  -
+    name: productivus
+    version: 0.1.1
+    repo: robertzk/productivus
+  -
+    name: RDS2
+    version: 0.1.0
+    repo: robertzk/rds2
+    ref: master
+  -
+    name: whisker
+    version: 0.4
+    repo: edwindj/whisker
+    ref: 1ee03c669d074511c6403eee76257b0648cd7dd3
+  -
+    name: DBI
+    version: 0.3.1.9008
+    repo: rstats-db/DBI
+    ref: f5bd553d0223f1e937bdef686b104a92bd4eaf65
+  -
+    name: RPostgres
+    version: 0.1
+    repo: rstats-db/RPostgres
+    ref: cba2e5e75eb6e133bc20836f0a6ecc529a10ff66
+  -
+    name: berdie
+    version: 0.1.0
+    repo: robertzk/berdie
+  -
+    name: e1071
+    version: 1.6.4
+    repo: cran/e1071
+    ref: 1.6-4
+  -
+    name: gbm
+    version: 2.1.1
+    repo: cran/gbm
+  -
+    name: pbapply
+    version: 1.1.1
+    repo: cran/pbapply
+    ref: 1.1-1
+  -
+    name: purrr
+    version: 0.0.0.9000
+    repo: hadley/purrr
+    ref: eb3512f88fd7e7d34a6268018b616e86f51b79a0
+  -
+    name: Ramd
+    version: 0.2.2
+    repo: robertzk/Ramd
+  -
+    name: tundra
+    version: 0.2.2
+    repo: robertzk/tundra
+  -
+    name: mungebits
+    version: 0.3.5
+    repo: robertzk/mungebits
+  -
+    name: batbelt
+    version: 0.1.2
+    repo: robertzk/batbelt
+  -
+    name: batchman
+    version: 1.1.0
+    repo: peterhurford/batchman
+  -
+    name: cachemeifyoucan
+    version: 0.2.1.2
+    repo: robertzk/cachemeifyoucan
+  -
+    name: objectdiff
+    version: 0.2.3
+    repo: robertzk/objectdiff
+  -
+    name: stagerunner
+    version: 0.5.0
+    repo: robertzk/stagerunner
+  -
+    name: director
+    version: 0.3.0.5
+    repo: robertzk/director
+    ref: documentation_cleanup
+  -
+    name: syberiaMungebits
+    version: 0.2.3
+    repo: robertzk/syberiaMungebits
+  -
+    name: s3mpi
+    version: 0.2.8
+    repo: robertzk/s3mpi
+  -
+    name: syberiaStages
+    version: 0.2.3
+    repo: robertzk/syberiaStages
+  -
+    name: syberia
+    version: 0.5.0
+    repo: robertzk/syberia
+    ref: engines
+
+development:
+
+test:
+  - magrittr
+  - purrr
+  - Ramd
+  - tundra
+  - syberia
+  - syberiaStages
+  - s3mpi
+  - syberiaMungebits
+  - director
+  - stagerunner
+  - objectdiff
+  - cachemeifyoucan
+  - mungebits
