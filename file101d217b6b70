@@ -1,0 +1,57 @@
+In package devtools: test()
+In package devtools: with_envvar(r_env_vars(), testthat::test_dir(test_path, filter = filter,      env = env, ...))
+In package base: force(code)
+In package testthat: testthat::test_dir(test_path, filter = filter, env = env, ...)
+In package testthat: test_files(paths, reporter = reporter, env = env, ...)
+In package base: lapply(paths, test_file, env = env, reporter = current_reporter,      start_end_reporter = FALSE)
+In package testthat: FUN(X[[i]], ...)
+In package testthat: sys.source2(fname, new.env(parent = env))
+In package base: eval(exprs, envir)
+In package syberia: eval(expr, envir, enclos)
+In /Users/robertk/dev/syberia/tests/testthat/test-engine_tests.R:32: describe("failing tests", {
+  has_failed_test <- function(test_summary) {
+    any(vapply(test_summary, function(summand) {
+ [...]
+In package base: eval(substitute(code), describe_environment)
+In package syberia: eval(expr, envir, enclos)
+In /Users/robertk/dev/syberia/tests/testthat/test-engine_tests.R:41: test_that("it fails with a simple example test", {
+    # TODO: (RK) Prevent test suite reporter mangling.
+    sink(tempfil [...]
+In package testthat: test_code(desc, substitute(code), env = parent.frame())
+In package base: tryCatch(withCallingHandlers(eval(code, new_test_environment),      error = capture_calls, message = function(c) invokeR [...]
+In package base: tryCatchList(expr, classes, parentenv, handlers)
+In package base: tryCatchOne(tryCatchList(expr, names[-nh], parentenv, handlers[-nh]),      names[nh], parentenv, handlers[[nh]])
+In package base: doTryCatch(return(expr), name, parentenv, handler)
+In package base: tryCatchList(expr, names[-nh], parentenv, handlers[-nh])
+In package base: tryCatchOne(expr, names, parentenv, handlers[[1L]])
+In package base: doTryCatch(return(expr), name, parentenv, handler)
+In package base: withCallingHandlers(eval(code, new_test_environment), error = capture_calls,      message = function(c) invokeRestart("m [...]
+In package base: eval(code, new_test_environment)
+In package syberia: eval(expr, envir, enclos)
+In /Users/robertk/dev/syberia/tests/testthat/test-engine_tests.R:44: expect_true(has_failed_test(test_engine("projects/simple_test_failure")))
+In package testthat: expect_that(object, is_true(), info, label)
+In package testthat: condition(object)
+In package testthat: expectation(identical(as.vector(x), TRUE), "isn't true", "is true")
+In package base: structure(list(passed = passed, error = FALSE, skipped = FALSE,      failure_msg = failure_msg, success_msg = success_ms [...]
+In package base: identical(as.vector(x), TRUE)
+In package base: as.vector(x)
+In package syberia: has_failed_test(test_engine("projects/simple_test_failure"))
+In /Users/robertk/dev/syberia/tests/testthat/test-engine_tests.R:34: any(vapply(test_summary, function(summand) {
+      any(vapply(summand[[1L]]$results, function(result) {
+        identical( [...]
+In package syberia: test_engine("projects/simple_test_failure")
+In /Users/robertk/dev/syberia/R/test.R:152: test_resources(engine, tests$active, config, reporter = reporter)
+In /Users/robertk/dev/syberia/R/test.R:177: ensure_no_global_variable_pollution(check_options = TRUE, {
+    setup_hook <- find_test_hook(engine, type = "setup", ...)
+ [...]
+In /Users/robertk/dev/syberia/R/utils.R:64: out <- eval.parent(substitute(expr))
+In package base: eval(expr, p)
+In package syberia: eval(expr, envir, enclos)
+In /Users/robertk/dev/syberia/R/test.R:181: single_setup    <- find_test_hook(engine, type = "single_setup", ...)
+In /Users/robertk/dev/syberia/R/test.R:256: hooks <- value_from_config(engine, config, type)
+In /Users/robertk/dev/syberia/R/test.R:368: test_environment_configuration(engine, config)[[value]]
+In package digest: digest(list(...))
+
+Error: Tests are missing for the following resources:
+
+[31mmain_resource[39m

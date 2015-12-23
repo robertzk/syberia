@@ -2,7 +2,7 @@
 <html lang="en" class="">
   <head>
     <meta http-equiv="content-type" content="text/html; charset=UTF-8">
-    <meta name="description" content="Syberia provides an opinionated unified framework for fast iteration on classifier development and deployment. It is founded on convention over configuration and aims to solve the problems of classifier-specific data preparation and classifier-specific modeling parameters.">
+    <meta name="description" content="Syberia is a meta-framework for R that allows for on-the-fly creation of concrete frameworks for constructing arbitrary software. In its current formulation, the modeling engine provides an opiniated framework for developing production-ready machine learning classifiers in R. The more general vision for Syberia is still in progress, but aims to unify the currently disparate realms of R packages, script codebases, Shiny dashboards, R web apps, and reproducible analysis. In the viewpoint of the author, R is syntactic sugar around LISP, which enables arbitrary computation; Syberia is an attempt to support this conjecture by allowing the construction of arbitrary software projects within the R programming language, thereby finally outgrowing its long-overdue misconception as a statistical tool.">
 
     <title>Syberia</title>
 
@@ -99,378 +99,6 @@
 
         <div class="section">
           <div class="markdown markdown-body">
-            <h1>director.R</h1>
-
-          </div>
-
-          <div class="code">
-            <pre>
-              <code class="R"><span class="spacer"></span></code>
-            </pre>
-          </div>
-        </div>
-        <div class="section">
-          <div class="markdown markdown-body">
-            
-          </div>
-
-          <div class="code">
-            <pre>
-              <code class="R"><span class="spacer">if (getRversion() >= "2.15.1") {
-  utils::globalVariables(c("input", "resource", "output", "resource_object"))
-}
-
-#' Fetch a syberia project director relative to a filename.
-#'
-#' @param filename character. Some in a syberia project.
-#' @return the director object for the syberia project.
-#' @export
-#' @examples
-#' \dontrun{
-#'   # Pretend you have the file blah/foo.R in your syberia project ~/proj.
-#'   syberia_projects('~/proj/blah/foo.R')
-#'   # Now we have the director object for the ~/proj syberia project.
-#' }
-syberia_project <- local({
-  # A cache of directors for the existent syberia projects
-  syberia_projects <- list()
-
-  function(filename = getwd()) {
-    if (!(is.character(filename) && length(filename) == 1)) {
-      stop("To fetch a syberia project, you must specify a file path ",
-           "(a character vector of length 1). Instead we got a ",
-           class(filename)[1], if (is.character(filename)) paste0(
-           ' of length ', length(filename)))
-    }
-    # TODO: (RK) Don't go through syberia_root here
-
-    root <- syberiaStructure::syberia_root(filename)
-    if (is.null(root))
-      stop("No syberia files detected in ", filename, "\n",
-           "Try syberia_project('path') with a path that includes Syberia files or",
-           "changing your working directory to a path with Syberia files.")
-    else root <- normalizePath(root)
-    if (!is.element(root, names(syberia_projects))) {
-      syberia_projects[[root]] <<- bootstrap_syberia_project(director(root, 'syberia'))
-    }
-    syberia_projects[[root]]
-  }
-})
-
-#' Bootstrap a syberia project by setting up its director object.
-#'
-#' The initial parsers that are derived from the syberia configuration
-#' directory (\code{"config/"}) will be added to the director object here.
-#' In particular, the \code{"config/routes.R"} file should specify the 
-#' controllers for various resource types, which will reside in 
-#' \code{"lib/controllers"} and be simple files with one function without
-#' any arguments. This function will have the following present
-#' when executed:
-#'
-#' \itemize{
-#'   \item{"resource"}{The name of the resource (basically, the filename
-#'     without the .R extension). If the resource is so-called an idempotent
-#'     resource, then this will be the non-idempotent version. An
-#'     idempotent resource is a file which is located in a directory whose
-#'     name is the same as the filename without extension.
-#'    
-#'     For example, \code{"models/infection/infection.R"} is an idempotent resource
-#'     because the \code{"infection.R"} file is present in the \code{"infection"}
-#'     directory and--ignoring file extension--they are identical. This kind of
-#'     convention allows any file in a syberia project to have helpers functions
-#'     that better help you structure your files. For example, if
-#'     \code{"infection.R"} needs to reference some long list of static
-#'     variable names, they can can be placed in \code{"models/infection/const.R"}
-#'     and included in \code{infection.R} using the \code{define} function
-#'     from the Ramd package.
-#'
-#'     The \code{resource} key will be the filename without its extension if it
-#'     is not an idempotent resource (so \code{"models/airtraffic.R"} will have
-#'     key \code{"models/airtraffic"}). On the other hand, an idempotent
-#'     resource will have key its residing directory so
-#'     (\code{"models/pollution/pollution.R"} will have key
-#'     \code{"models/pollution"}).}
-#'
-#'  \item{"input"}{When an R file is sourced through the \code{base::source}
-#'     function, it leaves a trail we can follow. This is because \code{source}
-#'     takes a second argument \code{local} (see the documentation for
-#'     \code{base::source}) which allows you to provide an environment in which
-#'     all execution of a given file will occur. Thus, if we have a file
-#'     that has the body \code{test <- 1; string <- 'hello'}, using this trick
-#'     we can construct an environment that has \code{test = 1} and
-#'     \code{string = 'hello'}.
-#'
-#'     The \code{input} that is available to the controller is precisely
-#'     this environment.}
-#'
-#'   \item{"output"}{When an R file is sourced through the \code{base::source}
-#'     function, its last executed expression is available in the return
-#'     value's \code{$value} key. Thus, if you had a file \code{"model.R"} with code
-#'     \code{column <- 'Sepal.Length'; lm(iris$Sepal.Width ~ iris[[column]])}
-#'     then we can access the \code{lm} model using \code{source('model.R')$value}.
-#'     
-#'     This "file return value" is precisely the \code{output} that is available
-#'     to the controller for a resource.}
-#'
-#'   \item{"resource_body"}{The source code (as a string) of the resource is
-#'     available as \code{resource_body} in the controller.}
-#'
-#'   \item{"director"}{The director object of the enclosing syberia project is
-#'     available through the \code{director} local variable in controller.
-#'
-#'     For more information on this, see the \code{director} package.}
-#'
-#' }
-#'
-#' The \code{config/routes.R} file in your syberia project should look something
-#' like this:
-#'
-#' \code{list('lib/classifiers' = 'classifier',
-#'            'data'            = 'data')}
-#'
-#' where we have two kinds of resources: classifiers and data sources.
-#' 
-#' It is up to you how to define what these resources "do". The
-#' \code{lib/classifiers} and \code{data} directories (in the root of your
-#' syberia project) can have arbitrary code, and the \code{resource},
-#' \code{input}, and \code{output} (like in the list above) are made available
-#' to the controller.
-#'
-#' The return value of a controller will be the final result of a user
-#' attempting to load a resource. For example, if we had the controller
-#' \code{"lib/controllers/classifier.R"} with:
-#'
-#' \code{function() {
-#'   classifier <- list(train = input$train, predict = input$predict)
-#'   class(classifier) <- 'simpleClassifier'
-#'   classifier
-#' }}
-#'
-#' then we could define a classifier object like the one generated above
-#' by placing a \code{train} and \code{predict} function in a file
-#' \code{"simple.R"} in the \code{lib/classifiers} directory.
-#'
-#' Then, if we have our syberia project, say
-#'    \code{proj <- syberia_project('some/directory')}
-#' we could load this object with
-#'    \code{simple_classifier <- proj$resource('lib/classifiers/simple')}
-#' and have an object that we can call \code{simple_classifier$train(...)}
-#' and \code{simple_classifier$predict} on.
-#'
-#' TODO: (RK) Explain why this is better than just random files.
-#'
-#' @param project director. The syberia director object to bootstrap.
-bootstrap_syberia_project <- function(project) {
-  register_config(project)
-  register_controllers(project)
-  register_routes(project)
-  register_tests(project)
-  custom_bootstrap(project)
-  project$cache_set("boostrapped", TRUE)
-  project
-}
-
-#' Run custom bootstrapping and startup actions.
-#'
-#' When a syberia project is first loaded, it is "bootstrapped" by performing
-#' several startup procedures: registering the config/application file, 
-#' registering the controllers, registering the routes, and setting up
-#' the tests so that \code{test_project} works correctly. The user
-#' can specify additional actions to perform using \code{custom_bootstrap}
-#' if and only if a config/boot resource is present (i.e., either a
-#' config/boot.R file or config/boot/boot.R file).
-#'
-#' Note that due to the dynamic and interactive nature of R, bootstrapping
-#' can occur non-deterministically. Unlike, for example, a Ruby on Rails application,
-#' which has one entrance point, a syberia project will be bootstrapped
-#' whenever it is referenced from R code the first time. This includes when
-#' any resources are loaded, tests are ran, configuration is accessed, etc.
-#' You should think of the bootstrapping process as "lazy loading" all that
-#' a syberia project needs to get to work.
-#'
-#' @inheritParams bootstrap_syberia_project
-custom_bootstrap <- function(project) {
-  if (project$exists('config/boot')) project$resource('config/boot')
-}
-
-
-#' Register configuration when bootstrapping a syberia project.
-#'
-#' @param project director. The syberia director object to bootstrap.
-register_config <- function(project) {
-  application_config_path <- file.path('config', 'application')
-  if (!project$exists(application_config_path)) {
-    stop("You must have a config/application.R file in your syberia project ",
-         "at directory ", sQuote(project$root()), ".", .call = FALSE)
-  }
-
-  project$register_parser(application_config_path,
-                          function() as.list(input), overwrite = TRUE)
-  project$register_parser(file.path('config', 'environments'),
-                          function() as.list(input), overwrite = TRUE)
-}
-
-#' Register routes when bootstrapping a syberia project.
-#'
-#' @param project director. The syberia director object to bootstrap.
-register_routes <- function(project) {
-  routes_path <- file.path('config', 'routes')
-  if (project$exists(routes_path)) {
-    project$register_parser(routes_path, routes_parser, overwrite = TRUE)
-    project$resource('config/routes')
-  }
-}
-
-#' Register parser for controllers.
-#'
-#' The only non-trivial action is to look for a \code{preprocessors} local
-#' variable in the \code{input} provider to the parser. The parsed value
-#' of a controller will be a list containing a \code{preprocessor} and
-#' a \code{parser}
-#'
-#' @param project director. The syberia director object on which to register
-#'   the default controllers parser.
-register_controllers <- function(project) {
-  controllers_path <- file.path('lib', 'controllers')
-  project$register_parser(controllers_path, function() {
-    if (exists('preprocessor', envir = input, inherits = FALSE) &&
-        !is.function(input$preprocessor))
-      stop("The preprocessor defined in ",
-           sQuote(crayon::red(resource)),
-           " must be a function, but instead is of class ",
-           sQuote(class(input$preprocessor[1])), call. = FALSE)
-    list(parser = output, preprocessor = input$preprocessor,
-         cache = isTRUE(input$cache), test = !identical(FALSE, input$test))
-  })
-}
-
-#' Register the default controller for Syberia project tests.
-#'
-#' By default, tests in a Syberia project will have access to the resource
-#' they are testing as well the \code{testthatsomemore} package.
-#' This function is responsible for bootstrapping this behavior in a
-#' Syberia project. See the documentation for \code{test_project}
-#' to understand how to create setup and teardown hooks (code that will be
-#' run before all tests are executed).
-#'
-#' @param project director. The syberia director object on which to register
-#'   the tests controller.
-#' @seealso \code{\link{test_project}}
-register_tests <- function(project) {
-  project$register_preprocessor('config/environments/test', default_tests_environment_preprocessor, overwrite = TRUE)
-  project$register_preprocessor('test', default_tests_preprocessor, overwrite = TRUE)
-}
-
-#' A director parser for parsing a routes file.
-#'
-#' A routes file (in \code{"config/routes.r"} relative to the syberia project)
-#' should contain a list whose names give the route prefixes and whose
-#' values are the controller names for parsing resources that begin with
-#' these prefixes. For example, if the file contains
-#' 
-#' \code{list('models' = 'models', 'lib/adapters' = 'adapters')}
-#'
-#' then files in the directory \code{"models"} (relative to the root of the
-#' syberia project) will be processed by the \code{"models"} controller
-#' and the files in the directory \code{"lib/adapters"} will be
-#' processed by the \code{adapters} controller. There should be files
-#' \code{"adapters.R"} and \code{"models.R"} in the \code{"lib/controllers"}
-#' directory containing only a single function. The function (the heart of
-#' the controller) will be applied to files sourced in the respective
-#' resource directory (\code{"models"} or \code{"lib/adapters"}).
-#' See the function \code{bootstrap_syberia_project} to understand what
-#' things are available in a controller function.
-#'
-#' @seealso \code{bootstrap_syberia_project}. 
-routes_parser <- function() {
-  error <- function(...) {
-    stop("In your ", crayon::red("config/routes.R"), " file in the ",
-         "syberia project at ", sQuote(crayon::blue(director$.root)),
-         ' ', ..., call. = FALSE)
-  }
-
-  if (!is.list(output)) {
-    error("you should return a list (put it at the end of the file). ",
-         "Currently, you have something of type ", sQuote(class(output)[1]), ".")
-    # TODO: (RK) More informative message here.
-  }
-  if (length(output) > 0 &&
-      (any(sapply(names(output), function(n) !isTRUE(nzchar(n)))) ||
-       length(unique(names(output))) != length(output))) {
-    error(" your list of routes needs to have unique prefixes.")
-    # TODO: (RK) Provide better information about name duplication or missing names.
-  }
-
-  # Only parse the routes file if it has changed, or the project has not
-  # been bootstrapped.
-  if (director$resource(resource, modification_tracker.touch = FALSE,
-                        dependency_tracker.return = "any_dependencies_modified") ||
-      !isTRUE(director$cache_get("bootstrapped"))) {
-    lapply(names(output), function(route) {
-      controller <- output[[route]]
-      if (!is.character(controller) && !is.function(controller)) {
-        error("Every route must be a character or a function (your route ",
-              crayon::yellow(sQuote(route)), " is of type ",
-              sQuote(class(controller)[1]), ")")
-      }
-
-      if (is.character(controller)) {
-        routes <- director$cache_get("routes") %||% list()
-        new_route <- routes[[route]]
-        new_route <- c(new_route, controller)
-        routes[[route]] <- new_route
-        director$cache_set("routes", routes)
-
-        controller <- director$resource(file.path('lib', 'controllers', controller))
-      } else if (is.function(controller)) controller <- list(parser = controller)
-
-      director$register_parser(route, controller$parser, cache = isTRUE(controller$cache))
-      if (is.function(controller$preprocessor))
-        director$register_preprocessor(route, controller$preprocessor)
-      # TODO: (RK) More validations on routes?
-    })
-  }
-  TRUE
-}
-
-#' The default preprocessor for syberia tests.
-#'
-#' @param resource_object directorResource
-#' @param director director
-#' @param source_args list
-#' @param source function
-default_tests_preprocessor <- function(resource_object, director, source_args, source) {
-  tested_resource <- gsub("^test\\/", "", resource)
-  if (!director$exists(tested_resource)) {
-    # TODO: (RK) Figure out how this interacts with virtual resources.
-    #warning("You are testing ", sQuote(crayon::yellow(tested_resource)),
-    #        " but it does not exist in the project.\n", call. = FALSE, immediate = TRUE)
-    #return(NULL)
-  }
-
-  context(tested_resource)
-  make_tested_resource <- function(...) director$resource(tested_resource, ...)
-  source_env$resource <- function() make_tested_resource(recompile. = TRUE)
-  source()
-}
-
-#' The default preprocessor for syberia test environments.
-#'
-#' @param director director
-#' @param source_args list
-#' @param source function
-default_tests_environment_preprocessor <- function(director, source_args, source) {
-  # Provide access to the director for people with hardcore test setup
-  # and teardown hooks.
-  source_env$director <- director 
-  source()
-}
-</span></code>
-            </pre>
-          </div>
-        </div>
-        <div class="section">
-          <div class="markdown markdown-body">
             <h1>engine.R</h1>
 
           </div>
@@ -483,7 +111,100 @@ default_tests_environment_preprocessor <- function(director, source_args, source
         </div>
         <div class="section">
           <div class="markdown markdown-body">
-            
+            <p>Syberia is a framework that was crafted specifically for the R
+programming language. The story is similar to JavaScript: a single-purpose
+language meant to be used in a particular context exploded in popularity
+and found itself in a host of other settings.</p>
+
+<p>However, R is really just <a href="https://en.wikipedia.org/wiki/Category:Lisp_programming_language_family">LISP</a>
+under the hood&ndash;a general purpose symbolic computing runtime. To prove that
+this makes R a viable production language for almost any purpose whatsoever,
+Syberia takes the first step of providing a hierarchical structure for R
+projects. Anything&ndash;from an empty directory, to an R package, to a collection
+of shiny dashboards&ndash;can be a Syberia project.</p>
+
+<p>This flexibility is achieved by assuming nothing about the underlying
+directory structure: in other words, fixing no conventions, but letting
+the user decide what the right course of action should be with respect
+to structuring their project. Other tools fare poorly at this; for example,
+a package does not even let you have a hierarchical directory structure
+in its <code>R/</code> subdirectory; what an affront to developer sanity!</p>
+
+<p>How can Syberia claim to be a convention-over-configuration framework
+if it fixes no conventions? The answer is that while Syberia <em>itself</em>,
+the package you are currently examining, does not fix any conventions,
+the de facto approach to development within Syberia is as follows:</p>
+
+<ol>
+<li><a href="http://github.com/syberia/modeling.sy">Pick an engine to build your work off of</a>.</li>
+<li><a href="https://github.com/syberia/examples">Build your project</a> within the conventions
+set by your choice of engine.</li>
+</ol>
+
+<p>It is possible to include multiple engines, or a whole complex potentially
+cyclic graph of engines, but this introduces <a href="https://en.wikipedia.org/wiki/Multiple_inheritance">the diamond problem</a>
+and should generally be avoided until you have a good understanding of
+computer science foundations.</p>
+
+<p>In other words, the Syberia approach is to be a <em>meta-framework</em>. By making
+no assumptions about the structure of your project, it is your choice which
+engine to build your project on depending on what suits your needs. This is
+especially helpful for machine learning projects, where the task and solution
+can take widely varying shapes depending on whether the problem is supervised,
+unsupervised, NLP, deep learning, etc.</p>
+
+<p>The above 2-step approach is recursive. For example, the <a href="https://github.com/syberia/modeling.sy">modeling engine</a>,
+the default engine for most projects, is built off the <a href="https://github.com/syberia/base.sy">base engine</a>,
+which dictates that each project should have a <code>config/routes.R</code> file which
+links the <code>lib/controllers</code> directory to the rest of the project and tells 
+you how R scripts in the project are to be parsed according to which
+directory they reside in. This is similar to object-oriented programming,
+except that it is strictly more general since it does not force you 
+to treat every single thing in the world as an object.</p>
+
+<p>Thus, the core structural unit is an <strong>engine</strong>. In order to bootstrap
+effectively, an engine should have a <code>config/application.R</code> file, potentially
+empty, so that Syberia can detect this is an engine, as well as a <code>config/engines.R</code>
+file indicating which engine this one depends on, if any. This is the sole
+convention and can be pretty easily deprecated in future versions of Syberia
+if there is demand for more flexible configuration.</p>
+
+<p>Each engine is <strong>testable</strong> by design. Syberia exports a function called
+<code>test_project</code> that by default looks in the <code>test/</code> directory of the
+engine and requires all resources have an accompanying test. If your
+resource (e.g., R script) does not have a test &ndash; it fails! In general,
+only well-written code is easily testable so this encourages both
+separating your project out into similar components through like
+directory structures as well as ensuring all inputs and outputs are
+what you expect them to be. (Not to mention saving you a huge headache
+of managing the complexity of a growing system!)</p>
+
+<p>To construct a Syberia engine object, run <code>syberia_project(&quot;/path/to/engine&quot;)</code>.
+This is a <code>syberia_engine</code> <a href="https://cran.r-project.org/web/packages/R6/vignettes/Introduction.html">R6 class</a>
+and holds together everything that Syberia knows about your project.
+It has methods like <code>$find</code>, <code>$resource</code>, and <code>$exists</code> to play with
+the files in your project. In general, Syberia takes a page out of
+<a href="https://nodejs.org/en/">node.js</a>&#39;s book and encourages all files
+to be structured so they have a single <em>export</em>: the last expression
+in the file. If you haven&#39;t replaced the default controller
+using the <code>config/routes</code> file, a topic we&#39;ll touch on later, you
+should be able to &ldquo;compile&rdquo; your resource using</p>
+
+<pre><code class="r">value &lt;- project$resource(&quot;relative/path/to/resource.R&quot;)
+</code></pre>
+
+<p>For example, if we had</p>
+
+<pre><code class="r"># relative/path/to/resource.R
+x &lt;- 1
+y &lt;- 2
+x + y
+</code></pre>
+
+<p>then <code>value</code> above would be <code>3</code>. However, as we will see,
+the <code>project$resource</code> caller is capable of much more than
+<a href="http://www.inside-r.org/r-doc/base/source">sourcing a file</a>.</p>
+
           </div>
 
           <div class="code">
@@ -506,7 +227,10 @@ default_tests_environment_preprocessor <- function(director, source_args, source
 #'    If this directory does not define a (relative) \code{"config/application.R"} 
 #'    file, the parent directories of \code{filepath} will be traversed
 #'    until such a file is found, or the function will error.
+#'    By default, the current directory.
 #' @param ... Additional arguments used internally.
+#' @param root. logical. Whether or not this is a root-level engine,
+#'    by default \code{TRUE}.
 #' @export
 #' @note The syberia package will maintain an internal cache of engines.
 #'    Therefore, calling \code{syberia_engine} twice will retrieve the
@@ -514,31 +238,131 @@ default_tests_environment_preprocessor <- function(director, source_args, source
 #'    environment object in the syberia package namespace.
 #' @return The \code{\link[director]{director}} object responsible for
 #'    managing the engine.
-syberia_engine <- function(filepath, ...) {
-  UseMethod("syberia_engine")
+syberia_engine <- function(filepath = getwd(), ..., root. = TRUE) {
+  project <- syberia_engine_(filepath, ...)
+  if (isTRUE(root.)) {
+    .syberia_env$active_project <- project
+  }
+  project
 }
 
+#' @rdname syberia_engine
 #' @export
-syberia_engine.pre_engine <- function(filepath, ...) {
+syberia_project <- syberia_engine
+
+#' The current active Syberia project.
+#'
+#' @return A \code{syberia_engine} object or \code{NULL}.
+#' @export
+active_project <- function() {
+  .syberia_env$active_project
+}
+
+#' @rdname active_project
+#' @name project
+#' @export
+makeActiveBinding("project", function() active_project(), env = environment())
+
+#' Compile a resource in the active syberia project.
+#'
+#' @seealso \code{\link{active_project}}
+#' @name resource
+#' @export
+makeActiveBinding("resource", function() active_project()$resource, env = environment())
+
+syberia_engine_ <- function(filepath, ...) {
+  UseMethod("syberia_engine_", filepath)
+}
+
+syberia_engine_.pre_engine <- function(filepath, ...) {
   build_engine(filepath)
 }
 
-#' @export
-syberia_engine.character <- function(filepath, cache = TRUE) {
-  traverse_parent_directories(normalizePath(filepath), function(filepath) {
-    if (isTRUE(cache) && has_application_file(filepath)) {
-      .syberia_env[[filepath]] <- .syberia_env[[filepath]] %||% build_engine(filepath)
-    } else {
+syberia_engine_.character <- function(filepath, ...) {
+  syberia_engine_character(filepath, ...)
+}
+
+syberia_engine_character <- function(filepath, cache = TRUE) {</span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <p>If a user gives <code>~/foo/bar/baz</code> as the path and the project&#39;s
+root is in fact <code>~/foo</code> (in other words, if they give a file or subdirectory 
+in the project), this should be inferrable. We traverse
+the parent directories until we hit the root of the file system
+to see if we are in a syberia engine</p>
+
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer">  traverse_parent_directories(normalizePath(filepath, mustWork = FALSE), function(filepath) {</span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <p>If we are caching the precomputed <code>syberia_engine</code> object, simply fetch
+it from the <code>.syberia_env</code> helper environment.                              </p>
+
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer">    if (isTRUE(cache) && has_application_file(filepath)) {</span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <p>If it is not cached, call <code>build_engine</code> on the directory.</p>
+
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer">      .syberia_env[[filepath]] <- .syberia_env[[filepath]] %||% build_engine(filepath)
+    } else if (has_application_file(filepath)) {
       build_engine(filepath)
-    }
-  }, error = sprintf("No syberia engine found at %s", sQuote(crayon::red(filepath))))
-}
+    }</span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <p>If we did not find a syberia engine, we just crash here.</p>
 
-extensions <- c('.R', '.r', '/application.R', '/application.r')
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer">  }, error = sprintf("No syberia engine found at %s", sQuote(crayon::red(filepath))))
+}
+</span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <p>A syberia engine with root <code>root</code> is, by definition, a directory of
+R files containing the file <code>root/config/application.R</code> or any variation
+thereof (e.g., <code>root/config/application/application.r</code>). This is how we
+recognize the engine.</p>
+
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer">extensions <- c(".R", ".r", "/application.R", "/application.r")
 has_application_file <- function(filepath) {
-  any(file.exists(paste0(file.path(filepath, 'config', 'application'), extensions)))
+  any(file.exists(paste0(file.path(filepath, "config", "application"), extensions)))
 }
 
+#' Build a syberia engine.
+#'
+#' @param buildable character. A file path from which to build the engine.
 #' @export
 build_engine <- function(buildable) {
   UseMethod("build_engine")
@@ -548,85 +372,300 @@ build_engine <- function(buildable) {
 build_engine.pre_engine <- function(buildable) {
   dir <- engine_dir(buildable$prefix)
   if (!file.exists(dir)) buildable$builder(dir)
-  syberia_engine(dir, cache = FALSE)
+  syberia_engine(dir, cache = FALSE, root. = FALSE)
 }
 
 #' @export
-build_engine.character <- function(buildable) {
-  # bootstrap_engine(director::director(buildable))
-  bootstrap_engine(syberia_engine_class$new(buildable))
+build_engine.character <- function(buildable) {</span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <p>To build an engine, we bootstrap an otherwise bare 
+<code>syberia_engine</code> R6 object. Bootstrapping an engine
+is explained below.</p>
+
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer">  bootstrap_engine(syberia_engine_class$new(buildable))
 }
 
 engine_dir <- function(dir) {
   file.path(engine_location(), dir)
 }
+</span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <p>The location where Syberia will keep copies of downloaded engines.</p>
 
-engine_location <- function() {
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer">engine_location <- function() {
   path <- engine_location_path()
-  if (!file.exists(path)) {
-    if (!dir.create(path, FALSE, TRUE)) {
-      stop(sprintf(paste0("Syberia needs a directory in which to place the code for ",
-           "dependencies. Please ensure %s is writable, or set a ",
-           "different path in the %s environment variable or ",
-           "the %s global option (using %s)."),
-           sQuote(crayon::red(path)),
-           sQuote(crayon::yellow("SYBERIA_ENGINE_LOCATION")),
-           sQuote(crayon::yellow("syberia.engine_location")),
-           sQuote(crayon::magenta("options(syberia.engine_location = 'some/dir')"))))
+  if (!file.exists(path)) {</span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <p>Ensure we can actually create the engine storage location.</p>
+
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer">    if (!dir.create(path, FALSE, TRUE)) {
+      stop(m("engine_location_mismatch", path = path), call. = FALSE)
     }
   }
   path
 }
+</span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <p>By default, Syberia will store engine code in
+<code>~/.R/.syberia/engines</code>.</p>
 
-engine_location_path <- function() {
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer">engine_location_path <- function() {
   Sys.getenv("SYBERIA_ENGINE_LOCATION") %|||%
   getOption("syberia.engine_location", "~/.R/.syberia/engines")
 }
+</span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <p>To build an engine, we bootstrap an otherwise bare 
+<code>syberia_engine</code> R6 object. Bootstrapping an engine
+consists of</p>
 
-bootstrap_engine <- function(engine) {
+<ul>
+<li>Registering preprocessors for <code>config/boot</code> and <code>config/engines</code>.</li>
+<li>Registering a parser for <code>config/engines</code>.</li>
+<li>Executing <code>config/engines</code> followed by <code>config/boot</code>.</li>
+<li>Ensure that the ensure has no conflicting resources with any other engine.</li>
+<li>Set the cache entry <code>bootstrapped</code> on the engine to indicate it is built.</li>
+</ul>
+
+<p>The notion of preprocessor and parser belongs to
+<a href="https://github.com/syberia/director">director</a>. In fact, every <code>syberia_engine</code>
+inherits from <code>director</code>, so every <code>syberia_engine</code> has at least the same
+capabilities as a <code>director</code> object. (Rails experts may notice the similarity
+between Syberia engines and directors, and Rails engines and railties.)</p>
+
+<p>Registering a preprocessor means we do <em>additional stuff</em> before sourcing
+that file. For example, in <code>config/engines</code>, we provide a helper function
+called <code>engine</code> for registering subengines. Registering a parser means we
+do additional stuff <em>after</em> preprocessing and sourcing that file. For example,
+in <code>config/engines</code> we need to actually build and mount the engines referred
+to in the fil with the <code>engine</code> helper function.</p>
+
+<p>In order to avoid the <a href="https://en.wikipedia.org/wiki/Multiple_inheritance">diamond problem</a>,
+Syberia ensures that engines do not share resources <em>unless</em> they come from
+a common base engine. This is a technical issue that will eventually be
+explained in a more thorough whitepaper. (For the confused CS students asking
+why I couldn&#39;t have simply made engines form a <a href="https://en.wikipedia.org/wiki/Directed_acyclic_graph">DAG</a>
+instead of a possibly cyclic ## graph&ndash;the short answer is that engines need to
+trivially modularizable while ## retaining the power to refer to parent engine
+resources dynamically and just-in-time. I may very well regret this decision.)</p>
+
+<p>Each <code>director</code>, and by proxy <code>syberia_engine</code>, has an internal cache for
+memoising run-time state while the R process is running (this is different
+from a <code>director</code>&#39;s <em>registry</em>, which captures persistent cross-session
+state on disk). We simply set the <code>bootstrapped</code> key to <code>TRUE</code> so we can
+check for it later.</p>
+
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer">bootstrap_engine <- function(engine) {
   if (isTRUE(engine$cache_get("bootstrapped"))) return(engine)
-  engine$register_preprocessor('config/boot',    boot_preprocessor)
-  engine$register_preprocessor('config/engines', engine_preprocessor)
-  engine$register_parser      ('config/engines', engine_parser)
-  if (engine$exists("config/engines")) engine$resource("config/engines")
-  if (engine$exists("config/boot"))    engine$resource("config/boot")
+  engine$register_preprocessor("config/boot",    boot_preprocessor)
+  engine$register_preprocessor("config/engines", engine_preprocessor)
+  engine$register_parser      ("config/engines", engine_parser)
+  
+  exists <- function(...) engine$exists(..., parent. = FALSE, children. = FALSE)
+  if (exists("config/engines")) engine$resource("config/engines")
+  if (exists("config/boot"))    engine$resource("config/boot")
+
+  # Check for duplicate resources in mounted child engines.
+  engine$find(check_duplicates. = TRUE, children. = TRUE, tag_engine. = TRUE)
   engine$cache_set("bootstrapped", TRUE)
   engine
 }
+</span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <p>The <code>boot_preprocessor</code> is referred to above in the <code>boostrap_engine</code> function.
+We are saying that the <code>config/boot</code> file should have access to
+the <code>director</code> object, and nothing more.</p>
 
-boot_preprocessor <- function(source, source_env, director) {
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer">boot_preprocessor <- function(source, source_env, director) {
   source_env$director <- director
   source()
 }
+</span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <p>The <code>config/engines</code> file is an epsilon harder. Basically, we use
+the <code>engine</code> helper function to record the user&#39;s requested engine
+mounting until we get to the parser below.</p>
 
-engine_preprocessor <- function(source, source_env, preprocessor_output) {
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer">engine_preprocessor <- function(source, source_env, preprocessor_output, director) {
+  if (isTRUE(director$cache_get("bootstrapped"))) return()
+
   preprocessor_output$engines <- new.env(parent = emptyenv())
   source_env$engine <- function(name, ...) {
     preprocessor_output$engines[[name]] <- list(...)
   }
   source()
 }
+</span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <p>Now that we have collected the engines to be mounted into the <code>preprocessor_output</code>
+helper (which also came from <a href="https://github.com/syberia/director">director</a>),</p>
 
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer"># 
 engine_parser <- function(director, preprocessor_output) {
   if (isTRUE(director$cache_get("bootstrapped"))) return()
+</span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <p>For each engine mentioned using the <code>engine</code> helper in <code>config/engines</code>,
+we <em>register</em> the engine. This means that we establish member variables
+on the respective <code>syberia_engine</code> objects that allow them to understand
+the topology: the parent engine knows about its children, and each child
+knows about its parent. Syberia is all about family.</p>
 
-  for (engine in ls(preprocessor_output$engines, all = TRUE)) {
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer">  for (engine in ls(preprocessor_output$engines, all = TRUE)) {
     register_engine(director, engine, parse_engine(preprocessor_output$engines[[engine]]),
                     mount = isTRUE(preprocessor_output$engines[[engine]]$mount))
   }
+</span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <p>When we use <code>devtools::load_all</code> on director, it loads a symbol called
+<code>exists</code>; we use explicit base namespacing to prevent conflicts during development.</p>
 
-  if (exists(".onAttach", envir = input, inherits = FALSE)) {
-    onAttach <- input$.onAttach
-    environment(onAttach) <- list2env(
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer">  if (base::exists(".onAttach", envir = input, inherits = FALSE)) {</span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <p>A little additional trick is that the user could have specified
+an <code>.onAttach</code> function in the <code>config/engines</code> file. If this exists,
+we store it in the <code>syberia_engine</code> cache and later invoke it.</p>
+
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer">    onAttach <- input$.onAttach
+
+    if (!is.function(onAttach)) {
+      stop(m("onattach_failure", root = director$root(), klass = class(onAttach)[1L]),
+           call. = FALSE)
+    }
+</span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <p>We use <code>list2env</code> to &ldquo;inject&rdquo; the <code>director</code> local variable into the 
+scope of the <code>onAttach</code> hook.</p>
+
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer">    environment(onAttach) <- list2env(
       list(director = director),
-      parent = environment(onAttach)
+      parent = environment(onAttach) %||% baseenv() 
     )
     director$cache_set(".onAttach", onAttach)
   }
   NULL
 }
+</span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <p>Registering an engine means making the parent aware of its child
+and the child aware of its parent. Mounting the engine means 
+we will be treating a collection of engines, each in potentially
+very different directories on the file system, as <em>one giant project</em>.
+This allows us to pull out a subset of Syberia resources and
+&ldquo;enginify&rdquo; them with ease.</p>
 
-register_engine <- function(director, name, engine, mount = FALSE) {
+<p>Although Syberia does face a few <a href="https://en.wikipedia.org/wiki/Multiple_inheritance#The_diamond_problem">theoretical challenges</a>,
+these have solutions, and the end result is that given a Syberia
+project with <code>N</code> resources, there are <code>2^N</code> possible engines extractable
+from that project: one for <em>each subset of resources</em>. One of Syberia&#39;s goals
+is to make it as easy as possible to pull out your work so others
+can re-use it.</p>
+
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer">register_engine <- function(director, name, engine, mount = FALSE) {
   # TODO: (RK) Replace with $engines private member after R6ing.
   if (!director$cache_exists("engines")) {
     director$cache_set("engines", new.env(parent = emptyenv()))
@@ -636,31 +675,85 @@ register_engine <- function(director, name, engine, mount = FALSE) {
 
   director$register_engine(name, engine, mount = mount)
 
-  if (engine$cache_exists(".onAttach")) {
-    engine$cache_get(".onAttach")(director)
-  }
+  if (engine$cache_exists(".onAttach")) {</span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <p>This is where we invoke the <code>.onAttach</code> hook registered in
+the <code>engine_parser</code>.</p>
 
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer">    engine$cache_get(".onAttach")(director)
+  }
 }
 
-parse_engine <- function(engine_parameters) {
-  engine_parameters$type <- engine_parameters$type %||% "github"
+parse_engine <- function(engine_parameters) {</span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <p>By default, download engines from GitHub.</p>
+
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer">  engine_parameters$type <- engine_parameters$type %||% "github"
 
   if (!is.simple_string(engine_parameters$type)) {
     stop(sprintf("When defining an engine, please provide a string for the %s",
                  sQuote("type")), call. = FALSE)
   }
 
-  parser <- paste0("parse_engine.", engine_parameters$type)
-  if (!exists(parser, envir = getNamespace("syberia"), inherits = FALSE)) {
+  parser <- paste0("parse_engine.", engine_parameters$type)</span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <p>When we use <code>devtools::load_all</code> on director, it loads a symbol called
+<code>exists</code>; we use explicit base namespacing to prevent conflicts during development.</p>
+
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer">  if (!base::exists(parser, envir = getNamespace("syberia"), inherits = FALSE)) {
     stop(sprintf("Cannot load an engine of type %s", 
                  sQuote(crayon::red(engine_parameters$type))))
   }
   syberia_engine(get(parser, envir = getNamespace("syberia"))(engine_parameters),
-                 cache = FALSE)
+                 cache = FALSE, root. = FALSE)
 }
 
-parse_engine.github <- function(engine_parameters) {
-  repo    <- engine_parameters$repo %||% engine_parameters$repository
+parse_engine.github <- function(engine_parameters) {</span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <p>GitHub-derived engines need to provide a <code>repo</code> and <code>version</code> (by default &ldquo;master&rdquo;).
+For example, the following indicates we wish to load the &ldquo;bobbleheads&rdquo;
+engine from GitHub &ldquo;jimbob/bobbleheads.sy&rdquo; off the master branch.</p>
+
+<pre><code class="r"># config/engines.R
+engine(&quot;bobbleheads&quot;, type = &quot;github&quot;, repo = &quot;jimbob/bobbleheads.sy&quot;)
+</code></pre>
+
+<p>Syberia will download and cache the engine.</p>
+
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer">  repo    <- engine_parameters$repo %||% engine_parameters$repository
+  # TODO: (RK) Checking for updates?
   version <- engine_parameters$version %||% "master"
   stopifnot(is.simple_string(repo))
 
@@ -670,60 +763,44 @@ parse_engine.github <- function(engine_parameters) {
       stopifnot(status == 0)
     })
 }
+</span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <p>Putting the following in <code>config/engines.R</code> indicates we wish
+to load the &ldquo;bobbleheads&rdquo; engine from GitHub
+&ldquo;jimbob/bobbleheads.sy&rdquo; off the master branch.</p>
 
-parse_engine.local <- function(engine_parameters) {
+<pre><code class="r"># config/engines.R
+engine(&quot;bobbleheads&quot;, type = &quot;local&quot;, path = &quot;~/dev/bobbleheads&quot;)
+</code></pre>
+
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer">parse_engine.local <- function(engine_parameters) {
   path <- engine_parameters$path %||% stop("Please provide an engine path")
   if (!file.exists(path)) stop("The path ", sQuote(path), " does not exist.")
   path
 }
 
-pre_engine <- function(prefix, builder) {
-  structure(list(prefix = prefix, builder = builder), class = "pre_engine")
-}
-#
-#syberia_engine_instance <- function(director) {
-#  structure(list(director = director), class = "syberia_engine")
-#}
-#
+pre_engine <- function(prefix, builder) {</span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <p>Build a <code>pre_engine</code> S3 object.</p>
 
-#`$.syberia_engine` <- function(engine, method) {
-#  if (identical(method, "exists")) syberia_engine_exists(engine)
-#  else if (identical(method, "resource")) syberia_engine_resource(engine)
-#  else eval.parent(bquote(`$`(.(substitute(engine))[['director']], .(method))))
-#}
-#
-#syberia_engine_exists <- function(engine) {
-#  force(engine)
-#  function(...) {
-#    if (!engine[['director']]$exists(...)) {
-#      for (subengine in ls(engine[['director']]$cache_get("engines"), all = TRUE)) {
-#        if (engine[['director']]$cache_get("engines")[[subengine]]$exists(...)) {
-#          return(TRUE)
-#        }
-#      }
-#    }
-#    FALSE
-#  }
-#}
-#
-#syberia_engine_resource <- function(engine) {
-#  force(engine)
-#  function(name, ...) {
-#    if (!engine[['director']]$exists(name)) {
-#      for (subengine in ls(engine[['director']]$cache_get("engines"), all = TRUE)) {
-#        subdirector <- engine[['director']]$cache_get("engines")[[subengine]]
-#        if (subdirector$exists(name)) {
-#          return(subdirector$resource(name, ...))
-#        }
-#      }
-#    }
-#    engine$resource(name, ...)
-#  }
-#}
-#
-#print.syberia_engine <- function(x, ...) {
-#  print(x$director)
-#}
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer">  structure(list(prefix = prefix, builder = builder), class = "pre_engine")
+}
 
 #' Whether to exclude a syberia engine from being used for resourcing.
 #'
@@ -756,7 +833,29 @@ syberia_engine_class <- R6::R6Class("syberia_engine",
       if (isTRUE(mount)) engine$.set_parent(self)
     },
 
-    resource = function(name, ..., parent. = TRUE, children. = TRUE, exclude. = NULL, defining_environment. = parent.frame()) {</span></code>
+    resource = function(name, ..., parent. = TRUE, children. = TRUE,
+                        exclude. = NULL, defining_environment. = parent.frame(),
+                        engine) {
+      if (!missing(engine)) {
+        if (!is.simple_string(engine)) {
+          stop("When sourcing a resource, please pass a string to the ",
+               sQuote("engine"), " parameter.")
+        }
+        if (!is.element(engine, names(self$.engines))) {
+          stop("There is no engine called ", sQuote(engine), ".")
+        }
+        engine_obj <- self$.engines[[engine]]$engine
+        if (isTRUE(engine_obj$mount)) {
+          stop("Explicit engine specification during resource sourcing is ",
+               "only allowed on unmounted engines. The ", sQuote(engine), 
+               " engine is a mounted engine.")
+        }
+        if (!engine_obj$exists(name, ..., parent. = FALSE)) {
+          stop("No resource ", sQuote(name), " in engine ", sQuote(engine), ".")
+        }
+        return(engine_obj$resource(name, ..., parent. = FALSE))
+      }
+</span></code>
             </pre>
           </div>
         </div>
@@ -770,7 +869,8 @@ syberia_engine_class <- R6::R6Class("syberia_engine",
             <pre>
               <code class="R"><span class="spacer">      if (isTRUE(parent.) && !is.null(self$.parent)) {
         if (self$.parent$exists(name, parent. = TRUE, children. = TRUE, exclude. = list(self$root()))) {
-          return(self$.parent$resource(name, ..., defining_environment. = defining_environment.))
+          return(self$.parent$resource(name, exclude. = list(self$root()), ...,
+                                       defining_environment. = defining_environment.))
         }
       }
 </span></code>
@@ -804,7 +904,9 @@ syberia_engine_class <- R6::R6Class("syberia_engine",
             engine <- engine$engine
             if (!any(vapply(exclude., should_exclude, logical(1), engine))) {
               if (engine$exists(name, parent. = FALSE, children. = TRUE, exclude. = exclude.)) {
-                return(engine$resource(name, ..., defining_environment. = defining_environment.))
+                return(engine$resource(name, parent. = FALSE, children. = TRUE,
+                                       exclude. = c(engine$root(), exclude.),
+                                       ..., defining_environment. = defining_environment.))
               }
             }
           }
@@ -823,6 +925,78 @@ syberia_engine_class <- R6::R6Class("syberia_engine",
           <div class="code">
             <pre>
               <code class="R"><span class="spacer">      super$resource(name, ..., defining_environment. = defining_environment.)
+    },
+
+    find = function(..., parent. = FALSE, children. = FALSE, exclude. = NULL,
+                    check_duplicates. = FALSE, tag_engine. = FALSE) {</span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <p>Check the parent engines for resources.</p>
+
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer">      resources <- character(0)
+      if (isTRUE(parent.) && !is.null(self$.parent)) {
+        resources <- self$.parent$find(..., parent. = TRUE, children. = TRUE, exclude. = list(self$root()))
+      }
+</span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <p>Check the current engines for resources.</p>
+
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer">      self_resources <- super$find(...)
+      if (is.character(tag_engine.)) {
+        names(self_resources) <- rep(tag_engine., length(self_resources))
+      }
+      resources <- c(self_resources, resources)
+      resources <- resources[!duplicated(resources)]
+</span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <p>Check the subengines for resources.</p>
+
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer">      children_resources <- vector("list", length(self$.engines))
+      if (isTRUE(children.)) {
+        for (i in seq_along(self$.engines)) {
+          name   <- names(self$.engines)[i]
+          engine <- self$.engines[[i]]
+          if (isTRUE(engine$mount)) {
+            engine <- engine$engine
+            if (!any(vapply(exclude., should_exclude, logical(1), engine))) {
+              tag <- if (!identical(tag_engine., FALSE)) name else FALSE
+              children_resources[[i]] <- engine$find(..., parent. = FALSE,
+                children. = TRUE, exclude. = exclude., tag_engine. = tag)
+              names(children_resources)[i] <- name
+            }
+          }
+        }
+      }
+
+      if (isTRUE(check_duplicates.)) {
+        children_resources <- Filter(Negate(is.null), children_resources)
+        detect_duplicate_resources(children_resources)
+      }
+      resources <- c(recursive = TRUE, c(unname(children_resources), list(resources)))
+      resources[!duplicated(resources)]
     },
 
     exists = function(resource, ..., parent. = TRUE, children. = TRUE, exclude. = NULL) {</span></code>
@@ -886,13 +1060,183 @@ syberia_engine_class <- R6::R6Class("syberia_engine",
   private = list(
   )
 )
+
+detect_duplicate_resources <- function(resource_list) {
+  if (length(unique(c(recursive = TRUE, resource_list))) !=
+      sum(vapply(resource_list, length, numeric(1)))) {
+    # Allow for comparison of engine-resource pairs.
+    engined_resource_list <- lapply(resource_list, function(resources) {
+      setNames(Map(paste, names(resources), resources, sep = "\1"), resources)
+    })
+
+    pairs <- combn(length(resource_list), 2)
+    conflict_list <- Filter(Negate(is.null), apply(pairs, 2, function(pair) {
+      same_subengine <- engined_resource_list[[pair[1]]][
+        engined_resource_list[[pair[1]]] %in% engined_resource_list[[pair[2]]]]
+      common <- setdiff(intersect(resource_list[[pair[1]]], resource_list[[pair[2]]]),
+                        names(same_subengine))
+      if (length(common) > 0) {
+        list(
+          engines   = names(resource_list)[pair],
+          resources = common
+        )
+      }
+    }))
+
+    if (length(conflict_list) > 0L) {
+      conflicts <- do.call(paste, lapply(conflict_list, function(conflict) {
+        paste0("\n\nEngine ", crayon::red(conflict$engines[1]), " and ",
+               crayon::red(conflict$engines[2]), " share:\n",
+          paste(collapse = "\n", paste(" *", vapply(conflict$resources, crayon::yellow, character(1)))))
+      }))
+
+      stop("Mounted child engines have conflicting resources. Please mount ",
+           "at a different root or remove the conflicts: ", conflicts, "\n\n")
+    }
+  }
+}
 </span></code>
             </pre>
           </div>
         </div>
         <div class="section">
           <div class="markdown markdown-body">
-            <h1>syberia-package.r</h1>
+            <h1>messages.R</h1>
+
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer"></span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <p>A dictionary of messages used by the package.
+We separate these into its own file to avoid cluttering
+the R code with a multitude of strings.</p>
+
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer">messages <- list(
+  test_engine_type_error = c(
+    "Please pass a ", sQuote(crayon::yellow("syberia_engine")), " object ",
+    "to the ", sQuote(crayon::yellow("test_engine")), " function."
+  ),
+  
+  test_hook_no_engine = c(
+    "To fetch the {{{type}}} hook for a project, please pass in a syberia_engine ",
+    "object (the syberia_engine for the syberia project). Instead I got ",
+    "an object of class {{{klass}}}."
+  ),
+
+  test_hook_invalid_format = c(
+    "Test {{{type}}} hooks must be a function or a list of functions.\n\nIn ",
+    "{{{filename}}}, ensure that ",
+    "you have ", sQuote(crayon::yellow("{{{type}}} <- some_function")),
+    " as right now it's an object of class ",
+    sQuote(crayon::red("{{{klass}}}"))
+  ),
+
+  test_hook_arity_error = c(
+    "Test {{{type}}} hooks must all be functions that take at least one ",
+    "argument.\n\nThe first argument will be an environment that has one ",
+    "key, ", sQuote("project"), ". In {{{filename}}}",
+    " ensure your ", sQuote(crayon::yellow("{{{type}}}")),
+    " local variable meets this constraint."
+  ),
+
+  engine_location_mismatch = c(
+    "Syberia needs a directory in which to place the code for ",
+    "dependencies. Please ensure ", sQuote(crayon::red("{{{path}}}")),
+    " is writable, or set a different path in the ",
+    sQuote(crayon::yellow("SYBERIA_ENGINE_LOCATION")), " environment variable or ",
+    "the ", sQuote(crayon::yellow("syberia.engine_location")), " global option (",
+    "using ", sQuote(crayon::magenta("options(syberia.engine_location = \"some/dir\")")), ")."
+  ),
+
+  onattach_failure = c(
+    "The ", sQuote(crayon::yellow(".onAttach")), " hook in the ",
+    sQuote(crayon::yellow("{{{root}}}")), " engine must be a *function*. ",
+    "Instead, I got a {{{klass}}}."
+  )
+)
+</span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <p>Cleanse the message a little after fetching it from the <code>messages</code> list.</p>
+
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer">msg <- function(name) {
+  stopifnot(name %in% names(messages))
+</span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <p>The <code>gsub</code> will squish multiple spaces into a single space,
+while the <code>paste(collapse = &quot;&quot;, ...)</code> usage will ensure we
+can take vectors of characters in the above <code>messages</code> list.</p>
+
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer">  paste(collapse = "", gsub("[ ]+", " ", messages[[name]]))
+}
+</span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <p>We use the <a href="https://github.com/edwindj/whisker">whisker</a> templating
+engine to inject any additional values into the message string.
+For example,</p>
+
+<pre><code class="r">m(&quot;parse_mungepiece_dual_error&quot;, error = &quot;Bloop&quot;)
+</code></pre>
+
+<p>would return the appropriate error with the string &ldquo;Bloop&rdquo; injected
+in the appropriate place.</p>
+
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer">m <- function(name, ...) {</span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <p>Note the use of <a href="http://www.inside-r.org/r-doc/base/do.call"><code>do.call</code></a>,
+a very handy R metaprogramming tool when we do not know exactly which 
+arguments we will pass.</p>
+
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer">  do.call(whisker::whisker.render, list(msg(name), list(...)))
+}
+</span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <h1>package.syberia.R</h1>
 
           </div>
 
@@ -909,15 +1253,31 @@ syberia_engine_class <- R6::R6Class("syberia_engine",
 
           <div class="code">
             <pre>
-              <code class="R"><span class="spacer">#' Syberia provides an opinionated unified framework for
+              <code class="R"><span class="spacer">#' Syberia is a development meta-framework for R.
+#'
+#' In its original formulation, in conjunction with
+#' \href{http://github.com/syberia/modeling.sy}{the modeling engine},
+#' Syberia serves as a machine learning classifier development framework.
+#'
+#' The modeling engine provides an opinionated unified framework for
 #' fast iteration on classifier development and deployment. It is
 #' founded on convention over configuration and aims to solve the
 #' problems of classifier-specific data preparation and
 #' classifier-specific modeling parameters.
 #'
-#' @name syberia
+#' The more general vision for Syberia is still in progress, but aims
+#' to unify the currently disparate realms of R packages, script codebases,
+#' Shiny dashboards, R web apps, and reproducible analysis. In the
+#' viewpoint of the author, R is syntactic sugar around LISP, which
+#' enables arbitrary computation; Syberia is an attempt to support this
+#' conjecture by allowing the construction of arbitrary software 
+#' projects within the R programming language, thereby finally outgrowing
+#' its long-overdue misconception as a statistical tool.
+#'
+#' @name syberia;
 #' @docType package
-#' @import testthat Ramd stagerunner statsUtils mungebits tundra syberiaMungebits syberiaStructure syberiaStages director objectdiff R6
+#' @author Robert Krzyzanowski
+#' @import testthat Ramd stagerunner statsUtils mungebits tundra syberiaMungebits syberiaStructure syberiaStages director objectdiff R6 whisker
 NULL
 </span></code>
             </pre>
@@ -925,19 +1285,20 @@ NULL
         </div>
         <div class="section">
           <div class="markdown markdown-body">
-            <p>An environment used for caching some syberia-managed objects, like directors.</p>
+            <p>An environment used for caching some Syberia-managed objects, like directors.</p>
 
           </div>
 
           <div class="code">
             <pre>
-              <code class="R"><span class="spacer">.syberia_env <- new.env(parent = emptyenv())</span></code>
+              <code class="R"><span class="spacer">.syberia_env <- new.env(parent = emptyenv())
+</span></code>
             </pre>
           </div>
         </div>
         <div class="section">
           <div class="markdown markdown-body">
-            <h1>tests.R</h1>
+            <h1>test.R</h1>
 
           </div>
 
@@ -949,144 +1310,340 @@ NULL
         </div>
         <div class="section">
           <div class="markdown markdown-body">
-            
+            <p>Like any good development framework, Syberia offers built-in support for
+testing. The primary unit of development in Syberia is the <em>engine</em>.
+All Syberia projects are composed of a collection of engines (each
+potentially depending on vanilla R packages).</p>
+
+<p>This function allows one to run all the <em>tests</em> associated with the engine.
+By default, the files in the <code>test</code> directory of the engine are considered
+tests, and all other files are non-tests.</p>
+
+<p>The convention is straightforward:
+if you have a Syberia resource <code>a/b/c</code> off the root of the project, you
+should have an accompanying test in <code>test/a/b/c</code>. Note we leave out the
+<code>.R</code> extension as the resource may be an <em>idempotent</em> or <em>non-idempotent</em>
+resource. </p>
+
+<p>Idempotent resources are <code>.R</code> files in a directory with the same name
+as the file without extension. For example, <code>test/a/b/c/c.R</code> would be an
+idempotent resource, and helper files like <code>test/a/b/c/helper.R</code> would be
+invisible to the Syberia engine: this encourages clean design and separation
+into helper files as your resource becomes more complex.</p>
+
+<p>Here is an example test. You can look at the accompanying
+<a href="http://github.com/syberia/syberia/tree/master/tests/testthat/projects/test_calculation_pi">helper project</a>.</p>
+
           </div>
 
           <div class="code">
             <pre>
-              <code class="R"><span class="spacer">#' Run all tests in a syberia project.
+              <code class="R"><span class="spacer"># TODO: (RK) Check this is the correct link.</span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <pre><code class="r"># calculations/pi.R
+# Compute pi using a series: http://functions.wolfram.com/Constants/Pi/06/01/01/
+Reduce(`+`, 4 * vapply(seq_len(1000) - 1, function(k) {
+  (-1)^k / (2 * k + 1)
+}, double(1)))
+
+# test/calculations/pi.R
+test_that(&quot;the calculation is close to pi&quot;, {
+  # Note we have access to the testthat package.
+  expect_less_than(abs(resource() - 3.1415926), 1e-3)
+})
+</code></pre>
+
+<p>We can execute the test using <code>test_engine(root)</code> where <code>root</code> is the string
+representing the directory the above files are contained in.</p>
+
+<p>Note that Syberia provides the <code>resource</code> helper to fetch the current resource
+being tested. You could pass a first argument to fetch another resource,
+but if you leave it empty, the default will always be the resource corresponding
+to the tested resources. Thus, if you are in <code>test/calculations/pi</code>, calling
+<code>resource()</code> will build you <code>calculations/pi</code>.</p>
+
+<p>It is possible to add test setup and teardown hooks. This means that before
+the test suite runs, you can add additional conditions to ensure your
+project is working as intended. For example, the author has found it useful
+to add checks for <code>README.md</code> files in all directories to encourage
+the team to always add documentation (or else your test suite breaks!).</p>
+
+<p>To add a test setup hook, simply place a function or a list of functions
+into the <code>setup</code> local variable in the file <code>config/environments/test.R</code>
+(note this is controlled by the <code>config</code> parameter to <code>test_engine</code>.
+Additional hooks are <code>teardown</code> (for when the test suite finishes),
+<code>single_setup</code> (every time a test runs), and <code>single_teardown</code> (every
+time a test finishes). Any functions or lists of functions passed to
+these locals should have only one argument: the received value will be
+an environment containing the key <code>resource</code>, a string representing the
+current resource being tested, and the key <code>project</code>, pointing to the
+<code>syberia_engine</code> object for the project (or engine).</p>
+
+<p>For example, one could include the following configuration file in a syberia
+project.</p>
+
+<pre><code class="r"># config/environments/test.R
+setup    &lt;- function(env) { cat(&quot;Beginning test suite!\n&quot;) }
+teardown &lt;- function(env) { cat(&quot;Ending test suite!\n&quot;) }
+single_setup    &lt;- function(env) {
+  cat(paste(&quot;Testing resource&quot;, env$resource, &quot;\n&quot;)) }
+single_teardown &lt;- function(env) {
+  cat(paste(&quot;Tested resource&quot;, env$resource,  &quot;\n&quot;)) }
+</code></pre>
+
+<p>Running <code>test_engine(...)</code> on this project will cause the first message
+to be printed, then the last two to alternate between each test,
+before finally wrapping up with the second message.</p>
+
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer">#' Run all tests in a syberia project or engine.
 #'
 #' The tests that will be run are all those in the \code{test} subdirectory
-#' of the root of the syberia project.
+#' of the root of the syberia engine, unless otherwise specified.
 #'
-#' By default, no test setup or teardown occurs. That is, there is no code that
-#' is executed before all tests run and after all tests run. However, there do
-#' exist hooks to provide this behavior. This can also be used to perform
-#' additional testing not covered by sourcing all files in the "test/" directory
-#' of the syberia project.
+#' It is possible to introduce additional behavior prior to and after tests.
+#' This can be used to perform additional testing not covered by sourcing
+#' all files in the "test/" directory of the syberia engine.
 #'
 #' To provide a setup or teardown hook, simply place a function or list of
 #' functions in a local variable \code{setup} or \code{teardown}, respectively,
-#' in \code{config/environments/test} relative to the root of the syberia project.
+#' in \code{config/environments/test} relative to the root of the syberia engine,
+#' or pass the relevant \code{setup} or \code{teardown} parameters to this function.
 #'
 #' For example, creating a file \code{config/environments/test.R} with the code
-#' code \code{setup <- function(env) cat("Running all tests.")} will print a message
+#' \code{setup <- function(env) cat("Running all tests.")} will print a message
 #' before all the tests are run. The one parameter the function must take is an
-#' environment which will contain a single key, `director`, pointing to the 
-#' `director` object coming from `syberia_project`.
+#' environment which will contain a single key, \code{director}, pointing to the 
+#' object returned by calling \code{\link{syberia_engine}}.
 #'
-#' @param project director or character. The director for the syberia project.
-#'    If a \code{character}, it will be passed to \code{syberia_project} first.
+#' @param engine syberia_engine. The syberia engine to test.
+#'    If a \code{character}, it will be passed to \code{\link{syberia_engine}} first.
 #' @param base character. Any subdirectory to test specifically. By default,
-#'    the empty string \code{''} which means "test everything".
-#' @seealso \code{\link{syberia_project}}
+#'    \code{"test"}.
+#' @param config character. The relative path to the configuration resource,
+#'    by default \code{"config/environments/test"}.
+#' @param ignored_tests character. The list of tests to ignore, by default
+#'    the local variable \code{ignored_tests} extracted from the configuration
+#'    resource specific by the \code{config} parameter.
+#' @param optional_tests character. The list of tests to ignore, by default
+#'    the local variable \code{optional_tests} extracted from the configuration
+#'    resource specific by the \code{config} parameter.
+#' @param required logical. Whether or not all tests are required to have resources,
+#'    by default \code{TRUE}. If \code{TRUE}, the \code{ignored_tests}
+#'    resources will not be required to have an accompanying test. It is highly
+#'    recommended that all your projects have full test coverage.
+#' @param reporter character. The testthat package test reporter to use. The
+#'    options are \code{c("check", "list", "summary", "minimal", "multi", "rstudio",
+#'    "silent", "stop", "tap", "teamcity")}, with the default being \code{"summary"}.
+#' @seealso \code{\link{syberia_engine}}
 #' @export
 #' @return \code{TRUE} if all tests pass or will error otherwise. Note this
-#'    function uses \code{pblapply} from the \code{pbapply} package to
-#'    represent progress.
-test_project <- function(project = syberia_project(), base = '') {
-  if (is.character(project)) project <- syberia_project(project)
-  test_path <- file.path(project$root(), 'test')
-  tests <- project$find(base = gsub("\\/$", "", file.path('test', base)))
-
-  ignored_tests <- file.path('test', test_environment_config(project)$ignored_tests %||% character(0))
-  all_tests <- tests
-  tests <- Filter(function(x) !director:::any_is_substring_of(x, ignored_tests), tests)
-  ignored_test_paths <- setdiff(all_tests, tests)
-
-  ensure_resources_have_tests(project, tests, ignore = ignored_test_paths)
-
-  # TODO: (RK) Figure out how to run this in an environment that has testthat
-  # without attaching to the global environment.
-  load_test_packages()
-  
-  ensure_no_global_variable_pollution(check_options = TRUE, {
-    test_hook(project, type = 'setup')$run() # Run the test setup hook stageRunner
-
-    # Run all tests
-    # TODO: (RK) Don't rely on pblapply
-    old_pboptions <- options('pboptions')
-    on.exit(options(old_pboptions))
-    single_setup <- test_hook(project, type = 'single_setup')
-    single_teardown <- test_hook(project, type = 'single_teardown')
-    requireNamespace("pbapply")
-    apply_function <- if ("pbapply" %in% installed.packages()[,1]) pbapply::pblapply else lapply
-    apply_function(tests, function(t) {
-      ensure_no_global_variable_pollution(check_options = TRUE, {
-        single_setup$.context$resource <- t
-        single_setup$run()
-        suppressMessages(project$resource(t, recompile = TRUE, recompile. = TRUE))
-        single_teardown$.context$resource <- t
-        single_teardown$run()
-      }, desc = paste('running', t))
-    })
-
-    # TODO: (RK) Populate teardown stageRunner environment with test info?
-    # Could be useful to some people.
-    test_hook(project, type = 'teardown')$run() # Run the test teardown hook stageRunner
-  }, desc = "running this project's tests (this is bad and should never happen)")
-
-  invisible(TRUE)
-}
-
-load_test_packages <- function() {
-  Ramd::packages('testthat')
-  if (!is.element('testthatsomemore', installed.packages()[,1])) {
-    install.packages('robertzk/testthatsomemore')
+#'    function uses \code{pblapply} from the pbapply package to
+#'    represent progress if available.
+test_engine <- function(engine = syberia_engine(), base = "test",
+                        config = file.path("config", "environments", "test"),
+                        ignored_tests = ignored_tests_from_config(engine, base, config),
+                        optional_tests = optional_tests_from_config(engine, base, config),
+                        required = TRUE, reporter = c("summary", "check", "list",
+                          "minimal", "multi", "rstudio", "silent", "stop", "tap", "teamcity")[1L]) {
+  if (is.character(engine)) {
+    engine <- syberia_engine(engine)
   }
+
+  if (!is(engine, "syberia_engine")) {
+    stop(m("test_engine_type_error"))
+  }
+
+  force(ignored_tests)</span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <p>We will try to identify the resources to test by grabbing all
+non-test (i.e., not in the <code>test</code> directory) resources from the engine
+and also excluding those given by <code>ignored_tests</code>.</p>
+
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer">  tests <- find_tests(engine, base, ignored_tests)
+</span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <p>If testing is required for the engine (i.e., every resource needs
+an accompanying test) fail unless the condition is satisfied.</p>
+
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer">  if (isTRUE(required)) {
+    ensure_resources_are_tested(engine, tests, optional_tests, base)
+  }
+
+  test_resources(engine, tests$active, config, reporter = reporter)
 }
 
-#' Check that all mandatory tested resources have tests.
+#' Run the tests on a given set of resources.
 #'
-#' @param project director or character. The director for the syberia project.
-#' @param tests character. The tests to check. By default, all tests in the project.
-#' @param ignore character. A vector of tests to ignore (and not check for presence).
-ensure_resources_have_tests <- function(project, tests = project$find(base = 'test'), ignore = character(0)) {
-  controllers <- project$find('lib/controllers/')
+#' @param engine syberia_engine. The engine to run the tests on.
+#' @param tests character. The character vector of resources to test.
+#' @param ... Additional arguments to pass to \code{find_test_hook}.
+#' @param reporter character. The test reporter to use.
+#' @return The testthat result summary for this one test run.
+test_resources <- function(engine, tests, ..., reporter) {</span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <p>We ensure testthat and testthatsomemore are installed.</p>
 
-  # Do not consider test controllers -- no meta-tests, heh!
-  controllers <- controllers[!grepl('^\\/lib/controllers/test/', controllers)]
+          </div>
 
-  # Filter down to the controllers that have make tests mandatory
-  # (the ones that aren't will have test <- FALSE)
-  controllers <- setNames(
-    lapply(controllers, function(x) project$resource(x)),
-    controllers)
-  controllers <- names(Filter(function(controller) controller$test, controllers))
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer">  ensure_test_packages()
+</span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <p>The testthat package does not export <code>find_reporter</code>, so we
+grab it <a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/ns-reflect.html">with a trick</a>.</p>
 
-  # Remove the lib/controllers prefix
-  controllers <- gsub("\\/?lib\\/controllers/", "", controllers)
+          </div>
 
-  # Get the routes that match controllers which we are testing.
-  routes <- names(Filter(
-    function(route_controller) is.element(route_controller, controllers),
-    project$cache_get("routes")
-  ))
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer">  reporter <- getNamespace("testthat")$find_reporter(reporter)</span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <p>We are mimicking <a href="https://github.com/hadley/testthat/blob/6cdd17cab674175297e16e12ac5ed29266534390/R/test-files.r#L43">testthat&#39;s <code>test_files</code></a>.</p>
 
-  # Filter down to the resources that contain one of the routes as a substring
-  # (and thus are owned by a controller which makes testing mandatory).
-  resources <- Filter(function(x) substring(x, 1, 5) != 'test/', project$find(''))
-  resources <- gsub('^\\/', '', resources)
-  all_routes <- names(project$cache_get("routes"))
-  unrouted_resources <- Filter(
-    function(x) !director:::any_is_substring_of(x, all_routes), resources)
-  resources <- Filter(function(x) director:::any_is_substring_of(x, routes), resources)
-  resources <- c(unrouted_resources, resources)
+          </div>
 
-  # Remove system resources from consideration.
-  built_in_routes <- c('config', 'etc', 'lib/controllers')
-  exceptions <- c(built_in_routes, test_environment_config(project)$optional_tests)
-  resources <- Filter(
-    function(x) !director:::any_is_substring_of(x, exceptions), resources)
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer">  reporter$start_reporter()
 
-  # Error if any resources don't have tests.
-  # TODO: (RK) Check for tests in subdirectories only?
-  necessary_tests <- file.path('test', resources)
-  missing_tests <- setdiff(necessary_tests, c(tests, ignore))
-  if (length(missing_tests) > 0) {
-    stop(call. = FALSE, "Tests are missing for the following resources:\n\n",
-         crayon::red(paste(gsub('^test/', '', missing_tests), collapse = "\n")))
-  }
+  results <- NULL</span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <p>We would like to error if any global options have been modified,
+or global variables introduced.</p>
+
+<p>Syberia resources should be stateless and not modify global options!</p>
+
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer">  ensure_no_global_variable_pollution(check_options = TRUE, {
+    setup_hook <- find_test_hook(engine, type = "setup", ...)
+    if (!is.null(setup_hook)) setup_hook$run()
+
+    single_setup    <- find_test_hook(engine, type = "single_setup", ...)
+    single_teardown <- find_test_hook(engine, type = "single_teardown", ...)
+    results <- lapply(tests, test_resource, engine = engine, reporter = reporter,
+                      setup = single_setup, teardown = single_teardown)
+  })
+
+  reporter$end_reporter()</span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <p>Again mimicking <a href="https://github.com/hadley/testthat/blob/6cdd17cab674175297e16e12ac5ed29266534390/R/test-files.r#L50">testthat</a>.</p>
+
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer">  invisible(getNamespace("testthat")$testthat_results(results))
+}
+
+ensure_test_packages <- function() {
+  ensure_installed("testthat")
+  ensure_testthatsomemore()
+}
+
+#' Run the tests for a single resource.
+#'
+#' @param engine syberia_engine. The engine to run the test on.
+#' @param resource character. The resource to test.
+#' @param setup stageRunner. A \code{\link[stagerunner]{stageRunner}} to
+#'    execute setup hooks for this test.
+#' @param teardown stageRunner. A \code{\link[stagerunner]{stageRunner}} to
+#'    execute teardown hooks for this test.
+#' @param reporter reporter. A testthat reporter object. 
+#' @return The testthat result summary for this one test run.
+test_resource <- function(engine, resource, setup, teardown, reporter) {
+  result <- NULL
+</span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <p>Each resource itself should not add global variables or pollute options.</p>
+
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer">  ensure_no_global_variable_pollution(check_options = TRUE, {
+    if (!missing(setup) && !is.null(setup)) {
+      setup$.context$resource <- resource
+      setup$run()
+    }
+
+    call_args <- list(resource, recompile = TRUE, recompile. = TRUE)
+    if (!missing(reporter)) {
+      call_args$reporter <- reporter
+    }
+    result <- suppressMessages(do.call(engine$resource, call_args))
+
+    if (!missing(teardown) && !is.null(teardown)) {
+      teardown$.context$resource <- resource
+      teardown$run()
+    }</span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <p>The <code>desc</code> parameters allows us to be specific when we fail:
+it will inform the user the name of the resource that created a global
+variable or modified a global option.</p>
+
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer">  }, desc = paste("running", resource))
+
+  result
 }
 
 #' Fetch the test setup or teardown hook, if any exists.
@@ -1099,71 +1656,188 @@ ensure_resources_have_tests <- function(project, tests = project$find(base = 'te
 #' The seed environment for the stageRunner will contain the director object
 #' of the relevant project in the key \code{director}.
 #'
-#' @param project director or character. The director for the syberia project.
+#' @param engine syberia_engine. The director for the syberia project.
 #' @param type character. Must be \code{'setup'} or \code{'teardown'}, the former
 #'   being the default.
-#' @seealso \code{\link{test_project}}
+#' @param config character. The resource used to fetch configuration.
+#' @seealso \code{\link{test_engine}}
 #' @return a stageRunner that will run the relevant setup or teardown hook(s).
-test_hook <- function(project, type = 'setup') {
-  if (!is.director(project)) {
-    stop("To fetch the ", type, " hook for a project, please pass in a director ",
-         "object (the director for the syberia project). Instead I got ",
-         "an object of class ", class(project)[1])
+find_test_hook <- function(engine, type = "setup", config) {
+  if (!is(engine, "syberia_engine")) {
+    stop(m("test_hook_not_engine", type = type, klass = class(engine)[1L]), call. = FALSE)
   }
 
-  test_environment_path <- 'config/environments/test'
-  if (project$exists(test_environment_path)) {
-    # TODO: (RK) Fix director absolute file paths in $.filename and this hack
-    filename <- director:::strip_root(project$root(),
-                                      project$filename(test_environment_path))
-    hooks <- test_environment_config(project)[[type]] %||% list(force)
+  hooks <- value_from_config(engine, config, type)
+  if (is.null(hooks)) return(NULL)
 
-    # TODO: (RK) Maybe replace this with a new stageRunner method to check 
-    # argument validity? In the future, stageRunner could maybe do more!
-    colored_filename <- sQuote(crayon::blue(filename))
-    if (!is.list(hooks) && !is.function(hooks) && !is.stagerunner(hooks)) {
-      stop("Test ", type, " hooks must be a function or a list of functions.\n\nIn ",
-           colored_filename, ", ensure that ",
-           "you have ", sQuote(crayon::yellow(paste0(type, ' <- some_function'))),
-           " as right now it's an object of class ",
-           sQuote(crayon::red(class(hooks)[1])), call. = FALSE)
-    }
-    if (!is.list(hooks)) hooks <- list(hooks)
+  # TODO: (RK) Maybe replace this with a new stageRunner method to check 
+  # argument validity? In the future, stageRunner could maybe do more!
+  colored_filename <- sQuote(crayon::blue(config))
+  if (!is.list(hooks) && !is.function(hooks) && !stagerunner::is.stagerunner(hooks)) {
+    stop(m("test_hook_invalid_format", type = type, filename = colored_filename,
+           klass = class(hooks)[1L]), call. = FALSE)
+  }
 
-    all_have_correct_arity <- is.stagerunner(hooks) || all(rapply(hooks, how = 'unlist',
-      function(hook) is.function(hook) && length(formals(hook)) > 0))
-    if (!all_have_correct_arity) {
-      stop("Test ", type, " hooks must all be functions that take at least one ",
-           "argument.\n\nThe first argument will be an environment that has one ",
-           "key, ", sQuote('director'), ". In ", colored_filename,
-           " ensure your ", sQuote(crayon::yellow(type)),
-           " local variable meets this constraint.", call. = FALSE)
-    }
+  if (!is.list(hooks)) { hooks <- list(hooks) }
 
-    # Do not give access to global environment to ensure modularity.
-    hook_env <- new.env(parent = parent.env(globalenv()))
-    hook_env$director <- project
+  all_have_correct_arity <- stagerunner::is.stagerunner(hooks) ||
+    all(rapply(hooks, how = "unlist", function(hook) {
+      is.function(hook) && length(formals(hook)) > 0
+    }))
 
-    stageRunner(hook_env, hooks)
-  } else stageRunner(new.env(), list(force))
+  if (!all_have_correct_arity) {
+    stop(m("test_hook_arity_error", type = type, filename = colored_filename,
+           type = type), call. = FALSE)
+  }
+
+  # Do not give access to global environment to ensure modularity.
+  hook_env <- list2env(list(project = engine), parent = parent.env(globalenv()))
+  stagerunner::stageRunner(hook_env, hooks)
 }
 
-#' Get the configuration for the test environment.
+ 
+#' Check that all mandatory tested resources have tests.
 #'
-#' @param project director or character. The director for the syberia project.
-test_environment_config <- function(project) {
-  test_environment_path <- 'config/environments/test'
-  if (!project$exists(test_environment_path)) list()
-  else project$resource(test_environment_path)
-}
+#' @param engine syberia_engine. The engine to check.
+#' @param tests character. The tests to check. Must be a list with keys
+#'     \code{"active"} and \code{"ignored"}.
+#' @param optional character. A character vector of optional tests.
+#' @param base character. The directory containing tests in the project, by
+#'     default \code{"test"}.
+#' @return Nothing, but error if not all resources have tests.
+ensure_resources_are_tested <- function(engine, tests, optional, base = "test") {
+  without_builtin_resources <- function(resources) {</span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <p>We exclude the <code>config</code> and <code>test</code> directories.</p>
 
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer">    resources[substring(resources, 1, 7) != "config/" &
+              substring(resources, 1, 5) != paste0(base, "/")]
+  }
+
+  without_optional_resources <- function(resources) {</span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <p><code>optional</code> resources are actually substring matches!</p>
+
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer">    Filter(function(resource) !any_is_substring_of(resources, optional), resources)
+  }
+
+  all_resources <- without_optional_resources(without_builtin_resources(engine$find()))
+
+  # Error if any resources don't have tests.
+  necessary_tests <- file.path(base, all_resources)
+  missing_tests   <- setdiff(necessary_tests, c(tests$active, tests$ignored))
+  if (length(missing_tests) > 0L) {
+    stop(call. = FALSE, "Tests are missing for the following resources:\n\n",
+         crayon::red(paste(gsub(paste0("^", base, "/"), "", missing_tests), collapse = "\n")))
+  }
+}
+  
+
+find_tests <- function(engine, base, ignored_tests) {
+  all_tests <- engine$find(children. = FALSE, base = gsub("\\/$", "", base)) 
+  tests     <- Filter(function(x) !any_is_substring_of(x, ignored_tests), all_tests)
+  ignored_test_paths <- setdiff(all_tests, tests)
+
+  list(
+    active  = tests,
+    ignored = setdiff(all_tests, tests)
+  )
+}
 </span></code>
             </pre>
           </div>
         </div>
         <div class="section">
           <div class="markdown markdown-body">
-            <h1>utils.r</h1>
+            <p>We don&#39;t expect this to change after the project is loaded, so we can memoise
+the results (store them internally so we don&#39;t have to recompute).
+By default, we will fetch the test configuration from
+<code>config/environments/test</code>, but the location of the configuration file
+itself is configurable (see the <code>config</code> parameter to <code>test_engine</code>).</p>
+
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer">test_environment_configuration <- memoise::memoise(
+  function(engine, path = file.path("config", "environments", "test")) {
+    if (!engine$exists(path, children. = FALSE)) {
+      list()
+    } else {
+      engine$resource(path, children. = FALSE)
+    }
+  }
+)
+</span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <p>If the configuration file, usually <code>config/environments/test.R</code>,
+has a local variable <code>ignored_tests</code>, the tests of the 
+character vector of resource names will not be executed.
+This is useful when certain tests are broken or under development.</p>
+
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer">ignored_tests_from_config <- function(engine, base, config) {
+  file.path(base, 
+    value_from_config(engine, config, "ignored_tests") %||% character(0)
+  )
+}
+</span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <p>If the configuration file, usually <code>config/environments/test.R</code>,
+has a local variable <code>optional_tests</code>, the character vector of resource
+names will not be executed. This is useful when certain resources
+were never expected to have tests, such as those representing network
+connections, constants, or other things that don&#39;t really make sense to test.</p>
+
+<p>Use with caution!</p>
+
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer">optional_tests_from_config <- function(engine, base, config) {
+  file.path(base, 
+    value_from_config(engine, config, "optional_tests") %||% character(0)
+  )
+}
+
+value_from_config <- function(engine, config, value) {
+  test_environment_configuration(engine, config)[[value]]
+}
+</span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <h1>utils.R</h1>
 
           </div>
 
@@ -1180,7 +1854,14 @@ test_environment_config <- function(project) {
 
           <div class="code">
             <pre>
-              <code class="R"><span class="spacer">`%||%`   <- function(x, y) if (is.null(x)) y else x
+              <code class="R"><span class="spacer">#' Non-null selection operator.
+#'
+#' @name infix_or
+#' @param x ANY. An R object. If \code{NULL}, return \code{y}.
+#' @param y ANY. An R object. If x is \code{NULL}, return \code{y}.
+#' @export
+`%||%`   <- function(x, y) if (is.null(x)) y else x
+
 `%|||%`  <- function(x, y) if (is.falsy(x)) y else x
 is.falsy <- function(x) {
   identical(x, NULL) || identical(x, FALSE) || identical(x, "") ||
@@ -1192,7 +1873,30 @@ is.falsy <- function(x) {
 syberia_version <- function() { utils::packageVersion('syberia') }
 
 package_exists <- function(name) {
-  is.element(name, base::.packages())
+  is.element(name, utils::installed.packages()[, 1])
+}
+
+ensure_installed <- function(package_name) {
+  if (!requireNamespace(package_name, quietly = TRUE)) {
+    stop("Please install ", crayon::yellow(package_name), ":\n\n",
+         crayon::green(paste0("install.packages('", package_name, "')")), "\n", call. = FALSE)
+  }
+}
+
+ensure_testthatsomemore <- function() {
+  if (package_exists("testthatsomemore")) return()
+  ensure_installed("devtools")
+  message("The package ", crayon::yellow("testthatsomemore"),
+          " is not installed; installing from http://github.com/robertzk/testthatsomemore")
+  withCallingHandlers({
+    devtools::install_github("robertzk/testthatsomemore")
+    requireNamespace("testthatsomemore", quietly = TRUE)
+  }, error = function(e) {
+    stop("The ", crayon::red("testthatsomemore"), " package failed to install. ",
+         "Try manually: \n\n",
+         crayon::green('devtools::install_github("robertzk/testthatsomemore")'), "\n\n",
+         "The error was: ", paste(as.character(e), collapse = "\n"), call. = FALSE)
+  })
 }
 
 as.list.environment <- function(env) {
@@ -1267,7 +1971,7 @@ traverse_parent_directories <- function(filepath, fn, error) {
   stopifnot(is.function(fn), length(formals(fn)) >= 1)
   stopifnot(is.character(error) || is.function(error))
 
-  path <- normalizePath(filepath)</span></code>
+  path <- normalizePath(filepath, mustWork = FALSE)</span></code>
             </pre>
           </div>
         </div>
@@ -1296,13 +2000,26 @@ order_by_key <- function(list) {
 is.simple_string <- function(obj) {
   is.character(obj) && length(obj) == 1 && !is.na(obj) && nzchar(obj)
 }
+
+#' Whether or not any substring of a string is any of a set of strings.
+#'
+#' @param string character.
+#' @param set_of_strings character.
+#' @return logical
+#' @examples
+#' stopifnot(syberia:::any_is_substring_of('test', c('blah', 'te', 'woo'))) # TRUE
+#' stopifnot(!syberia:::any_is_substring_of('test', c('blah', 'woo'))) # FALSE
+any_is_substring_of <- function(string, set_of_strings) {
+  any(vapply(set_of_strings,
+             function(x) substring(string, 1, nchar(x)) == x, logical(1)))
+}
 </span></code>
             </pre>
           </div>
         </div>
         <div class="section">
           <div class="markdown markdown-body">
-            <h1>zzz.r</h1>
+            <h1>zzz.R</h1>
 
           </div>
 
@@ -1323,16 +2040,41 @@ is.simple_string <- function(obj) {
   if (!isTRUE(getOption("syberia.silent"))) {
     packageStartupMessage(paste0("Loading ", crayon::red("Syberia"), "...\n"))
   }
+
+  # Load better trace.
+  if (isTRUE(getOption("syberia.autoload_bettertrace", TRUE))) {
+    if (!is.element("devtools", utils::installed.packages()[, 1])) {
+      packageStartupMessage(crayon::yellow("   ...Installing devtools\n"))
+      utils::install.packages("devtools")
+    }
+
+    if (!requireNamespace("bettertrace", quietly = TRUE)) {
+      packageStartupMessage(crayon::yellow("   ...Installing github.com/robertzk/bettertrace\n"))
+      devtools::install_github("robertzk/bettertrace")
+    }
+    library(bettertrace)
+  }
   
   # We want to initialize a Syberia project in the current working directory
   # because 9 times out of 10 this is what the user wants.
   #
-  # However, this hook doesn"t work on install, because install is done from
+  # However, this hook doesn't work on install, because install is done from
   # the working directory of the package, not the user.
   #
   # But when the user calls library(syberia), this will work.
-  try(syberia_project(), silent = TRUE)
-}</span></code>
+  try({
+    syberia_engine()
+    packageStartupMessage(crayon::yellow(
+      "Loaded syberia project ", sQuote(active_project()$root()), "...\n"
+    ))
+  }, silent = TRUE)
+}
+
+.onDetach <- function(...) {
+  # TODO: (RK) Detach any environments attached to the search path
+  # by the active project.
+}
+</span></code>
             </pre>
           </div>
         </div>
