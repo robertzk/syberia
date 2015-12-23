@@ -383,6 +383,7 @@ register_engine <- function(director, name, engine, mount = FALSE) {
 }
 
 parse_engine <- function(engine_parameters) {
+  ## By default, download engines from GitHub.
   engine_parameters$type <- engine_parameters$type %||% "github"
 
   if (!is.simple_string(engine_parameters$type)) {
@@ -402,7 +403,18 @@ parse_engine <- function(engine_parameters) {
 }
 
 parse_engine.github <- function(engine_parameters) {
+  ## GitHub-derived engines need to provide a `repo` and `version` (by default "master").
+  ## For example, the following indicates we wish to load the "bobbleheads"
+  ## engine from GitHub "jimbob/bobbleheads.sy" off the master branch.
+  ##
+  ## ```r
+  ## # config/engines.R
+  ## engine("bobbleheads", type = "github", repo = "jimbob/bobbleheads.sy")
+  ## ```
+  ##
+  ## Syberia will download and cache the engine.
   repo    <- engine_parameters$repo %||% engine_parameters$repository
+  # TODO: (RK) Checking for updates?
   version <- engine_parameters$version %||% "master"
   stopifnot(is.simple_string(repo))
 
@@ -413,6 +425,14 @@ parse_engine.github <- function(engine_parameters) {
     })
 }
 
+## Putting the following in `config/engines.R` indicates we wish
+## to load the "bobbleheads" engine from GitHub
+## "jimbob/bobbleheads.sy" off the master branch.
+##
+## ```r
+## # config/engines.R
+## engine("bobbleheads", type = "local", path = "~/dev/bobbleheads")
+## ```
 parse_engine.local <- function(engine_parameters) {
   path <- engine_parameters$path %||% stop("Please provide an engine path")
   if (!file.exists(path)) stop("The path ", sQuote(path), " does not exist.")
@@ -420,6 +440,7 @@ parse_engine.local <- function(engine_parameters) {
 }
 
 pre_engine <- function(prefix, builder) {
+  ## Build a `pre_engine` S3 object.
   structure(list(prefix = prefix, builder = builder), class = "pre_engine")
 }
 
