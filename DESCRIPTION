@@ -43,7 +43,7 @@ Suggests:
     pbapply,
     testthatsomemore
 VignetteBuilder: knitr
-License: GPL (>= 2)
+License: MIT + file LICENSE
 LazyData: true
 Roxygen: list(wrap = FALSE)
 RoxygenNote: 5.0.1
