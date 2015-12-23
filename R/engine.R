@@ -1,3 +1,96 @@
+## Syberia is a framework that was crafted specifically for the R
+## programming language. The story is similar to JavaScript: a single-purpose
+## language meant to be used in a particular context exploded in popularity
+## and found itself in a host of other settings.
+##
+## However, R is really just [LISP](https://en.wikipedia.org/wiki/Category:Lisp_programming_language_family)
+## under the hood--a general purpose symbolic computing runtime. To prove that
+## this makes R a viable production language for almost any purpose whatsoever,
+## Syberia takes the first step of providing a hierarchical structure for R
+## projects. Anything--from an empty directory, to an R package, to a collection
+## of shiny dashboards--can be a Syberia project.
+##
+## This flexibility is achieved by assuming nothing about the underlying
+## directory structure: in other words, fixing no conventions, but letting
+## the user decide what the right course of action should be with respect
+## to structuring their project. Other tools fare poorly at this; for example,
+## a package does not even let you have a hierarchical directory structure
+## in its `R/` subdirectory; what an affront to developer sanity!
+##
+## How can Syberia claim to be a convention-over-configuration framework
+## if it fixes no conventions? The answer is that while Syberia *itself*,
+## the package you are currently examining, does not fix any conventions,
+## the de facto approach to development within Syberia is as follows:
+##
+## 1. [Pick an engine to build your work off of](http://github.com/syberia/modeling.sy).
+## 2. [Build your project](https://github.com/syberia/examples) within the conventions
+##    set by your choice of engine.
+##
+## It is possible to include multiple engines, or a whole complex potentially
+## cyclic graph of engines, but this introduces [the diamond problem](https://en.wikipedia.org/wiki/Multiple_inheritance)
+## and should generally be avoided until you have a good understanding of
+## computer science foundations.
+##
+## In other words, the Syberia approach is to be a *meta-framework*. By making
+## no assumptions about the structure of your project, it is your choice which
+## engine to build your project on depending on what suits your needs. This is
+## especially helpful for machine learning projects, where the task and solution
+## can take widely varying shapes depending on whether the problem is supervised,
+## unsupervised, NLP, deep learning, etc.
+## 
+## The above 2-step approach is recursive. For example, the [modeling engine](https://github.com/syberia/modeling.sy),
+## the default engine for most projects, is built off the [base engine](https://github.com/syberia/base.sy),
+## which dictates that each project should have a `config/routes.R` file which
+## links the `lib/controllers` directory to the rest of the project and tells 
+## you how R scripts in the project are to be parsed according to which
+## directory they reside in. This is similar to object-oriented programming,
+## except that it is strictly more general since it does not force you 
+## to treat every single thing in the world as an object.
+##
+## Thus, the core structural unit is an **engine**. In order to bootstrap
+## effectively, an engine should have a `config/application.R` file, potentially
+## empty, so that Syberia can detect this is an engine, as well as a `config/engines.R`
+## file indicating which engine this one depends on, if any. This is the sole
+## convention and can be pretty easily deprecated in future versions of Syberia
+## if there is demand for more flexible configuration.
+##
+## Each engine is **testable** by design. Syberia exports a function called
+## `test_project` that by default looks in the `test/` directory of the
+## engine and requires all resources have an accompanying test. If your
+## resource (e.g., R script) does not have a test -- it fails! In general,
+## only well-written code is easily testable so this encourages both
+## separating your project out into similar components through like
+## directory structures as well as ensuring all inputs and outputs are
+## what you expect them to be. (Not to mention saving you a huge headache
+## of managing the complexity of a growing system!)
+##
+## To construct a Syberia engine object, run `syberia_project("/path/to/engine")`.
+## This is a `syberia_engine` [R6 class](https://cran.r-project.org/web/packages/R6/vignettes/Introduction.html)
+## and holds together everything that Syberia knows about your project.
+## It has methods like `$find`, `$resource`, and `$exists` to play with
+## the files in your project. In general, Syberia takes a page out of
+## [node.js](https://nodejs.org/en/)'s book and encourages all files
+## to be structured so they have a single *export*: the last expression
+## in the file. If you haven't replaced the default controller
+## using the `config/routes` file, a topic we'll touch on later, you
+## should be able to "compile" your resource using
+##
+## ```r
+## value <- project$resource("relative/path/to/resource.R")
+## ```
+##
+## For example, if we had
+##
+## ```r
+## # relative/path/to/resource.R
+## x <- 1
+## y <- 2
+## x + y
+## ```
+##
+## then `value` above would be `3`. However, as we will see,
+## the `project$resource` caller is capable of much more than
+## [sourcing a file](http://www.inside-r.org/r-doc/base/source).
 #' Bootstrap a Syberia engine.
 #'
 #' A Syberia engine defines the core re-usable structural unit across
