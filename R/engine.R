@@ -165,18 +165,31 @@ syberia_engine_.character <- function(filepath, ...) {
 }
 
 syberia_engine_character <- function(filepath, cache = TRUE) {
+  ## If a user gives `~/foo/bar/baz` as the path and the project's
+  ## root is in fact `~/foo` (in other words, if they give a file or subdirectory 
+  ## in the project), this should be inferrable. We traverse
+  ## the parent directories until we hit the root of the file system
+  ## to see if we are in a syberia engine
   traverse_parent_directories(normalizePath(filepath, mustWork = FALSE), function(filepath) {
+    ## If we are caching the precomputed `syberia_engine` object, simply fetch
+    ## it from the `.syberia_env` helper environment.                              
     if (isTRUE(cache) && has_application_file(filepath)) {
+      ## If it is not cached, call `build_engine` on the directory.
       .syberia_env[[filepath]] <- .syberia_env[[filepath]] %||% build_engine(filepath)
     } else if (has_application_file(filepath)) {
       build_engine(filepath)
     }
+  ## If we did not find a syberia engine, we just crash here.
   }, error = sprintf("No syberia engine found at %s", sQuote(crayon::red(filepath))))
 }
 
-extensions <- c('.R', '.r', '/application.R', '/application.r')
+## A syberia engine with root `root` is, by definition, a directory of
+## R files containing the file `root/config/application.R` or any variation
+## thereof (e.g., `root/config/application/application.r`). This is how we
+## recognize the engine.
+extensions <- c(".R", ".r", "/application.R", "/application.r")
 has_application_file <- function(filepath) {
-  any(file.exists(paste0(file.path(filepath, 'config', 'application'), extensions)))
+  any(file.exists(paste0(file.path(filepath, "config", "application"), extensions)))
 }
 
 #' Build a syberia engine.
@@ -204,23 +217,20 @@ engine_dir <- function(dir) {
   file.path(engine_location(), dir)
 }
 
+## The location where Syberia will keep copies of downloaded engines.
 engine_location <- function() {
   path <- engine_location_path()
   if (!file.exists(path)) {
+    ## Ensure we can actually create the engine storage location.
     if (!dir.create(path, FALSE, TRUE)) {
-      stop(sprintf(paste0("Syberia needs a directory in which to place the code for ",
-           "dependencies. Please ensure %s is writable, or set a ",
-           "different path in the %s environment variable or ",
-           "the %s global option (using %s)."),
-           sQuote(crayon::red(path)),
-           sQuote(crayon::yellow("SYBERIA_ENGINE_LOCATION")),
-           sQuote(crayon::yellow("syberia.engine_location")),
-           sQuote(crayon::magenta("options(syberia.engine_location = 'some/dir')"))))
+      stop(m("engine_location_mismatch", path = path), call. = FALSE)
     }
   }
   path
 }
 
+## By default, Syberia will store engine code in
+## `~/.R/.syberia/engines`.
 engine_location_path <- function() {
   Sys.getenv("SYBERIA_ENGINE_LOCATION") %|||%
   getOption("syberia.engine_location", "~/.R/.syberia/engines")

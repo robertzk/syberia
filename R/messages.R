@@ -27,6 +27,15 @@ messages <- list(
     "key, ", sQuote("project"), ". In {{{filename}}}",
     " ensure your ", sQuote(crayon::yellow("{{{type}}}")),
     " local variable meets this constraint."
+  ),
+
+  engine_location_mismatch = c(
+    "Syberia needs a directory in which to place the code for ",
+    "dependencies. Please ensure ", sQuote(crayon::red("{{{path}}}")),
+    " is writable, or set a different path in the ",
+    sQuote(crayon::yellow("SYBERIA_ENGINE_LOCATION")), " environment variable or ",
+    "the ", sQuote(crayon::yellow("syberia.engine_location")), " global option (",
+    "using ", sQuote(crayon::magenta("options(syberia.engine_location = \"some/dir\")")), ")."
   )
 )
 
