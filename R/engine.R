@@ -299,7 +299,12 @@ boot_preprocessor <- function(source, source_env, director) {
   source()
 }
 
-engine_preprocessor <- function(source, source_env, preprocessor_output) {
+## The `config/engines` file is an epsilon harder. Basically, we use
+## the `engine` helper function to record the user's requested engine
+## mounting until we get to the parser below.
+engine_preprocessor <- function(source, source_env, preprocessor_output, director) {
+  if (isTRUE(director$cache_get("bootstrapped"))) return()
+
   preprocessor_output$engines <- new.env(parent = emptyenv())
   source_env$engine <- function(name, ...) {
     preprocessor_output$engines[[name]] <- list(...)
@@ -307,9 +312,17 @@ engine_preprocessor <- function(source, source_env, preprocessor_output) {
   source()
 }
 
+## Now that we have collected the engines to be mounted into the `preprocessor_output`
+## helper (which also came from [director](https://github.com/syberia/director)),
+# 
 engine_parser <- function(director, preprocessor_output) {
   if (isTRUE(director$cache_get("bootstrapped"))) return()
 
+  ## For each engine mentioned using the `engine` helper in `config/engines`,
+  ## we *register* the engine. This means that we establish member variables
+  ## on the respective `syberia_engine` objects that allow them to understand
+  ## the topology: the parent engine knows about its children, and each child
+  ## knows about its parent. Syberia is all about family.
   for (engine in ls(preprocessor_output$engines, all = TRUE)) {
     register_engine(director, engine, parse_engine(preprocessor_output$engines[[engine]]),
                     mount = isTRUE(preprocessor_output$engines[[engine]]$mount))
@@ -318,16 +331,40 @@ engine_parser <- function(director, preprocessor_output) {
   ## When we use `devtools::load_all` on director, it loads a symbol called
   ## `exists`; we use explicit base namespacing to prevent conflicts during development.
   if (base::exists(".onAttach", envir = input, inherits = FALSE)) {
+    ## A little additional trick is that the user could have specified
+    ## an `.onAttach` function in the `config/engines` file. If this exists,
+    ## we store it in the `syberia_engine` cache and later invoke it.
     onAttach <- input$.onAttach
+
+    if (!is.function(onAttach)) {
+      stop(m("onattach_failure", root = director$root(), klass = class(onAttach)[1L]),
+           call. = FALSE)
+    }
+
+    ## We use `list2env` to "inject" the `director` local variable into the 
+    ## scope of the `onAttach` hook.
     environment(onAttach) <- list2env(
       list(director = director),
-      parent = environment(onAttach)
+      parent = environment(onAttach) %||% baseenv() 
     )
     director$cache_set(".onAttach", onAttach)
   }
   NULL
 }
 
+## Registering an engine means making the parent aware of its child
+## and the child aware of its parent. Mounting the engine means 
+## we will be treating a collection of engines, each in potentially
+## very different directories on the file system, as *one giant project*.
+## This allows us to pull out a subset of Syberia resources and
+## "enginify" them with ease.
+##
+## Although Syberia does face a few [theoretical challenges](https://en.wikipedia.org/wiki/Multiple_inheritance#The_diamond_problem),
+## these have solutions, and the end result is that given a Syberia
+## project with `N` resources, there are `2^N` possible engines extractable
+## from that project: one for *each subset of resources*. One of Syberia's goals
+## is to make it as easy as possible to pull out your work so others
+## can re-use it.
 register_engine <- function(director, name, engine, mount = FALSE) {
   # TODO: (RK) Replace with $engines private member after R6ing.
   if (!director$cache_exists("engines")) {
@@ -339,6 +376,8 @@ register_engine <- function(director, name, engine, mount = FALSE) {
   director$register_engine(name, engine, mount = mount)
 
   if (engine$cache_exists(".onAttach")) {
+    ## This is where we invoke the `.onAttach` hook registered in
+    ## the `engine_parser`.
     engine$cache_get(".onAttach")(director)
   }
 }

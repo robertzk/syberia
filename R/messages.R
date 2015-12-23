@@ -36,6 +36,12 @@ messages <- list(
     sQuote(crayon::yellow("SYBERIA_ENGINE_LOCATION")), " environment variable or ",
     "the ", sQuote(crayon::yellow("syberia.engine_location")), " global option (",
     "using ", sQuote(crayon::magenta("options(syberia.engine_location = \"some/dir\")")), ")."
+  ),
+
+  onattach_failure = c(
+    "The ", sQuote(crayon::yellow(".onAttach")), " hook in the ",
+    sQuote(crayon::yellow("{{{root}}}")), " engine must be a *function*. ",
+    "Instead, I got a {{{klass}}}."
   )
 )
 
