@@ -340,50 +340,6 @@ parse_engine.local <- function(engine_parameters) {
 pre_engine <- function(prefix, builder) {
   structure(list(prefix = prefix, builder = builder), class = "pre_engine")
 }
-#
-#syberia_engine_instance <- function(director) {
-#  structure(list(director = director), class = "syberia_engine")
-#}
-#
-
-#`$.syberia_engine` <- function(engine, method) {
-#  if (identical(method, "exists")) syberia_engine_exists(engine)
-#  else if (identical(method, "resource")) syberia_engine_resource(engine)
-#  else eval.parent(bquote(`$`(.(substitute(engine))[['director']], .(method))))
-#}
-#
-#syberia_engine_exists <- function(engine) {
-#  force(engine)
-#  function(...) {
-#    if (!engine[['director']]$exists(...)) {
-#      for (subengine in ls(engine[['director']]$cache_get("engines"), all = TRUE)) {
-#        if (engine[['director']]$cache_get("engines")[[subengine]]$exists(...)) {
-#          return(TRUE)
-#        }
-#      }
-#    }
-#    FALSE
-#  }
-#}
-#
-#syberia_engine_resource <- function(engine) {
-#  force(engine)
-#  function(name, ...) {
-#    if (!engine[['director']]$exists(name)) {
-#      for (subengine in ls(engine[['director']]$cache_get("engines"), all = TRUE)) {
-#        subdirector <- engine[['director']]$cache_get("engines")[[subengine]]
-#        if (subdirector$exists(name)) {
-#          return(subdirector$resource(name, ...))
-#        }
-#      }
-#    }
-#    engine$resource(name, ...)
-#  }
-#}
-#
-#print.syberia_engine <- function(x, ...) {
-#  print(x$director)
-#}
 
 #' Whether to exclude a syberia engine from being used for resourcing.
 #'
