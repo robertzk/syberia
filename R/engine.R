@@ -209,7 +209,9 @@ build_engine.pre_engine <- function(buildable) {
 
 #' @export
 build_engine.character <- function(buildable) {
-  # bootstrap_engine(director::director(buildable))
+  ## To build an engine, we bootstrap an otherwise bare 
+  ## `syberia_engine` R6 object. Bootstrapping an engine
+  ## is explained below.
   bootstrap_engine(syberia_engine_class$new(buildable))
 }
 
@@ -236,21 +238,62 @@ engine_location_path <- function() {
   getOption("syberia.engine_location", "~/.R/.syberia/engines")
 }
 
+## To build an engine, we bootstrap an otherwise bare 
+## `syberia_engine` R6 object. Bootstrapping an engine
+## consists of
+##
+## * Registering preprocessors for `config/boot` and `config/engines`.
+## * Registering a parser for `config/engines`.
+## * Executing `config/engines` followed by `config/boot`.
+## * Ensure that the ensure has no conflicting resources with any other engine.
+## * Set the cache entry `bootstrapped` on the engine to indicate it is built.
+##
+## The notion of preprocessor and parser belongs to
+## [director](https://github.com/syberia/director). In fact, every `syberia_engine`
+## inherits from `director`, so every `syberia_engine` has at least the same
+## capabilities as a `director` object. (Rails experts may notice the similarity
+## between Syberia engines and directors, and Rails engines and railties.)
+##
+## Registering a preprocessor means we do *additional stuff* before sourcing
+## that file. For example, in `config/engines`, we provide a helper function
+## called `engine` for registering subengines. Registering a parser means we
+## do additional stuff *after* preprocessing and sourcing that file. For example,
+## in `config/engines` we need to actually build and mount the engines referred
+## to in the fil with the `engine` helper function.
+## 
+## In order to avoid the [diamond problem](https://en.wikipedia.org/wiki/Multiple_inheritance),
+## Syberia ensures that engines do not share resources *unless* they come from
+## a common base engine. This is a technical issue that will eventually be
+## explained in a more thorough whitepaper. (For the confused CS students asking
+## why I couldn't have simply made engines form a [DAG](https://en.wikipedia.org/wiki/Directed_acyclic_graph)
+## instead of a possibly cyclic ## graph--the short answer is that engines need to
+## trivially modularizable while ## retaining the power to refer to parent engine
+## resources dynamically and just-in-time. I may very well regret this decision.)
+##
+## Each `director`, and by proxy `syberia_engine`, has an internal cache for
+## memoising run-time state while the R process is running (this is different
+## from a `director`'s *registry*, which captures persistent cross-session
+## state on disk). We simply set the `bootstrapped` key to `TRUE` so we can
+## check for it later.
 bootstrap_engine <- function(engine) {
   if (isTRUE(engine$cache_get("bootstrapped"))) return(engine)
-  engine$register_preprocessor('config/boot',    boot_preprocessor)
-  engine$register_preprocessor('config/engines', engine_preprocessor)
-  engine$register_parser      ('config/engines', engine_parser)
+  engine$register_preprocessor("config/boot",    boot_preprocessor)
+  engine$register_preprocessor("config/engines", engine_preprocessor)
+  engine$register_parser      ("config/engines", engine_parser)
   
   exists <- function(...) engine$exists(..., parent. = FALSE, children. = FALSE)
   if (exists("config/engines")) engine$resource("config/engines")
   if (exists("config/boot"))    engine$resource("config/boot")
+
   # Check for duplicate resources in mounted child engines.
   engine$find(check_duplicates. = TRUE, children. = TRUE, tag_engine. = TRUE)
   engine$cache_set("bootstrapped", TRUE)
   engine
 }
 
+## The `boot_preprocessor` is referred to above in the `boostrap_engine` function.
+## We are saying that the `config/boot` file should have access to
+## the `director` object, and nothing more.
 boot_preprocessor <- function(source, source_env, director) {
   source_env$director <- director
   source()
