@@ -1,4 +1,4 @@
-Syberia [![Build Status](https://travis-ci.org/robertzk/syberia.svg?branch=master)](https://travis-ci.org/robertzk/syberia.svg?branch=master) [![Coverage Status](https://coveralls.io/repos/robertzk/syberia/badge.png)](https://coveralls.io/r/robertzk/syberia) [![Documentation](https://img.shields.io/badge/rocco--docs-%E2%9C%93-blue.svg)](http://robertzk.github.io/syberia/) 
+Syberia [![Build Status](https://travis-ci.org/syberia/syberia.svg?branch=master)](https://travis-ci.org/syberia/syberia.svg?branch=master) [![Coverage Status](https://coveralls.io/repos/syberia/syberia/badge.png)](https://coveralls.io/r/syberia/syberia) [![Documentation](https://img.shields.io/badge/rocco--docs-%E2%9C%93-blue.svg)](http://syberia.github.io/syberia/) 
 ===========
 
 Syberia is the development framework for R.
