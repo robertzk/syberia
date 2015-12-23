@@ -128,6 +128,7 @@ syberia_engine <- function(filepath = getwd(), ..., root. = TRUE) {
   project
 }
 
+#' @rdname syberia_engine
 #' @export
 syberia_project <- syberia_engine
 

@@ -2,9 +2,12 @@
 % Please edit documentation in R/engine.R
 \name{syberia_engine}
 \alias{syberia_engine}
+\alias{syberia_project}
 \title{Bootstrap a Syberia engine.}
 \usage{
 syberia_engine(filepath = getwd(), ..., root. = TRUE)
+
+syberia_project(filepath = getwd(), ..., root. = TRUE)
 }
 \arguments{
 \item{filepath}{character. The root directory of the engine.
