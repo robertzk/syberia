@@ -40,7 +40,6 @@ describe("Finding the engine", {
       expect_false(is.null(syberia_engine(tempdir)))
     })
   })
-            browser()
 
   test_that("it can find an engine from a nested directory", {
     testthatsomemore::within_file_structure(list("foo" = list("bar.R"), "config" = list("application.R")), {
