@@ -478,7 +478,30 @@ syberia_engine_class <- R6::R6Class("syberia_engine",
     resource = function(name, ..., parent. = TRUE, children. = TRUE,
                         exclude. = NULL, defining_environment. = parent.frame(),
                         engine) {
-      if (!missing(engine)) {
+
+      if (missing(engine)) {
+        # If we do not force right away, parent.frame() will be pointing to
+        # the wrong place. Everything in R is a promise...
+        force(defining_environment.)
+        dots <- list(...)
+        private$traverse_tree(parent = parent., children = children.,
+          exclude = exclude., exists_args = list(name),
+          on_parent = self$.parent$resource(name, ...,
+                        exclude. = c(list(self$root()), exclude.),
+                        defining_environment. = defining_environment.),
+          on_self = super$resource(name, ...,
+                                   defining_environment. = defining_environment.),
+          on_child = function(engine) {
+            do.call(engine$resource, c(list(name), dots, list(
+              parent. = FALSE, children. = TRUE,
+              exclude. = c(engine$root(), exclude.),
+              defining_environment. = defining_environment.)
+            ))
+          },
+          otherwise = super$resource(name, ...,
+                                     defining_environment. = defining_environment.)
+        )
+      } else {
         stopifnot(is.character(engine))
         engine_name <- engine
         engine <- private$sanitize_engine(engine)
@@ -487,36 +510,6 @@ syberia_engine_class <- R6::R6Class("syberia_engine",
         }
         return(engine$resource(name, ..., parent. = FALSE))
       }
-
-      ## Check the parent engines for resource existence.
-      if (isTRUE(parent.) && private$has_parent()) {
-        if (self$.parent$exists(name, parent. = TRUE, children. = TRUE, exclude. = list(self$root()))) {
-          return(self$.parent$resource(name, exclude. = list(self$root()), ...,
-                                       defining_environment. = defining_environment.))
-        }
-      }
-
-      ## Check the current engines for resource existence.
-      if (super$exists(name)) return(super$resource(name, ..., defining_environment. = defining_environment.))
-
-      ## Check the subengines for resource existence.
-      if (isTRUE(children.)) {
-        for (engine in self$.engines) {
-          if (isTRUE(engine$mount)) {
-            engine <- engine$engine
-            if (!any(vapply(exclude., should_exclude, logical(1), engine))) {
-              if (engine$exists(name, parent. = FALSE, children. = TRUE, exclude. = exclude.)) {
-                return(engine$resource(name, parent. = FALSE, children. = TRUE,
-                                       exclude. = c(engine$root(), exclude.),
-                                       ..., defining_environment. = defining_environment.))
-              }
-            }
-          }
-        }
-      }
-
-      ## Force trigger an error using the self director.
-      super$resource(name, ..., defining_environment. = defining_environment.)
     },
 
     find = function(..., parent. = FALSE, children. = FALSE, exclude. = NULL,
