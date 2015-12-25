@@ -479,27 +479,17 @@ syberia_engine_class <- R6::R6Class("syberia_engine",
                         exclude. = NULL, defining_environment. = parent.frame(),
                         engine) {
       if (!missing(engine)) {
-        if (!is.simple_string(engine)) {
-          stop("When sourcing a resource, please pass a string to the ",
-               sQuote("engine"), " parameter.")
+        stopifnot(is.character(engine))
+        engine_name <- engine
+        engine <- private$sanitize_engine(engine)
+        if (!engine$exists(name, ..., parent. = FALSE)) {
+          stop("No resource ", sQuote(name), " exists in engine ", sQuote(engine_name), ".")
         }
-        if (!is.element(engine, names(self$.engines))) {
-          stop("There is no engine called ", sQuote(engine), ".")
-        }
-        engine_obj <- self$.engines[[engine]]$engine
-        if (isTRUE(engine_obj$mount)) {
-          stop("Explicit engine specification during resource sourcing is ",
-               "only allowed on unmounted engines. The ", sQuote(engine), 
-               " engine is a mounted engine.")
-        }
-        if (!engine_obj$exists(name, ..., parent. = FALSE)) {
-          stop("No resource ", sQuote(name), " in engine ", sQuote(engine), ".")
-        }
-        return(engine_obj$resource(name, ..., parent. = FALSE))
+        return(engine$resource(name, ..., parent. = FALSE))
       }
 
       ## Check the parent engines for resource existence.
-      if (isTRUE(parent.) && !is.null(self$.parent)) {
+      if (isTRUE(parent.) && private$has_parent()) {
         if (self$.parent$exists(name, parent. = TRUE, children. = TRUE, exclude. = list(self$root()))) {
           return(self$.parent$resource(name, exclude. = list(self$root()), ...,
                                        defining_environment. = defining_environment.))
@@ -533,7 +523,7 @@ syberia_engine_class <- R6::R6Class("syberia_engine",
                     check_duplicates. = FALSE, tag_engine. = FALSE) {
       ## Check the parent engines for resources.
       resources <- character(0)
-      if (isTRUE(parent.) && !is.null(self$.parent)) {
+      if (isTRUE(parent.) && private$has_parent()) {
         resources <- self$.parent$find(..., parent. = TRUE, children. = TRUE, exclude. = list(self$root()))
       }
 
@@ -572,34 +562,63 @@ syberia_engine_class <- R6::R6Class("syberia_engine",
     },
 
     exists = function(resource, ..., parent. = TRUE, children. = TRUE, exclude. = NULL) {
-      ## Check the parent engines for resource existence.
-      if (isTRUE(parent.) && !is.null(self$.parent)) {
-        if (self$.parent$exists(resource, ..., parent. = TRUE, children. = TRUE, exclude. = list(self$root()))) {
-          return(TRUE)
+      private$traverse_tree(parent = parent., children = children.,
+        exclude = exclude., exists_args = list(resource, ...),
+        on_parent = TRUE, on_self = TRUE,
+        on_child = function(engine) TRUE, otherwise = FALSE)
+    }
+  ),
+  private = list(
+    has_parent = (has_parent <- function() { !is.null(self$.parent) }),
+    is_root    = Negate(has_parent),
+    mounted_engines = function() {
+      Filter(function(e) isTRUE(e$mount), self$.engines)
+    },
+
+    sanitize_engine = function(engine) {
+      if (!is.simple_string(engine)) {
+        stop(m("sanitize_engine_class"), call. = FALSE)
+      }
+      if (!is.element(engine, names(self$.engines))) {
+        stop(m("sanitize_engine_no_engine", engine = engine), call. = FALSE)
+      }
+      engine_obj <- self$.engines[[engine]]$engine
+      if (isTRUE(engine_obj$mount)) {
+        stop(m("sanitize_engine_mounting_conflict", engine = engine), call. = FALSE)
+      }
+      engine_obj
+    },
+
+    traverse_tree = function(parent, children, on_parent, on_self, on_child, otherwise,
+                             exists_args, exclude) {
+
+      full_exists_args <- c(exists_args, exclude. = c(list(self$root())),
+        parent. = TRUE, children. = TRUE)
+
+      if (isTRUE(parent) && private$has_parent()) {
+        if (do.call(self$.parent$exists, full_exists_args)) {
+          return(eval.parent(substitute(on_parent)))
         }
       }
 
-      ## Check the current engines for resource existence.
-      if (super$exists(resource, ...)) return(TRUE)
-
-      ## Check the subengines for resource existence.
-      if (isTRUE(children.)) {
-        for (engine in self$.engines) {
-          if (isTRUE(engine$mount)) {
-            engine <- engine$engine
-            if (!any(vapply(exclude., should_exclude, logical(1), engine))) {
-              if (engine$exists(resource, ..., parent. = FALSE, children. = TRUE, exclude. = exclude.)) {
-                return(TRUE)
-              }
+      if (do.call(super$exists, exists_args)) {
+        return(eval.parent(substitute(on_self)))
+      }
+      
+      if (isTRUE(children)) {
+        for (engine in private$mounted_engines()) {
+          engine <- engine$engine
+          if (!any(vapply(exclude, should_exclude, logical(1), engine))) {
+            full_exists_args$parent. <- FALSE
+            if (do.call(engine$exists, full_exists_args)) {
+              return(on_child(engine))
             }
           }
         }
       }
 
-      FALSE
+      eval.parent(substitute(otherwise))
     }
-  ),
-  private = list(
   )
 )
 

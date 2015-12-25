@@ -42,6 +42,19 @@ messages <- list(
     "The ", sQuote(crayon::yellow(".onAttach")), " hook in the ",
     sQuote(crayon::yellow("{{{root}}}")), " engine must be a *function*. ",
     "Instead, I got a {{{klass}}}."
+  ),
+
+  sanitize_engine_class = c(
+    "When sourcing a resource, please pass a string to the ",
+    sQuote("engine"), " parameter."
+  ),
+
+  sanitize_engine_no_engine = c("There is no engine called ", sQuote("{{{engine}}}"), "."),
+
+  sanitize_engine_mounting_conflict = c(
+    "Explicit engine specification during resource sourcing is ",
+    "only allowed on unmounted engines. The ", sQuote("{{{engine}}}"), 
+    " engine is a mounted engine."
   )
 )
 
