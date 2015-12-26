@@ -146,3 +146,10 @@ describe("Project hybrid_resourcing", {
   })
 })
 
+describe("Project overwritten_controller", {
+  test_that("it can overwrite a controller", {
+    expect_equal(syberia_engine("projects/overwritten_controller/main")$resource("foo/bar"), "Bar")
+    expect_equal(syberia_engine("projects/overwritten_controller/main")$resource("foo/qux"), "Foo")
+  })
+})
+
