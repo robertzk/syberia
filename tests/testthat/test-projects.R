@@ -149,6 +149,8 @@ describe("Project hybrid_resourcing", {
 describe("Project overwritten_controller", {
   test_that("it can overwrite a controller", {
     expect_equal(syberia_engine("projects/overwritten_controller/main")$resource("foo/bar"), "Bar")
+    # TODO: (RK) This is probably not the right approach given the motif that
+    # a tree of directors should act as one director.
     expect_equal(syberia_engine("projects/overwritten_controller/main")$resource("foo/qux"), "Foo")
   })
 })
