@@ -51,43 +51,40 @@ syberia_engine_class <- R6::R6Class("syberia_engine",
 
     find = function(..., parent. = FALSE, children. = FALSE, exclude. = NULL,
                     check_duplicates. = FALSE, tag_engine. = FALSE) {
-      ## Check the parent engines for resources.
-      resources <- character(0)
-      if (isTRUE(parent.) && private$has_parent()) {
-        resources <- self$.parent$find(..., parent. = TRUE, children. = TRUE, exclude. = list(self$root()))
-      }
 
-      ## Check the current engines for resources.
-      self_resources <- super$find(...)
-      if (is.character(tag_engine.)) {
-        names(self_resources) <- rep(tag_engine., length(self_resources))
-      }
-      resources <- c(self_resources, resources)
-      resources <- resources[!duplicated(resources)]
-
-      ## Check the subengines for resources.
-      children_resources <- vector("list", length(self$.engines))
-      if (isTRUE(children.)) {
-        for (i in seq_along(self$.engines)) {
-          name   <- names(self$.engines)[i]
-          engine <- self$.engines[[i]]
-          if (isTRUE(engine$mount)) {
-            engine <- engine$engine
-            if (!any(vapply(exclude., should_exclude, logical(1), engine))) {
-              tag <- if (!identical(tag_engine., FALSE)) name else FALSE
-              children_resources[[i]] <- engine$find(..., parent. = FALSE,
-                children. = TRUE, exclude. = exclude., tag_engine. = tag)
-              names(children_resources)[i] <- name
-            }
+      resources <- private$traverse_tree(parent = parent., children = children.,
+        exclude = exclude., accumulate = TRUE,
+        on_parent = self$.parent$find(..., parent. = TRUE, children. = TRUE,
+          exclude. = c(list(self$root()), exclude.), tag_engine. = tag_engine.),
+        on_self = {
+          self_resources <- super$find(...)
+          if (is.character(tag_engine.)) {
+            `names<-`(self_resources, rep(tag_engine., length(self_resources)))
+          } else {
+            self_resources
           }
+        },
+        on_child = function(engine, name) {
+          tag <- if (!identical(tag_engine., FALSE)) name else FALSE
+          engine$find(..., parent. = FALSE,
+            children. = TRUE, exclude. = exclude., tag_engine. = tag)
         }
+      )
+
+      if (isTRUE(children.)) {
+        if (isTRUE(check_duplicates.)) {
+          resources[[length(resources)]] <- Filter(Negate(is.null), resources[[length(resources)]])
+          detect_duplicate_resources(resources[[length(resources)]])
+        }
+        resources[[length(resources)]] <- unname(resources[[length(resources)]])
       }
 
-      if (isTRUE(check_duplicates.)) {
-        children_resources <- Filter(Negate(is.null), children_resources)
-        detect_duplicate_resources(children_resources)
-      }
-      resources <- c(recursive = TRUE, c(unname(children_resources), list(resources)))
+      ## We revert the list to ensure children resources mask self
+      ## and parent resources (or, for example, we would get a conflict
+      ## in a simple diamond with two engines depending on a base
+      ## engine, which has `config/application.R` and `config/engines.R`).
+      resources <- c(recursive = TRUE, rev(resources))
+      ## Using `unique` here would drop names!
       resources[!duplicated(resources)]
     },
 
@@ -120,34 +117,64 @@ syberia_engine_class <- R6::R6Class("syberia_engine",
     },
 
     traverse_tree = function(parent, children, on_parent, on_self, on_child, otherwise,
-                             exists_args, exclude) {
+                             exists_args, exclude, accumulate = FALSE) {
 
-      full_exists_args <- c(exists_args, exclude. = c(list(self$root())),
-        parent. = TRUE, children. = TRUE)
+      record <- if (isTRUE(accumulate)) {
+        result <- list()
+        function(value, subindex) {
+          if (missing(subindex)) {
+            result[[length(result) + 1]] <<- value
+          } else {
+            result[[length(result)]][[subindex]] <<- value
+          }
+        }
+      } else { `return` }
+
+      check_exists <- !missing(exists_args)
+
+      if (check_exists) {
+        full_exists_args <- c(exists_args, exclude. = c(list(self$root())),
+          parent. = TRUE, children. = TRUE)
+      }
 
       if (isTRUE(parent) && private$has_parent()) {
-        if (do.call(self$.parent$exists, full_exists_args)) {
-          return(eval.parent(substitute(on_parent)))
+        if (!check_exists || do.call(self$.parent$exists, full_exists_args)) {
+          record(eval.parent(substitute(on_parent)))
         }
       }
 
-      if (do.call(super$exists, exists_args)) {
-        return(eval.parent(substitute(on_self)))
+      if (!check_exists || do.call(super$exists, exists_args)) {
+        record(eval.parent(substitute(on_self)))
       }
       
       if (isTRUE(children)) {
-        for (engine in private$mounted_engines()) {
-          engine <- engine$engine
+        if (length(formals(on_child)) > 1L) {
+          record(list())
+        }
+        if (check_exists) {
+          full_exists_args$parent. <- FALSE
+        }
+        engines <- private$mounted_engines()
+        for (i in seq_along(engines)) {
+          name   <- names(engines)[i]
+          engine <- engines[[i]]$engine
           if (!any(vapply(exclude, should_exclude, logical(1), engine))) {
-            full_exists_args$parent. <- FALSE
-            if (do.call(engine$exists, full_exists_args)) {
-              return(on_child(engine))
+            if (!check_exists || do.call(engine$exists, full_exists_args)) {
+              if (length(formals(on_child)) == 1L) {
+                record(on_child(engine))
+              } else {
+                record(on_child(engine, name), name)
+              }
             }
           }
         }
       }
 
-      eval.parent(substitute(otherwise))
+      if (isTRUE(accumulate)) {
+        result
+      } else {
+        eval.parent(substitute(otherwise))
+      }
     }
   )
 )
