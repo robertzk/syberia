@@ -20,8 +20,7 @@
 ## into helper files as your resource becomes more complex.
 ##
 ## Here is an example test. You can look at the accompanying
-## [helper project](http://github.com/syberia/syberia/tree/master/tests/testthat/projects/test_calculation_pi).
-# TODO: (RK) Check this is the correct link.
+## [helper project](https://github.com/syberia/syberia/tree/23840b25a8d06740761d6200c7ba68d40c7d7745/tests/testthat/projects/test_calculation_pi)
 ##
 ## ```r
 ## # calculations/pi.R
