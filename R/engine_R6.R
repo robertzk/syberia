@@ -101,6 +101,15 @@ syberia_engine_class <- R6::R6Class("syberia_engine",
       }
     },
 
+    ## Finding resources (as opposed to compiling them) follows a similar
+    ## pattern: we first check the parent, then self, then the children.
+    ## However, unlike `$resource`, the `$find` method must traverse
+    ## all of them and take their union, similarly to the difference
+    ## between calling [`Reduce`](https://stat.ethz.ch/R-manual/R-devel/library/base/html/funprog.html)
+    ## with and without the `accumulate` parameter. In some sense, 
+    ## the find operation is a tree traversal pattern with the action of
+    ## "find the resources matching these arguments" and a final
+    ## reduce step.
     find = function(..., parent. = FALSE, children. = FALSE, exclude. = NULL,
                     check_duplicates. = FALSE, tag_engine. = FALSE) {
 
@@ -109,6 +118,9 @@ syberia_engine_class <- R6::R6Class("syberia_engine",
         on_parent = self$.parent$find(..., parent. = TRUE, children. = TRUE,
           exclude. = c(list(self$root()), exclude.), tag_engine. = tag_engine.),
         on_self = {
+          ## This is a bit of a subtle point. We tag the resources with the
+          ## name of the engine so that we can later avoid some problems related
+          ## to [multiple inheritance](https://en.wikipedia.org/wiki/Multiple_inheritance)
           self_resources <- super$find(...)
           if (is.character(tag_engine.)) {
             `names<-`(self_resources, rep(tag_engine., length(self_resources)))
@@ -125,6 +137,22 @@ syberia_engine_class <- R6::R6Class("syberia_engine",
 
       if (isTRUE(children.)) {
         if (isTRUE(check_duplicates.)) {
+          ## If we are checking child engines, we take this opportunity to
+          ## ensure none of the mounted engines have *shared* resources.
+          ## For example, if two engines both have a `foo/bar.R` file, this
+          ## would cause terrible conflicts related to multiple inheritance:
+          ## if the engine1 asked for `foo/bar.R`, then since the tree  
+          ## traversal asks the *parent* firsts, which asks its non-engine1
+          ## children, then engine1 would receive `foo/bar.R` from engine2.
+          ## Conversely, engine2 would receive engine1's `foo/bar.R`, probably
+          ## leading to all sorts of perverse bugs. In the future it may
+          ## be possible to specify canonical preferences in configuration
+          ## but for now we disable shared resources all together:
+          ##
+          ## **All engines must be disjoint.**
+          ##
+          ## (Except insofar as they share resources from a common child
+          ## engine, as in a diamond graph.)
           resources[[length(resources)]] <- Filter(Negate(is.null), resources[[length(resources)]])
           detect_duplicate_resources(resources[[length(resources)]])
         }
@@ -141,12 +169,17 @@ syberia_engine_class <- R6::R6Class("syberia_engine",
     },
 
     exists = function(resource, ..., parent. = TRUE, children. = TRUE, exclude. = NULL) {
+      ## Check if a resource exists is a straightforward tree traversal
+      ## pattern: check the parent, then self, then the children,
+      ## and return `TRUE` as soon as any find them. Otherwise, return `FALSE`.
       private$traverse_tree(parent = parent., children = children.,
         exclude = exclude., exists_args = list(resource, ...),
         on_parent = TRUE, on_self = TRUE,
         on_child = function(engine) TRUE, otherwise = FALSE)
     }
   ),
+
+  ## This forms a collection of private helper methods.
   private = list(
     has_parent = (has_parent <- function() { !is.null(self$.parent) }),
     is_root    = Negate(has_parent),
@@ -154,7 +187,9 @@ syberia_engine_class <- R6::R6Class("syberia_engine",
       Filter(function(e) isTRUE(e$mount), self$.engines)
     },
 
-    sanitize_engine = function(engine) {
+    ## We convert an engine from string representation to a
+    ## `syberia_engine` object.
+    sanitize_engine = function(engine, uility = TRUE) {
       if (!is.simple_string(engine)) {
         stop(m("sanitize_engine_class"), call. = FALSE)
       }
@@ -162,12 +197,30 @@ syberia_engine_class <- R6::R6Class("syberia_engine",
         stop(m("sanitize_engine_no_engine", engine = engine), call. = FALSE)
       }
       engine_obj <- self$.engines[[engine]]$engine
-      if (isTRUE(engine_obj$mount)) {
+      if (isTRUE(utility) && isTRUE(engine_obj$mount)) {
         stop(m("sanitize_engine_mounting_conflict", engine = engine), call. = FALSE)
       }
       engine_obj
     },
 
+    ## The master helper that defines `$find`, `$resource`, and `$exists`.
+    ## A little many arguments for my usual taste, but they make sense here:
+    ## we specify whether we would like to operate on the `parent` or `children`
+    ## first as scalar bools, followed by expressions for `on_parent` and `on_self`
+    ## and a function for `on_child`. We use a function for the latter since it
+    ## may operate on multiple children whereas the parent and self are singletons.
+    ##
+    ## If the `on_child` function has arity 1 it receives the `syberia_engine`
+    ## object as its argument. On arity 2, it also receives the name.
+    ##
+    ## Finally, we can specify which arguments to pass to `director$exists`
+    ## when checking for resource existence as well as which engines to exclude.
+    ## If this is missing, resources will not be checked for existence prior
+    ## to running parent, self, or child actions.
+    ## 
+    ## Finally, if `accumulate = TRUE`, we return a list of the three results
+    ## (parent, self, children) with a list of multiple results per child as
+    ## the third element.
     traverse_tree = function(parent, children, on_parent, on_self, on_child, otherwise,
                              exists_args, exclude, accumulate = FALSE) {
 
@@ -190,26 +243,37 @@ syberia_engine_class <- R6::R6Class("syberia_engine",
       }
 
       if (isTRUE(parent) && private$has_parent()) {
+        ## A little tricky here: If we do not check for existence, always
+        ## run the `on_parent` action, otherwise only check it if the parent
+        ## engine has the resource.
         if (!check_exists || do.call(self$.parent$exists, full_exists_args)) {
           record(eval.parent(substitute(on_parent)))
         }
       }
 
+      ## Similarly, if we do not check for existence, always
+      ## run the `on_self` action, otherwise only check it if the current 
+      ## engine has the resource.
       if (!check_exists || do.call(super$exists, exists_args)) {
         record(eval.parent(substitute(on_self)))
       }
       
       if (isTRUE(children)) {
-        if (length(formals(on_child)) > 1L) {
+        ## The third element returned by the tree traversal when
+        ## `accumulate = TRUE` will be a list of children.
+        if (isTRUE(accumulate) && length(formals(on_child)) > 1L) {
           record(list())
         }
         if (check_exists) {
+          ## No longer ask the parent during existence checks
+          ## (or we would have infinite loops!).
           full_exists_args$parent. <- FALSE
         }
         engines <- private$mounted_engines()
         for (i in seq_along(engines)) {
           name   <- names(engines)[i]
           engine <- engines[[i]]$engine
+
           if (!any(vapply(exclude, should_exclude, logical(1), engine))) {
             if (!check_exists || do.call(engine$exists, full_exists_args)) {
               if (length(formals(on_child)) == 1L) {
@@ -225,12 +289,32 @@ syberia_engine_class <- R6::R6Class("syberia_engine",
       if (isTRUE(accumulate)) {
         result
       } else {
+        ## Note that if `accumulate = FALSE`, we should never get
+        ## here if `on_parent`, `on_self`, or `on_child` had a return
+        ## action.
         eval.parent(substitute(otherwise))
       }
     }
   )
 )
 
+## A rather technical helper function to ensure that child engines
+## of a common parent engines do not share resources.
+##
+## For example, if two engines both have a `foo/bar.R` file, this
+## would cause terrible conflicts related to multiple inheritance:
+## if the engine1 asked for `foo/bar.R`, then since the tree  
+## traversal asks the *parent* firsts, which asks its non-engine1
+## children, then engine1 would receive `foo/bar.R` from engine2.
+## Conversely, engine2 would receive engine1's `foo/bar.R`, probably
+## leading to all sorts of perverse bugs. In the future it may
+## be possible to specify canonical preferences in configuration
+## but for now we disable shared resources all together:
+##
+## **All engines must be disjoint.**
+##
+## (Except insofar as they share resources from a common child
+## engine, as in a diamond graph.)
 detect_duplicate_resources <- function(resource_list) {
   if (length(unique(c(recursive = TRUE, resource_list))) !=
       sum(vapply(resource_list, length, numeric(1)))) {
@@ -257,7 +341,8 @@ detect_duplicate_resources <- function(resource_list) {
       conflicts <- do.call(paste, lapply(conflict_list, function(conflict) {
         paste0("\n\nEngine ", crayon::red(conflict$engines[1]), " and ",
                crayon::red(conflict$engines[2]), " share:\n",
-          paste(collapse = "\n", paste(" *", vapply(conflict$resources, crayon::yellow, character(1)))))
+          paste(collapse = "\n", paste(" *",
+            vapply(conflict$resources, crayon::yellow, character(1)))))
       }))
 
       stop("Mounted child engines have conflicting resources. Please mount ",
