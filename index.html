@@ -99,6 +99,601 @@
 
         <div class="section">
           <div class="markdown markdown-body">
+            <h1>engine_R6.R</h1>
+
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer"></span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <p>The core object coordinating a syberia engine is a
+<code>syberia_engine</code> <a href="https://cran.r-project.org/web/packages/R6/vignettes/Introduction.html">R6</a>
+object.</p>
+
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer">syberia_engine_class <- R6::R6Class("syberia_engine",
+  portable = TRUE,</span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <p>We inherit directly from the <code>director</code> base class.</p>
+
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer">  inherit = getFromNamespace("director_", "director"), #environment(director::director)$director_,
+  public = list(</span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <p>Each syberia engine can include more dependent engines.
+This forms a graph of engines. However, child engines are allowed
+to be shared, so the final structure is usually a DAG, not a tree.
+The parent node is stored in <code>.parent</code> and the children
+(immediate dependent engines) are stored in <code>.engines</code>.              </p>
+
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer">    .parent  = NULL,
+    .engines = list(),
+    .set_parent = function(parent) { self$.parent <<- parent },
+</span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <p>Registering an engine is as simple adding it to the list of
+<code>.engines</code>. If we are mounting it, we register its parent
+node as the current engine.</p>
+
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer">    register_engine = function(name, engine, mount = FALSE) {
+      stopifnot(is(engine, "syberia_engine"))
+      self$.engines[[name]] <<- list(engine = engine, mount = isTRUE(mount))
+      if (isTRUE(mount)) engine$.set_parent(self)
+    },
+</span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <p>The vanilla <code>director</code> object that the <code>syberia_engine</code> inherits
+from has a <code>resource</code> method: namely, take an R file and compile it
+according to some preprocessor and parser (see the director package
+for a more thorough explanation).</p>
+
+<p>The <code>syberia_engine$resource</code> method takes a different approach.
+Since an engine may itself have more engines, resources can come
+from a whole tree of engines. Typically, it would be sufficient
+to check the engine itself and its children when looking for a
+resource. However, Syberia takes a different approach. To make
+it possible to pull out arbitrary subsets of files and turn them
+into an engine, Syberia first traverses <em>up</em> to the parent to
+see if it has overwritten any of the resources.</p>
+
+<p>This leads to some multiple inheritance problems and is a tricky
+course to navigate, but the end result is that the user is completely
+transparent to the machinery that goes into finding resources
+under the hood. It is possible to extract a collection of controllers
+and resources from any top-level syberia project (as long as they are
+self contained and include each other&#39;s dependencies) and transform
+that into an engine simply by copying the files, while retaining
+the power provided by controllers insofar as giving each directory
+structure its own meaning.</p>
+
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer">    resource = function(name, ..., parent. = TRUE, children. = TRUE,
+                        exclude. = NULL, defining_environment. = parent.frame(),
+                        engine) {
+
+      if (missing(engine)) {
+        # If we do not force right away, parent.frame() will be pointing to
+        # the wrong place. Everything in R is a promise...
+        force(defining_environment.)
+        dots <- list(...)</span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <p>We use a tree traversal helper defined later in this file:
+first, it checks the parent exists (if one exists). This
+will recursively call its parent&#39;s <code>resource</code> method. To avoid
+infinite loops, we have to be careful about excluding the
+current engine from traversal. If the parent engine reports
+it owns the resource, we return the <code>on_parent</code> action.</p>
+
+<p>Otherwise, if the current engine has the resource, we return
+that instead. Finally, if neither the parent engine nor self
+own the resource, we browse through the children.</p>
+
+<p>In the event that none of the engines have the resource,
+we trigger the self engine to resource the object so
+that we get an error that the resource was not found.</p>
+
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer">        private$traverse_tree(parent = parent., children = children.,
+          exclude = exclude., exists_args = list(name),
+          on_parent = self$.parent$resource(name, ...,
+                        exclude. = c(list(self$root()), exclude.),
+                        defining_environment. = defining_environment.),
+          on_self = super$resource(name, ...,
+                                   defining_environment. = defining_environment.),
+          on_child = function(engine) {
+            do.call(engine$resource, c(list(name), dots, list(
+              parent. = FALSE, children. = TRUE,
+              exclude. = c(engine$root(), exclude.),
+              defining_environment. = defining_environment.)
+            ))
+          },
+          otherwise = super$resource(name, ...,
+                                     defining_environment. = defining_environment.)
+        )
+      } else { # if (!missing(engine))</span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <p>It is possible to &ldquo;pluck&rdquo; a resource explicitly out of a utility engine
+using the <code>engine</code> parameter (if the engine is not mounted).</p>
+
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer">        stopifnot(is.character(engine))
+        engine_name <- engine
+        engine <- private$sanitize_engine(engine)
+        if (!engine$exists(name, ..., parent. = FALSE)) {
+          stop("No resource ", sQuote(name), " exists in engine ", sQuote(engine_name), ".")
+        }</span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <p>Extract the resource directly from the utility engine.</p>
+
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer">        return(engine$resource(name, ..., parent. = FALSE))
+      }
+    },
+</span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <p>Finding resources (as opposed to compiling them) follows a similar
+pattern: we first check the parent, then self, then the children.
+However, unlike <code>$resource</code>, the <code>$find</code> method must traverse
+all of them and take their union, similarly to the difference
+between calling <a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/funprog.html"><code>Reduce</code></a>
+with and without the <code>accumulate</code> parameter. In some sense, 
+the find operation is a tree traversal pattern with the action of
+&ldquo;find the resources matching these arguments&rdquo; and a final
+reduce step.</p>
+
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer">    find = function(..., parent. = FALSE, children. = FALSE, exclude. = NULL,
+                    check_duplicates. = FALSE, tag_engine. = FALSE) {
+
+      resources <- private$traverse_tree(parent = parent., children = children.,
+        exclude = exclude., accumulate = TRUE,
+        on_parent = self$.parent$find(..., parent. = TRUE, children. = TRUE,
+          exclude. = c(list(self$root()), exclude.), tag_engine. = tag_engine.),
+        on_self = {</span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <p>This is a bit of a subtle point. We tag the resources with the
+name of the engine so that we can later avoid some problems related
+to <a href="https://en.wikipedia.org/wiki/Multiple_inheritance">multiple inheritance</a></p>
+
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer">          self_resources <- super$find(...)
+          if (is.character(tag_engine.)) {
+            `names<-`(self_resources, rep(tag_engine., length(self_resources)))
+          } else {
+            self_resources
+          }
+        },
+        on_child = function(engine, name) {
+          tag <- if (!identical(tag_engine., FALSE)) name else FALSE
+          engine$find(..., parent. = FALSE,
+            children. = TRUE, exclude. = exclude., tag_engine. = tag)
+        }
+      )
+
+      if (isTRUE(children.)) {
+        if (isTRUE(check_duplicates.)) {</span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <p>If we are checking child engines, we take this opportunity to
+ensure none of the mounted engines have <em>shared</em> resources.
+For example, if two engines both have a <code>foo/bar.R</code> file, this
+would cause terrible conflicts related to multiple inheritance:
+if the engine1 asked for <code>foo/bar.R</code>, then since the tree<br/>
+traversal asks the <em>parent</em> firsts, which asks its non-engine1
+children, then engine1 would receive <code>foo/bar.R</code> from engine2.
+Conversely, engine2 would receive engine1&#39;s <code>foo/bar.R</code>, probably
+leading to all sorts of perverse bugs. In the future it may
+be possible to specify canonical preferences in configuration
+but for now we disable shared resources all together:</p>
+
+<p><strong>All engines must be disjoint.</strong></p>
+
+<p>(Except insofar as they share resources from a common child
+engine, as in a diamond graph.)</p>
+
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer">          resources[[length(resources)]] <- Filter(Negate(is.null), resources[[length(resources)]])
+          detect_duplicate_resources(resources[[length(resources)]])
+        }
+        resources[[length(resources)]] <- unname(resources[[length(resources)]])
+      }
+</span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <p>We revert the list to ensure children resources mask self
+and parent resources (or, for example, we would get a conflict
+in a simple diamond with two engines depending on a base
+engine, which has <code>config/application.R</code> and <code>config/engines.R</code>).</p>
+
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer">      resources <- c(recursive = TRUE, rev(resources))</span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <p>Using <code>unique</code> here would drop names!</p>
+
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer">      resources[!duplicated(resources)]
+    },
+
+    exists = function(resource, ..., parent. = TRUE, children. = TRUE, exclude. = NULL) {</span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <p>Check if a resource exists is a straightforward tree traversal
+pattern: check the parent, then self, then the children,
+and return <code>TRUE</code> as soon as any find them. Otherwise, return <code>FALSE</code>.</p>
+
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer">      private$traverse_tree(parent = parent., children = children.,
+        exclude = exclude., exists_args = list(resource, ...),
+        on_parent = TRUE, on_self = TRUE,
+        on_child = function(engine) TRUE, otherwise = FALSE)
+    }
+  ),
+</span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <p>This forms a collection of private helper methods.</p>
+
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer">  private = list(
+    has_parent = (has_parent <- function() { !is.null(self$.parent) }),
+    is_root    = Negate(has_parent),
+    mounted_engines = function() {
+      Filter(function(e) isTRUE(e$mount), self$.engines)
+    },
+</span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <p>We convert an engine from string representation to a
+<code>syberia_engine</code> object.</p>
+
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer">    sanitize_engine = function(engine, utility = TRUE) {
+      if (!is.simple_string(engine)) {
+        stop(m("sanitize_engine_class"), call. = FALSE)
+      }
+      if (!is.element(engine, names(self$.engines))) {
+        stop(m("sanitize_engine_no_engine", engine = engine), call. = FALSE)
+      }
+      engine_obj <- self$.engines[[engine]]$engine
+      if (isTRUE(utility) && isTRUE(engine_obj$mount)) {
+        stop(m("sanitize_engine_mounting_conflict", engine = engine), call. = FALSE)
+      }
+      engine_obj
+    },
+</span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <p>The master helper that defines <code>$find</code>, <code>$resource</code>, and <code>$exists</code>.
+A little many arguments for my usual taste, but they make sense here:
+we specify whether we would like to operate on the <code>parent</code> or <code>children</code>
+first as scalar bools, followed by expressions for <code>on_parent</code> and <code>on_self</code>
+and a function for <code>on_child</code>. We use a function for the latter since it
+may operate on multiple children whereas the parent and self are singletons.</p>
+
+<p>If the <code>on_child</code> function has arity 1 it receives the <code>syberia_engine</code>
+object as its argument. On arity 2, it also receives the name.</p>
+
+<p>Finally, we can specify which arguments to pass to <code>director$exists</code>
+when checking for resource existence as well as which engines to exclude.
+If this is missing, resources will not be checked for existence prior
+to running parent, self, or child actions.</p>
+
+<p>Finally, if <code>accumulate = TRUE</code>, we return a list of the three results
+(parent, self, children) with a list of multiple results per child as
+the third element.</p>
+
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer">    traverse_tree = function(parent, children, on_parent, on_self, on_child, otherwise,
+                             exists_args, exclude, accumulate = FALSE) {
+
+      record <- if (isTRUE(accumulate)) {
+        result <- list()
+        function(value, subindex) {
+          if (missing(subindex)) {
+            result[[length(result) + 1]] <<- value
+          } else {
+            result[[length(result)]][[subindex]] <<- value
+          }
+        }
+      } else { `return` }
+
+      check_exists <- !missing(exists_args)
+
+      if (check_exists) {
+        full_exists_args <- c(exists_args, exclude. = c(list(self$root())),
+          parent. = TRUE, children. = TRUE)
+      }
+
+      if (isTRUE(parent) && private$has_parent()) {</span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <p>A little tricky here: If we do not check for existence, always
+run the <code>on_parent</code> action, otherwise only check it if the parent
+engine has the resource.</p>
+
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer">        if (!check_exists || do.call(self$.parent$exists, full_exists_args)) {
+          record(eval.parent(substitute(on_parent)))
+        }
+      }
+</span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <p>Similarly, if we do not check for existence, always
+run the <code>on_self</code> action, otherwise only check it if the current 
+engine has the resource.</p>
+
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer">      if (!check_exists || do.call(super$exists, exists_args)) {
+        record(eval.parent(substitute(on_self)))
+      }
+      
+      if (isTRUE(children)) {</span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <p>The third element returned by the tree traversal when
+<code>accumulate = TRUE</code> will be a list of children.</p>
+
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer">        if (isTRUE(accumulate) && length(formals(on_child)) > 1L) {
+          record(list())
+        }
+        if (check_exists) {</span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <p>No longer ask the parent during existence checks
+(or we would have infinite loops!).</p>
+
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer">          full_exists_args$parent. <- FALSE
+        }
+        engines <- private$mounted_engines()
+        for (i in seq_along(engines)) {
+          name   <- names(engines)[i]
+          engine <- engines[[i]]$engine
+
+          if (!any(vapply(exclude, should_exclude, logical(1), engine))) {
+            if (!check_exists || do.call(engine$exists, full_exists_args)) {
+              if (length(formals(on_child)) == 1L) {
+                record(on_child(engine))
+              } else {
+                record(on_child(engine, name), name)
+              }
+            }
+          }
+        }
+      }
+
+      if (isTRUE(accumulate)) {
+        result
+      } else {</span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <p>Note that if <code>accumulate = FALSE</code>, we should never get
+here if <code>on_parent</code>, <code>on_self</code>, or <code>on_child</code> had a return
+action.</p>
+
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer">        eval.parent(substitute(otherwise))
+      }
+    }
+  )
+)
+</span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <p>A rather technical helper function to ensure that child engines
+of a common parent engines do not share resources.</p>
+
+<p>For example, if two engines both have a <code>foo/bar.R</code> file, this
+would cause terrible conflicts related to multiple inheritance:
+if the engine1 asked for <code>foo/bar.R</code>, then since the tree<br/>
+traversal asks the <em>parent</em> firsts, which asks its non-engine1
+children, then engine1 would receive <code>foo/bar.R</code> from engine2.
+Conversely, engine2 would receive engine1&#39;s <code>foo/bar.R</code>, probably
+leading to all sorts of perverse bugs. In the future it may
+be possible to specify canonical preferences in configuration
+but for now we disable shared resources all together:</p>
+
+<p><strong>All engines must be disjoint.</strong></p>
+
+<p>(Except insofar as they share resources from a common child
+engine, as in a diamond graph.)</p>
+
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer">detect_duplicate_resources <- function(resource_list) {
+  if (length(unique(c(recursive = TRUE, resource_list))) !=
+      sum(vapply(resource_list, length, numeric(1)))) {
+    # Allow for comparison of engine-resource pairs.
+    engined_resource_list <- lapply(resource_list, function(resources) {
+      setNames(Map(paste, names(resources), resources, sep = "\1"), resources)
+    })
+
+    pairs <- combn(length(resource_list), 2)
+    conflict_list <- Filter(Negate(is.null), apply(pairs, 2, function(pair) {
+      same_subengine <- engined_resource_list[[pair[1]]][
+        engined_resource_list[[pair[1]]] %in% engined_resource_list[[pair[2]]]]
+      common <- setdiff(intersect(resource_list[[pair[1]]], resource_list[[pair[2]]]),
+                        names(same_subengine))
+      if (length(common) > 0) {
+        list(
+          engines   = names(resource_list)[pair],
+          resources = common
+        )
+      }
+    }))
+
+    if (length(conflict_list) > 0L) {
+      conflicts <- do.call(paste, lapply(conflict_list, function(conflict) {
+        paste0("\n\nEngine ", crayon::red(conflict$engines[1]), " and ",
+               crayon::red(conflict$engines[2]), " share:\n",
+          paste(collapse = "\n", paste(" *",
+            vapply(conflict$resources, crayon::yellow, character(1)))))
+      }))
+
+      stop("Mounted child engines have conflicting resources. Please mount ",
+           "at a different root or remove the conflicts: ", conflicts, "\n\n")
+    }
+  }
+}
+</span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
             <h1>engine.R</h1>
 
           </div>
@@ -818,283 +1413,6 @@ should_exclude.syberia_engine <- function(...) { identical(...) }
 should_exclude.character <- function(condition, engine) {
   identical(condition, engine$root())
 }
-
-syberia_engine_class <- R6::R6Class("syberia_engine",
-  portable = TRUE,
-  inherit = director:::director_, #environment(director::director)$director_,
-  public = list(
-    .parent  = NULL,
-    .engines = list(),
-    .set_parent = function(parent) { self$.parent <<- parent },
-
-    register_engine = function(name, engine, mount = FALSE) {
-      stopifnot(is(engine, "syberia_engine"))
-      self$.engines[[name]] <<- list(engine = engine, mount = isTRUE(mount))
-      if (isTRUE(mount)) engine$.set_parent(self)
-    },
-
-    resource = function(name, ..., parent. = TRUE, children. = TRUE,
-                        exclude. = NULL, defining_environment. = parent.frame(),
-                        engine) {
-      if (!missing(engine)) {
-        if (!is.simple_string(engine)) {
-          stop("When sourcing a resource, please pass a string to the ",
-               sQuote("engine"), " parameter.")
-        }
-        if (!is.element(engine, names(self$.engines))) {
-          stop("There is no engine called ", sQuote(engine), ".")
-        }
-        engine_obj <- self$.engines[[engine]]$engine
-        if (isTRUE(engine_obj$mount)) {
-          stop("Explicit engine specification during resource sourcing is ",
-               "only allowed on unmounted engines. The ", sQuote(engine), 
-               " engine is a mounted engine.")
-        }
-        if (!engine_obj$exists(name, ..., parent. = FALSE)) {
-          stop("No resource ", sQuote(name), " in engine ", sQuote(engine), ".")
-        }
-        return(engine_obj$resource(name, ..., parent. = FALSE))
-      }
-</span></code>
-            </pre>
-          </div>
-        </div>
-        <div class="section">
-          <div class="markdown markdown-body">
-            <p>Check the parent engines for resource existence.</p>
-
-          </div>
-
-          <div class="code">
-            <pre>
-              <code class="R"><span class="spacer">      if (isTRUE(parent.) && !is.null(self$.parent)) {
-        if (self$.parent$exists(name, parent. = TRUE, children. = TRUE, exclude. = list(self$root()))) {
-          return(self$.parent$resource(name, exclude. = list(self$root()), ...,
-                                       defining_environment. = defining_environment.))
-        }
-      }
-</span></code>
-            </pre>
-          </div>
-        </div>
-        <div class="section">
-          <div class="markdown markdown-body">
-            <p>Check the current engines for resource existence.</p>
-
-          </div>
-
-          <div class="code">
-            <pre>
-              <code class="R"><span class="spacer">      if (super$exists(name)) return(super$resource(name, ..., defining_environment. = defining_environment.))
-</span></code>
-            </pre>
-          </div>
-        </div>
-        <div class="section">
-          <div class="markdown markdown-body">
-            <p>Check the subengines for resource existence.</p>
-
-          </div>
-
-          <div class="code">
-            <pre>
-              <code class="R"><span class="spacer">      if (isTRUE(children.)) {
-        for (engine in self$.engines) {
-          if (isTRUE(engine$mount)) {
-            engine <- engine$engine
-            if (!any(vapply(exclude., should_exclude, logical(1), engine))) {
-              if (engine$exists(name, parent. = FALSE, children. = TRUE, exclude. = exclude.)) {
-                return(engine$resource(name, parent. = FALSE, children. = TRUE,
-                                       exclude. = c(engine$root(), exclude.),
-                                       ..., defining_environment. = defining_environment.))
-              }
-            }
-          }
-        }
-      }
-</span></code>
-            </pre>
-          </div>
-        </div>
-        <div class="section">
-          <div class="markdown markdown-body">
-            <p>Force trigger an error using the self director.</p>
-
-          </div>
-
-          <div class="code">
-            <pre>
-              <code class="R"><span class="spacer">      super$resource(name, ..., defining_environment. = defining_environment.)
-    },
-
-    find = function(..., parent. = FALSE, children. = FALSE, exclude. = NULL,
-                    check_duplicates. = FALSE, tag_engine. = FALSE) {</span></code>
-            </pre>
-          </div>
-        </div>
-        <div class="section">
-          <div class="markdown markdown-body">
-            <p>Check the parent engines for resources.</p>
-
-          </div>
-
-          <div class="code">
-            <pre>
-              <code class="R"><span class="spacer">      resources <- character(0)
-      if (isTRUE(parent.) && !is.null(self$.parent)) {
-        resources <- self$.parent$find(..., parent. = TRUE, children. = TRUE, exclude. = list(self$root()))
-      }
-</span></code>
-            </pre>
-          </div>
-        </div>
-        <div class="section">
-          <div class="markdown markdown-body">
-            <p>Check the current engines for resources.</p>
-
-          </div>
-
-          <div class="code">
-            <pre>
-              <code class="R"><span class="spacer">      self_resources <- super$find(...)
-      if (is.character(tag_engine.)) {
-        names(self_resources) <- rep(tag_engine., length(self_resources))
-      }
-      resources <- c(self_resources, resources)
-      resources <- resources[!duplicated(resources)]
-</span></code>
-            </pre>
-          </div>
-        </div>
-        <div class="section">
-          <div class="markdown markdown-body">
-            <p>Check the subengines for resources.</p>
-
-          </div>
-
-          <div class="code">
-            <pre>
-              <code class="R"><span class="spacer">      children_resources <- vector("list", length(self$.engines))
-      if (isTRUE(children.)) {
-        for (i in seq_along(self$.engines)) {
-          name   <- names(self$.engines)[i]
-          engine <- self$.engines[[i]]
-          if (isTRUE(engine$mount)) {
-            engine <- engine$engine
-            if (!any(vapply(exclude., should_exclude, logical(1), engine))) {
-              tag <- if (!identical(tag_engine., FALSE)) name else FALSE
-              children_resources[[i]] <- engine$find(..., parent. = FALSE,
-                children. = TRUE, exclude. = exclude., tag_engine. = tag)
-              names(children_resources)[i] <- name
-            }
-          }
-        }
-      }
-
-      if (isTRUE(check_duplicates.)) {
-        children_resources <- Filter(Negate(is.null), children_resources)
-        detect_duplicate_resources(children_resources)
-      }
-      resources <- c(recursive = TRUE, c(unname(children_resources), list(resources)))
-      resources[!duplicated(resources)]
-    },
-
-    exists = function(resource, ..., parent. = TRUE, children. = TRUE, exclude. = NULL) {</span></code>
-            </pre>
-          </div>
-        </div>
-        <div class="section">
-          <div class="markdown markdown-body">
-            <p>Check the parent engines for resource existence.</p>
-
-          </div>
-
-          <div class="code">
-            <pre>
-              <code class="R"><span class="spacer">      if (isTRUE(parent.) && !is.null(self$.parent)) {
-        if (self$.parent$exists(resource, ..., parent. = TRUE, children. = TRUE, exclude. = list(self$root()))) {
-          return(TRUE)
-        }
-      }
-</span></code>
-            </pre>
-          </div>
-        </div>
-        <div class="section">
-          <div class="markdown markdown-body">
-            <p>Check the current engines for resource existence.</p>
-
-          </div>
-
-          <div class="code">
-            <pre>
-              <code class="R"><span class="spacer">      if (super$exists(resource, ...)) return(TRUE)
-</span></code>
-            </pre>
-          </div>
-        </div>
-        <div class="section">
-          <div class="markdown markdown-body">
-            <p>Check the subengines for resource existence.</p>
-
-          </div>
-
-          <div class="code">
-            <pre>
-              <code class="R"><span class="spacer">      if (isTRUE(children.)) {
-        for (engine in self$.engines) {
-          if (isTRUE(engine$mount)) {
-            engine <- engine$engine
-            if (!any(vapply(exclude., should_exclude, logical(1), engine))) {
-              if (engine$exists(resource, ..., parent. = FALSE, children. = TRUE, exclude. = exclude.)) {
-                return(TRUE)
-              }
-            }
-          }
-        }
-      }
-
-      FALSE
-    }
-  ),
-  private = list(
-  )
-)
-
-detect_duplicate_resources <- function(resource_list) {
-  if (length(unique(c(recursive = TRUE, resource_list))) !=
-      sum(vapply(resource_list, length, numeric(1)))) {
-    # Allow for comparison of engine-resource pairs.
-    engined_resource_list <- lapply(resource_list, function(resources) {
-      setNames(Map(paste, names(resources), resources, sep = "\1"), resources)
-    })
-
-    pairs <- combn(length(resource_list), 2)
-    conflict_list <- Filter(Negate(is.null), apply(pairs, 2, function(pair) {
-      same_subengine <- engined_resource_list[[pair[1]]][
-        engined_resource_list[[pair[1]]] %in% engined_resource_list[[pair[2]]]]
-      common <- setdiff(intersect(resource_list[[pair[1]]], resource_list[[pair[2]]]),
-                        names(same_subengine))
-      if (length(common) > 0) {
-        list(
-          engines   = names(resource_list)[pair],
-          resources = common
-        )
-      }
-    }))
-
-    if (length(conflict_list) > 0L) {
-      conflicts <- do.call(paste, lapply(conflict_list, function(conflict) {
-        paste0("\n\nEngine ", crayon::red(conflict$engines[1]), " and ",
-               crayon::red(conflict$engines[2]), " share:\n",
-          paste(collapse = "\n", paste(" *", vapply(conflict$resources, crayon::yellow, character(1)))))
-      }))
-
-      stop("Mounted child engines have conflicting resources. Please mount ",
-           "at a different root or remove the conflicts: ", conflicts, "\n\n")
-    }
-  }
-}
 </span></code>
             </pre>
           </div>
@@ -1162,6 +1480,19 @@ the R code with a multitude of strings.</p>
     "The ", sQuote(crayon::yellow(".onAttach")), " hook in the ",
     sQuote(crayon::yellow("{{{root}}}")), " engine must be a *function*. ",
     "Instead, I got a {{{klass}}}."
+  ),
+
+  sanitize_engine_class = c(
+    "When sourcing a resource, please pass a string to the ",
+    sQuote("engine"), " parameter."
+  ),
+
+  sanitize_engine_no_engine = c("There is no engine called ", sQuote("{{{engine}}}"), "."),
+
+  sanitize_engine_mounting_conflict = c(
+    "Explicit engine specification during resource sourcing is ",
+    "only allowed on unmounted engines. The ", sQuote("{{{engine}}}"), 
+    " engine is a mounted engine."
   )
 )
 </span></code>
@@ -1277,7 +1608,7 @@ arguments we will pass.</p>
 #' @name syberia;
 #' @docType package
 #' @author Robert Krzyzanowski
-#' @import testthat Ramd stagerunner statsUtils mungebits tundra syberiaMungebits syberiaStructure syberiaStages director objectdiff R6 whisker
+#' @import testthat stagerunner director R6 whisker
 NULL
 </span></code>
             </pre>
@@ -1444,9 +1775,7 @@ before finally wrapping up with the second message.</p>
 #'    "silent", "stop", "tap", "teamcity")}, with the default being \code{"summary"}.
 #' @seealso \code{\link{syberia_engine}}
 #' @export
-#' @return \code{TRUE} if all tests pass or will error otherwise. Note this
-#'    function uses \code{pblapply} from the pbapply package to
-#'    represent progress if available.
+#' @return \code{TRUE} if all tests pass or will error otherwise.
 test_engine <- function(engine = syberia_engine(), base = "test",
                         config = file.path("config", "environments", "test"),
                         ignored_tests = ignored_tests_from_config(engine, base, config),
@@ -1870,26 +2199,65 @@ is.falsy <- function(x) {
 
 #' Fetch the current Syberia version.
 #' @export
-syberia_version <- function() { utils::packageVersion('syberia') }
+#' @return The version of the syberia package as \code{\link{package_version}}
+#'   object.
+syberia_version <- function() {
+  utils::packageVersion("syberia")
+}
 
 package_exists <- function(name) {
   is.element(name, utils::installed.packages()[, 1])
 }
 
-ensure_installed <- function(package_name) {
-  if (!requireNamespace(package_name, quietly = TRUE)) {
+ensure_installed <- function(package_name) {</span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <p>Using <a href="http://r-pkgs.had.co.nz/src.html"><code>requireNamespace</code></a>
+is the de facto accepted approach here.</p>
+
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer">  if (!requireNamespace(package_name, quietly = TRUE)) {
     stop("Please install ", crayon::yellow(package_name), ":\n\n",
          crayon::green(paste0("install.packages('", package_name, "')")), "\n", call. = FALSE)
   }
 }
+</span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <p><a href="https://github.com/robertzk/testthatsomemore">Testthatsomemore</a>
+is an auxiliary package used for some testing utilities.</p>
 
-ensure_testthatsomemore <- function() {
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer">ensure_testthatsomemore <- function() {
   if (package_exists("testthatsomemore")) return()
   ensure_installed("devtools")
   message("The package ", crayon::yellow("testthatsomemore"),
           " is not installed; installing from http://github.com/robertzk/testthatsomemore")
-  withCallingHandlers({
-    devtools::install_github("robertzk/testthatsomemore")
+  withCallingHandlers({</span></code>
+            </pre>
+          </div>
+        </div>
+        <div class="section">
+          <div class="markdown markdown-body">
+            <p>We install it from GitHub if the user does not have it installed.</p>
+
+          </div>
+
+          <div class="code">
+            <pre>
+              <code class="R"><span class="spacer">    devtools::install_github("robertzk/testthatsomemore")
     requireNamespace("testthatsomemore", quietly = TRUE)
   }, error = function(e) {
     stop("The ", crayon::red("testthatsomemore"), " package failed to install. ",
@@ -1913,6 +2281,7 @@ as.list.environment <- function(env) {
 #' @param desc character. A string to add to "you modified global 
 #' @param check_options logical. Whether to check if any global options were changed.
 #'   variables while [\code{desc} goes here]".
+#' @return the output of the \code{expr}.
 ensure_no_global_variable_pollution <- function(expr, desc, check_options = FALSE) {
   if (isTRUE(check_options)) old_options <- options()
   before <- ls(globalenv())
@@ -1921,8 +2290,8 @@ ensure_no_global_variable_pollution <- function(expr, desc, check_options = FALS
 
   after <- ls(globalenv())
   missing_desc <- missing(desc)
-  shorten <- function(vars) if (length(vars) > 5) c(vars[1:5], '...') else vars
-  message <- function(vars, type = 'variables', action = 'removed') {
+  shorten <- function(vars) if (length(vars) > 5) c(vars[1:5], "...") else vars
+  message <- function(vars, type = "variables", action = "removed") {
     msg <- paste("Some global", type, "were", action)
     if (!eval.parent(quote(missing_desc))) msg <- paste(msg, "while", desc)
     msg <- paste0(msg, ": ", crayon::red(paste(vars, collapse = ", ")))
@@ -1931,14 +2300,14 @@ ensure_no_global_variable_pollution <- function(expr, desc, check_options = FALS
   check_before_after <- function(before, after, type) {
     if (length(bads <- setdiff(before, after)) > 0) stop(message(bads, type = type))
     else if (length(bads <- setdiff(after, before)) > 0)
-      stop(message(bads, type = type, action = 'added'))
+      stop(message(bads, type = type, action = "added"))
   }
 
-  check_before_after(before, after, 'variables')
+  check_before_after(before, after, "variables")
 
   if (isTRUE(check_options) && !identical(new_options <- options(), old_options)) {
     before <- ls(old_options); after <- ls(new_options)
-    check_before_after(before, after, 'options')
+    check_before_after(before, after, "options")
     diffs <- vapply(before,
       function(name)! identical(old_options[[name]], new_options[[name]]), logical(1))
     stop("Some global options were modified: ",
@@ -1971,13 +2340,14 @@ traverse_parent_directories <- function(filepath, fn, error) {
   stopifnot(is.function(fn), length(formals(fn)) >= 1)
   stopifnot(is.character(error) || is.function(error))
 
-  path <- normalizePath(filepath, mustWork = FALSE)</span></code>
+  path <- normalizePath(filepath, mustWork = FALSE)
+</span></code>
             </pre>
           </div>
         </div>
         <div class="section">
           <div class="markdown markdown-body">
-            <p>As long as we have not hit the root directory, keep trying</p>
+            <p>As long as we have not hit the root directory, keep trying.</p>
 
           </div>
 

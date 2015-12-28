@@ -1,0 +1,11 @@
+
+lib/controllers/person : .
+lib/people/john : 1
+1. Failure (at john.R#2): Her name is Jane Doe ---------------------------------
+as.character(resource()) not equal to "Jane Doe"
+1 string mismatches:
+x[1]: "John Doe"
+y[1]: "Jane Doe"
+
+No-one gets it right on their first try
+.
