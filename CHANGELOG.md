@@ -1,4 +1,4 @@
-# Version 0.5.1
+# Version 0.5.1-0.6.1
 
 * A complete re-write of the original Syberia that incorporates
   the new concept of **engines**, the core re-usable structural unit across
