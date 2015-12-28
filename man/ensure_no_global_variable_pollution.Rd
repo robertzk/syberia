@@ -14,6 +14,9 @@ ensure_no_global_variable_pollution(expr, desc, check_options = FALSE)
 \item{check_options}{logical. Whether to check if any global options were changed.
 variables while [\code{desc} goes here]".}
 }
+\value{
+the output of the \code{expr}.
+}
 \description{
 If any global variables are removed or created, it will
 give a descriptive error.

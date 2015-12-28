@@ -120,9 +120,7 @@
 #'    "silent", "stop", "tap", "teamcity")}, with the default being \code{"summary"}.
 #' @seealso \code{\link{syberia_engine}}
 #' @export
-#' @return \code{TRUE} if all tests pass or will error otherwise. Note this
-#'    function uses \code{pblapply} from the pbapply package to
-#'    represent progress if available.
+#' @return \code{TRUE} if all tests pass or will error otherwise.
 test_engine <- function(engine = syberia_engine(), base = "test",
                         config = file.path("config", "environments", "test"),
                         ignored_tests = ignored_tests_from_config(engine, base, config),

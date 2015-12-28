@@ -6,6 +6,10 @@
 \usage{
 syberia_version()
 }
+\value{
+The version of the syberia package as \code{\link{package_version}}
+  object.
+}
 \description{
 Fetch the current Syberia version.
 }

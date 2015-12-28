@@ -39,9 +39,7 @@ options are \code{c("check", "list", "summary", "minimal", "multi", "rstudio",
 "silent", "stop", "tap", "teamcity")}, with the default being \code{"summary"}.}
 }
 \value{
-\code{TRUE} if all tests pass or will error otherwise. Note this
-   function uses \code{pblapply} from the pbapply package to
-   represent progress if available.
+\code{TRUE} if all tests pass or will error otherwise.
 }
 \description{
 The tests that will be run are all those in the \code{test} subdirectory

@@ -40,7 +40,6 @@ Suggests:
     bettertrace,
     devtools,
     knitr,
-    pbapply,
     testthatsomemore
 VignetteBuilder: knitr
 License: MIT + file LICENSE
