@@ -14,25 +14,34 @@ is.falsy <- function(x) {
 
 #' Fetch the current Syberia version.
 #' @export
-syberia_version <- function() { utils::packageVersion('syberia') }
+#' @return The version of the syberia package as \code{\link{package_version}}
+#'   object.
+syberia_version <- function() {
+  utils::packageVersion("syberia")
+}
 
 package_exists <- function(name) {
   is.element(name, utils::installed.packages()[, 1])
 }
 
 ensure_installed <- function(package_name) {
+  ## Using [`requireNamespace`](http://r-pkgs.had.co.nz/src.html)
+  ## is the de facto accepted approach here.
   if (!requireNamespace(package_name, quietly = TRUE)) {
     stop("Please install ", crayon::yellow(package_name), ":\n\n",
          crayon::green(paste0("install.packages('", package_name, "')")), "\n", call. = FALSE)
   }
 }
 
+## [Testthatsomemore](https://github.com/robertzk/testthatsomemore)
+## is an auxiliary package used for some testing utilities.
 ensure_testthatsomemore <- function() {
   if (package_exists("testthatsomemore")) return()
   ensure_installed("devtools")
   message("The package ", crayon::yellow("testthatsomemore"),
           " is not installed; installing from http://github.com/robertzk/testthatsomemore")
   withCallingHandlers({
+    ## We install it from GitHub if the user does not have it installed.
     devtools::install_github("robertzk/testthatsomemore")
     requireNamespace("testthatsomemore", quietly = TRUE)
   }, error = function(e) {
@@ -57,6 +66,7 @@ as.list.environment <- function(env) {
 #' @param desc character. A string to add to "you modified global 
 #' @param check_options logical. Whether to check if any global options were changed.
 #'   variables while [\code{desc} goes here]".
+#' @return the output of the \code{expr}.
 ensure_no_global_variable_pollution <- function(expr, desc, check_options = FALSE) {
   if (isTRUE(check_options)) old_options <- options()
   before <- ls(globalenv())
@@ -65,8 +75,8 @@ ensure_no_global_variable_pollution <- function(expr, desc, check_options = FALS
 
   after <- ls(globalenv())
   missing_desc <- missing(desc)
-  shorten <- function(vars) if (length(vars) > 5) c(vars[1:5], '...') else vars
-  message <- function(vars, type = 'variables', action = 'removed') {
+  shorten <- function(vars) if (length(vars) > 5) c(vars[1:5], "...") else vars
+  message <- function(vars, type = "variables", action = "removed") {
     msg <- paste("Some global", type, "were", action)
     if (!eval.parent(quote(missing_desc))) msg <- paste(msg, "while", desc)
     msg <- paste0(msg, ": ", crayon::red(paste(vars, collapse = ", ")))
@@ -75,14 +85,14 @@ ensure_no_global_variable_pollution <- function(expr, desc, check_options = FALS
   check_before_after <- function(before, after, type) {
     if (length(bads <- setdiff(before, after)) > 0) stop(message(bads, type = type))
     else if (length(bads <- setdiff(after, before)) > 0)
-      stop(message(bads, type = type, action = 'added'))
+      stop(message(bads, type = type, action = "added"))
   }
 
-  check_before_after(before, after, 'variables')
+  check_before_after(before, after, "variables")
 
   if (isTRUE(check_options) && !identical(new_options <- options(), old_options)) {
     before <- ls(old_options); after <- ls(new_options)
-    check_before_after(before, after, 'options')
+    check_before_after(before, after, "options")
     diffs <- vapply(before,
       function(name)! identical(old_options[[name]], new_options[[name]]), logical(1))
     stop("Some global options were modified: ",
@@ -116,7 +126,8 @@ traverse_parent_directories <- function(filepath, fn, error) {
   stopifnot(is.character(error) || is.function(error))
 
   path <- normalizePath(filepath, mustWork = FALSE)
-  ## As long as we have not hit the root directory, keep trying
+
+  ## As long as we have not hit the root directory, keep trying.
   while (!identical(dirname(path), path)) {
     result <- fn(path)
     if (!is.null(result)) return(result)

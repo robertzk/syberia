@@ -189,7 +189,7 @@ syberia_engine_class <- R6::R6Class("syberia_engine",
 
     ## We convert an engine from string representation to a
     ## `syberia_engine` object.
-    sanitize_engine = function(engine, uility = TRUE) {
+    sanitize_engine = function(engine, utility = TRUE) {
       if (!is.simple_string(engine)) {
         stop(m("sanitize_engine_class"), call. = FALSE)
       }
