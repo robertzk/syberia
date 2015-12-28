@@ -1,17 +1,52 @@
+## The core object coordinating a syberia engine is a
+## `syberia_engine` [R6](https://cran.r-project.org/web/packages/R6/vignettes/Introduction.html)
+## object.
 syberia_engine_class <- R6::R6Class("syberia_engine",
   portable = TRUE,
-  inherit = director:::director_, #environment(director::director)$director_,
+  ## We inherit directly from the `director` base class.
+  inherit = getFromNamespace("director_", "director"), #environment(director::director)$director_,
   public = list(
+    ## Each syberia engine can include more dependent engines.
+    ## This forms a graph of engines. However, child engines are allowed
+    ## to be shared, so the final structure is usually a DAG, not a tree.
+    ## The parent node is stored in `.parent` and the children
+    ## (immediate dependent engines) are stored in `.engines`.              
     .parent  = NULL,
     .engines = list(),
     .set_parent = function(parent) { self$.parent <<- parent },
 
+    ## Registering an engine is as simple adding it to the list of
+    ## `.engines`. If we are mounting it, we register its parent
+    ## node as the current engine.
     register_engine = function(name, engine, mount = FALSE) {
       stopifnot(is(engine, "syberia_engine"))
       self$.engines[[name]] <<- list(engine = engine, mount = isTRUE(mount))
       if (isTRUE(mount)) engine$.set_parent(self)
     },
 
+    ## The vanilla `director` object that the `syberia_engine` inherits
+    ## from has a `resource` method: namely, take an R file and compile it
+    ## according to some preprocessor and parser (see the director package
+    ## for a more thorough explanation).
+    ## 
+    ## The `syberia_engine$resource` method takes a different approach.
+    ## Since an engine may itself have more engines, resources can come
+    ## from a whole tree of engines. Typically, it would be sufficient
+    ## to check the engine itself and its children when looking for a
+    ## resource. However, Syberia takes a different approach. To make
+    ## it possible to pull out arbitrary subsets of files and turn them
+    ## into an engine, Syberia first traverses *up* to the parent to
+    ## see if it has overwritten any of the resources.
+    ##
+    ## This leads to some multiple inheritance problems and is a tricky
+    ## course to navigate, but the end result is that the user is completely
+    ## transparent to the machinery that goes into finding resources
+    ## under the hood. It is possible to extract a collection of controllers
+    ## and resources from any top-level syberia project (as long as they are
+    ## self contained and include each other's dependencies) and transform
+    ## that into an engine simply by copying the files, while retaining
+    ## the power provided by controllers insofar as giving each directory
+    ## structure its own meaning.
     resource = function(name, ..., parent. = TRUE, children. = TRUE,
                         exclude. = NULL, defining_environment. = parent.frame(),
                         engine) {
@@ -21,6 +56,20 @@ syberia_engine_class <- R6::R6Class("syberia_engine",
         # the wrong place. Everything in R is a promise...
         force(defining_environment.)
         dots <- list(...)
+        ## We use a tree traversal helper defined later in this file:
+        ## first, it checks the parent exists (if one exists). This
+        ## will recursively call its parent's `resource` method. To avoid
+        ## infinite loops, we have to be careful about excluding the
+        ## current engine from traversal. If the parent engine reports
+        ## it owns the resource, we return the `on_parent` action.
+        ## 
+        ## Otherwise, if the current engine has the resource, we return
+        ## that instead. Finally, if neither the parent engine nor self
+        ## own the resource, we browse through the children.
+        ##
+        ## In the event that none of the engines have the resource,
+        ## we trigger the self engine to resource the object so
+        ## that we get an error that the resource was not found.
         private$traverse_tree(parent = parent., children = children.,
           exclude = exclude., exists_args = list(name),
           on_parent = self$.parent$resource(name, ...,
@@ -38,13 +87,16 @@ syberia_engine_class <- R6::R6Class("syberia_engine",
           otherwise = super$resource(name, ...,
                                      defining_environment. = defining_environment.)
         )
-      } else {
+      } else { # if (!missing(engine))
+        ## It is possible to "pluck" a resource explicitly out of a utility engine
+        ## using the `engine` parameter (if the engine is not mounted).
         stopifnot(is.character(engine))
         engine_name <- engine
         engine <- private$sanitize_engine(engine)
         if (!engine$exists(name, ..., parent. = FALSE)) {
           stop("No resource ", sQuote(name), " exists in engine ", sQuote(engine_name), ".")
         }
+        ## Extract the resource directly from the utility engine.
         return(engine$resource(name, ..., parent. = FALSE))
       }
     },
