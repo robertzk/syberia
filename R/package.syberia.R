@@ -22,7 +22,7 @@
 #' @name syberia;
 #' @docType package
 #' @author Robert Krzyzanowski
-#' @import testthat Ramd stagerunner statsUtils mungebits tundra syberiaMungebits syberiaStructure syberiaStages director objectdiff R6 whisker
+#' @import testthat stagerunner director R6 whisker
 NULL
 
 ## An environment used for caching some Syberia-managed objects, like directors.
