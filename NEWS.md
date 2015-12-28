@@ -1,3 +1,7 @@
+# Version 0.6.1.1
+
+* The loading of engines is announced to the user.
+
 # Version 0.5.1-0.6.1
 
 * A complete re-write of the original Syberia that incorporates
