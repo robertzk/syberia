@@ -186,10 +186,16 @@ syberia_engine_character <- function(filepath, cache = TRUE) {
 ## A syberia engine with root `root` is, by definition, a directory of
 ## R files containing the file `root/config/application.R` or any variation
 ## thereof (e.g., `root/config/application/application.r`). This is how we
-## recognize the engine.
-extensions <- c(".R", ".r", "/application.R", "/application.r")
+## recognize the engine. (Alternatively, if it has a `config/engines` resource.)
 has_application_file <- function(filepath) {
-  any(file.exists(paste0(file.path(filepath, "config", "application"), extensions)))
+  extensions <- c(".R", ".r", "/_.R", "/_.r")
+  files <- function(...) {
+    c(recursive = TRUE, lapply(list(...), function(type) {
+      paste0(file.path(filepath, "config", type),
+             gsub(fixed = TRUE, "_", type, extensions))
+    }))
+  }
+  any(file.exists(files("application", "engines")))
 }
 
 #' Build a syberia engine.
