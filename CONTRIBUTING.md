@@ -6,10 +6,6 @@ Want to show Syberia some love?  Help out by contributing!
  - [Bug?](#issue)
  - [Feature Request?](#feature)
  - [Submission Guidelines](#submit)
- - [Coding Rules](#rules)
- - [Commit Message Guidelines](#commit)
- - [Signing the CLA](#cla)
- - [Further Info](#info)
 
 
 ## <a name="question"></a> Got a Question?
