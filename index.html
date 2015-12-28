@@ -1663,19 +1663,9 @@ invisible to the Syberia engine: this encourages clean design and separation
 into helper files as your resource becomes more complex.</p>
 
 <p>Here is an example test. You can look at the accompanying
-<a href="http://github.com/syberia/syberia/tree/master/tests/testthat/projects/test_calculation_pi">helper project</a>.</p>
+<a href="https://github.com/syberia/syberia/tree/23840b25a8d06740761d6200c7ba68d40c7d7745/tests/testthat/projects/test_calculation_pi">helper project</a></p>
 
-          </div>
-
-          <div class="code">
-            <pre>
-              <code class="R"><span class="spacer"># TODO: (RK) Check this is the correct link.</span></code>
-            </pre>
-          </div>
-        </div>
-        <div class="section">
-          <div class="markdown markdown-body">
-            <pre><code class="r"># calculations/pi.R
+<pre><code class="r"># calculations/pi.R
 # Compute pi using a series: http://functions.wolfram.com/Constants/Pi/06/01/01/
 Reduce(`+`, 4 * vapply(seq_len(1000) - 1, function(k) {
   (-1)^k / (2 * k + 1)
