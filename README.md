@@ -86,6 +86,17 @@ in conjunction with Syberia modeling projects include
 [testthatsomemore](https://github.com/robertzk/testthatsomemore), and
 [treeskeleton](https://github.com/robertzk/treeskeleton).
 
+### Development
+
+To run the tests for the Syberia package, you will have to check
+out its git submodules.
+
+```
+git submodule update --init --recursive
+```
+
+This will pull in `inst/engines/base.sy` from the [base engine](http://github.com/syberia/base.sy).
+
 ### License
 
 This project is licensed under the MIT License:
