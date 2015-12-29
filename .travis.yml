@@ -17,7 +17,7 @@ install:
 - "./travis-tool.sh install_github robertzk/bettertrace"
 - "./travis-tool.sh install_github robertzk/testthatsomemore"
 - "./travis-tool.sh install_github syberia/stagerunner"
-- "./travis-tool.sh install_github syberia/director@documentation_cleanup"
+- "./travis-tool.sh install_github syberia/director"
 script: "./travis-tool.sh run_tests"
 after_failure:
   - "./travis-tool.sh dump_logs"
