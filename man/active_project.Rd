@@ -2,7 +2,6 @@
 % Please edit documentation in R/engine.R
 \name{active_project}
 \alias{active_project}
-\alias{project}
 \title{The current active Syberia project.}
 \usage{
 active_project()

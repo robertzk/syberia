@@ -17,6 +17,11 @@
     }
     library(bettertrace)
   }
+
+  makeActiveBinding("project", env = globalenv(),
+    function() getFromNamespace("active_project", "syberia")())
+  makeActiveBinding("resource", env = globalenv(),
+    function() getFromNamespace("active_project", "syberia")()$resource)
   
   # We want to initialize a Syberia project in the current working directory
   # because 9 times out of 10 this is what the user wants.
@@ -34,7 +39,12 @@
 }
 
 .onDetach <- function(...) {
+  try(silent = TRUE, detach("syberia:shims"))
   # TODO: (RK) Detach any environments attached to the search path
   # by the active project.
+}
+
+.onUnload <- function(...) {
+  try(silent = TRUE, detach("syberia:shims"))
 }
 
