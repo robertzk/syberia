@@ -21,7 +21,7 @@
   makeActiveBinding("project", env = globalenv(),
     function() getFromNamespace("active_project", "syberia")())
   makeActiveBinding("resource", env = globalenv(),
-    function(...) getFromNamespace("active_project", "syberia")()$resource(...))
+    function() getFromNamespace("active_project", "syberia")()$resource)
   
   # We want to initialize a Syberia project in the current working directory
   # because 9 times out of 10 this is what the user wants.
