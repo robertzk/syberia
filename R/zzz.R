@@ -1,27 +1,34 @@
+install_options <- function() {
+  # Use Rstudio as the default CRAN mirror.
+  c(repos = getOption("repos", structure(c(CRAN = "http://cran.rstudio.com"))))
+}
+
+install_bettertrace <- function() {
+  devtools::with_options(install_options(), {
+    if (!is.element("devtools", utils::installed.packages()[, 1])) {
+      packageStartupMessage(crayon::yellow("   ...Installing devtools\n"))
+      utils::install.packages("devtools")
+    }
+
+    if (!requireNamespace("bettertrace", quietly = TRUE)) {
+      packageStartupMessage(crayon::yellow("   ...Installing github.com/robertzk/bettertrace\n"))
+      devtools::install_github("robertzk/bettertrace")
+    }
+    library(bettertrace)
+  })
+}
+
 .onAttach <- function(...) {
   if (!isTRUE(getOption("syberia.silent"))) {
     packageStartupMessage(paste0("Loading ", crayon::red("Syberia"), "...\n"))
   }
 
   # Load bettertrace.
-  devtools::with_options(
-    c(repos = getOption('repos', structure(c(CRAN="http://cran.rstudio.com")))),
-    {
-      if (isTRUE(getOption("syberia.autoload_bettertrace", TRUE)) &&
-          !identical(Sys.getenv("CI"), "TRUE")) {
-        if (!is.element("devtools", utils::installed.packages()[, 1])) {
-          packageStartupMessage(crayon::yellow("   ...Installing devtools\n"))
-          utils::install.packages("devtools")
-        }
+  if (isTRUE(getOption("syberia.autoload_bettertrace", TRUE)) &&
+      !identical(Sys.getenv("CI"), "TRUE")) {
+    install_bettertrace()
+  }
 
-        if (!requireNamespace("bettertrace", quietly = TRUE)) {
-          packageStartupMessage(crayon::yellow("   ...Installing github.com/robertzk/bettertrace\n"))
-          devtools::install_github("robertzk/bettertrace")
-        }
-        library(bettertrace)
-      }
-    }
-  )
   # We want to initialize a Syberia project in the current working directory
   # because 9 times out of 10 this is what the user wants.
   #
