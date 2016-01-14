@@ -11,7 +11,7 @@ Description: Syberia is a meta-framework for R that allows for on-the-fly
     Shiny dashboards, R web apps, and reproducible analysis. In the
     viewpoint of the author, R is syntactic sugar around LISP, which
     enables arbitrary computation; Syberia is an attempt to support this
-    conjecture by allowing the construction of arbitrary software 
+    conjecture by allowing the construction of arbitrary software
     projects within the R programming language, thereby finally outgrowing
     its long-overdue misconception as a statistical tool.
 Author: Robert Krzyzanowski <rkrzyzanowski@gmail.com>
@@ -23,6 +23,7 @@ Depends:
 Imports:
     crayon,
     director,
+    devtools,
     memoise,
     R6,
     stagerunner,
@@ -30,7 +31,6 @@ Imports:
     whisker
 Suggests:
     bettertrace,
-    devtools,
     knitr,
     testthatsomemore
 VignetteBuilder: knitr
