@@ -23,6 +23,7 @@ Depends:
 Imports:
     crayon,
     director,
+    devtools,
     memoise,
     R6,
     stagerunner,
@@ -30,7 +31,6 @@ Imports:
     whisker
 Suggests:
     bettertrace,
-    devtools,
     knitr,
     testthatsomemore
 VignetteBuilder: knitr
