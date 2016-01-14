@@ -38,10 +38,3 @@ License: MIT + file LICENSE
 LazyData: true
 Roxygen: list(wrap = FALSE)
 RoxygenNote: 5.0.1
-Remotes:
-    hadley/testthat,
-    kirillseva/covr,
-    robertzk/bettertrace,
-    robertzk/testthatsomemore,
-    syberia/stagerunner,
-    syberia/director

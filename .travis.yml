@@ -23,10 +23,10 @@ cache:
 before_script:
   - mkdir -p "$R_LIBS_USER"
   - Rscript -e 'if (length(find.package("devtools", quiet = TRUE)) == 0L) { install.packages("devtools", repos = "http://cran.rstudio.com"); devtools::install_github("hadley/devtools") }'
-  - Rscript -e 'if (!require("testthatsomemore")) install.packages("robertzk/testthatsomemore")'
-  - Rscript -e 'if (!require("bettertrace")) install.packages("robertzk/bettertrace")'
-  - Rscript -e 'if (!require("stagerunner")) install.packages("robertzk/stagerunner")'
-  - Rscript -e 'if (!require("director")) install.packages("robertzk/director")'
+  - Rscript -e 'if (!require("testthatsomemore")) devtools::install_github("robertzk/testthatsomemore")'
+  - Rscript -e 'if (!require("bettertrace")) devtools::install_github("robertzk/bettertrace")'
+  - Rscript -e 'if (!require("stagerunner")) devtools::install_github("robertzk/stagerunner")'
+  - Rscript -e 'if (!require("director")) devtools::install_github("robertzk/director")'
   - Rscript -e 'devtools::update_packages("devtools", repos = "http://cran.rstudio.com")'
   - Rscript -e 'devtools::install_deps(repos = "http://cran.rstudio.com", dependencies = TRUE)'
 script:
