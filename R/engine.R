@@ -37,14 +37,14 @@
 ## especially helpful for machine learning projects, where the task and solution
 ## can take widely varying shapes depending on whether the problem is supervised,
 ## unsupervised, NLP, deep learning, etc.
-## 
+##
 ## The above 2-step approach is recursive. For example, the [modeling engine](https://github.com/syberia/modeling.sy),
 ## the default engine for most projects, is built off the [base engine](https://github.com/syberia/base.sy),
 ## which dictates that each project should have a `config/routes.R` file which
-## links the `lib/controllers` directory to the rest of the project and tells 
+## links the `lib/controllers` directory to the rest of the project and tells
 ## you how R scripts in the project are to be parsed according to which
 ## directory they reside in. This is similar to object-oriented programming,
-## except that it is strictly more general since it does not force you 
+## except that it is strictly more general since it does not force you
 ## to treat every single thing in the world as an object.
 ##
 ## Thus, the core structural unit is an **engine**. In order to bootstrap
@@ -106,7 +106,7 @@
 #' project from which the engine will be used.
 #'
 #' @param filepath character. The root directory of the engine.
-#'    If this directory does not define a (relative) \code{"config/application.R"} 
+#'    If this directory does not define a (relative) \code{"config/application.R"}
 #'    file, the parent directories of \code{filepath} will be traversed
 #'    until such a file is found, or the function will error.
 #'    By default, the current directory.
@@ -166,13 +166,13 @@ syberia_engine_.character <- function(filepath, ...) {
 
 syberia_engine_character <- function(filepath, cache = TRUE) {
   ## If a user gives `~/foo/bar/baz` as the path and the project's
-  ## root is in fact `~/foo` (in other words, if they give a file or subdirectory 
+  ## root is in fact `~/foo` (in other words, if they give a file or subdirectory
   ## in the project), this should be inferrable. We traverse
   ## the parent directories until we hit the root of the file system
   ## to see if we are in a syberia engine
   traverse_parent_directories(normalizePath(filepath, mustWork = FALSE), function(filepath) {
     ## If we are caching the precomputed `syberia_engine` object, simply fetch
-    ## it from the `.syberia_env` helper environment.                              
+    ## it from the `.syberia_env` helper environment.
     if (isTRUE(cache) && has_application_file(filepath)) {
       ## If it is not cached, call `build_engine` on the directory.
       .syberia_env[[filepath]] <- .syberia_env[[filepath]] %||% build_engine(filepath)
@@ -215,7 +215,7 @@ build_engine.pre_engine <- function(buildable) {
 
 #' @export
 build_engine.character <- function(buildable) {
-  ## To build an engine, we bootstrap an otherwise bare 
+  ## To build an engine, we bootstrap an otherwise bare
   ## `syberia_engine` R6 object. Bootstrapping an engine
   ## is explained below.
   bootstrap_engine(syberia_engine_class$new(buildable))
@@ -244,7 +244,7 @@ engine_location_path <- function() {
   getOption("syberia.engine_location", "~/.R/.syberia/engines")
 }
 
-## To build an engine, we bootstrap an otherwise bare 
+## To build an engine, we bootstrap an otherwise bare
 ## `syberia_engine` R6 object. Bootstrapping an engine
 ## consists of
 ##
@@ -266,7 +266,7 @@ engine_location_path <- function() {
 ## do additional stuff *after* preprocessing and sourcing that file. For example,
 ## in `config/engines` we need to actually build and mount the engines referred
 ## to in the fil with the `engine` helper function.
-## 
+##
 ## In order to avoid the [diamond problem](https://en.wikipedia.org/wiki/Multiple_inheritance),
 ## Syberia ensures that engines do not share resources *unless* they come from
 ## a common base engine. This is a technical issue that will eventually be
@@ -286,7 +286,7 @@ bootstrap_engine <- function(engine) {
   engine$register_preprocessor("config/boot",    boot_preprocessor)
   engine$register_preprocessor("config/engines", engine_preprocessor)
   engine$register_parser      ("config/engines", engine_parser)
-  
+
   exists <- function(...) engine$exists(..., parent. = FALSE, children. = FALSE)
   if (exists("config/engines")) engine$resource("config/engines")
   if (exists("config/boot"))    engine$resource("config/boot")
@@ -320,7 +320,7 @@ engine_preprocessor <- function(source, source_env, preprocessor_output, directo
 
 ## Now that we have collected the engines to be mounted into the `preprocessor_output`
 ## helper (which also came from [director](https://github.com/syberia/director)),
-# 
+#
 engine_parser <- function(director, preprocessor_output) {
   if (isTRUE(director$cache_get("bootstrapped"))) return()
 
@@ -347,11 +347,11 @@ engine_parser <- function(director, preprocessor_output) {
            call. = FALSE)
     }
 
-    ## We use `list2env` to "inject" the `director` local variable into the 
+    ## We use `list2env` to "inject" the `director` local variable into the
     ## scope of the `onAttach` hook.
     environment(onAttach) <- list2env(
       list(director = director),
-      parent = environment(onAttach) %||% baseenv() 
+      parent = environment(onAttach) %||% baseenv()
     )
     director$cache_set(".onAttach", onAttach)
   }
@@ -359,7 +359,7 @@ engine_parser <- function(director, preprocessor_output) {
 }
 
 ## Registering an engine means making the parent aware of its child
-## and the child aware of its parent. Mounting the engine means 
+## and the child aware of its parent. Mounting the engine means
 ## we will be treating a collection of engines, each in potentially
 ## very different directories on the file system, as *one giant project*.
 ## This allows us to pull out a subset of Syberia resources and
@@ -401,7 +401,7 @@ parse_engine <- function(engine_parameters) {
   ## When we use `devtools::load_all` on director, it loads a symbol called
   ## `exists`; we use explicit base namespacing to prevent conflicts during development.
   if (!base::exists(parser, envir = getNamespace("syberia"), inherits = FALSE)) {
-    stop(sprintf("Cannot load an engine of type %s", 
+    stop(sprintf("Cannot load an engine of type %s",
                  sQuote(crayon::red(engine_parameters$type))))
   }
   syberia_engine(get(parser, envir = getNamespace("syberia"))(engine_parameters),
@@ -466,4 +466,3 @@ should_exclude.syberia_engine <- function(...) { identical(...) }
 should_exclude.character <- function(condition, engine) {
   identical(condition, engine$root())
 }
-
