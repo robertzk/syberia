@@ -360,6 +360,8 @@ engine_parser <- function(director, preprocessor_output) {
 ## is to make it as easy as possible to pull out your work so others
 ## can re-use it.
 register_engine <- function(director, name, engine, mount = FALSE) {
+  message(crayon::green(paste("...Mounting", name, "engine.")))
+
   # TODO: (RK) Replace with $engines private member after R6ing.
   if (!director$cache_exists("engines")) {
     director$cache_set("engines", new.env(parent = emptyenv()))
