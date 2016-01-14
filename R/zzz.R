@@ -5,7 +5,7 @@
 
   # Load bettertrace.
   devtools::with_options(
-    c(repos=structure(c(CRAN="http://streaming.stat.iastate.edu/CRAN/"))),
+    c(repos = getOption('repos', structure(c(CRAN="http://cran.rstudio.com")))),
     {
       if (isTRUE(getOption("syberia.autoload_bettertrace", TRUE)) &&
           !identical(Sys.getenv("CI"), "TRUE")) {
