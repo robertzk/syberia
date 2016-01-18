@@ -297,7 +297,7 @@ ensure_resources_are_tested <- function(engine, tests, optional, base = "test") 
 
   without_optional_resources <- function(resources) {
     ## `optional` resources are actually substring matches!
-    Filter(function(resource) !any_is_substring_of(resources, optional), resources)
+    Filter(function(resource) !any_is_substring_of(resource, optional), resources)
   }
 
   all_resources <- without_optional_resources(without_builtin_resources(engine$find()))
