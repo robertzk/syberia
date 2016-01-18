@@ -356,9 +356,7 @@ ignored_tests_from_config <- function(engine, base, config) {
 ##
 ## Use with caution!
 optional_tests_from_config <- function(engine, base, config) {
-  file.path(base, 
-    value_from_config(engine, config, "optional_tests") %||% character(0)
-  )
+  value_from_config(engine, config, "optional_tests") %||% character(0)
 }
 
 value_from_config <- function(engine, config, value) {
