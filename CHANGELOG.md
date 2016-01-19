@@ -1,5 +1,6 @@
-# Version 0.6.1.9001-4
+# Version 0.6.1.9001-5
 
+* `test_engine` errors if there are any test failures.
 * Engine cloning uses HTTPS instead of SSH.
 * Mounting of engines are announced to the user.
 
