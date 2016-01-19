@@ -1,7 +1,7 @@
 Package: syberia
 Type: Package
 Title: Syberia
-Version: 0.6.1.9004
+Version: 0.6.1.9005
 Description: Syberia is a meta-framework for R that allows for on-the-fly
     creation of concrete frameworks for constructing arbitrary software.
     In its current formulation, the modeling engine provides an opiniated

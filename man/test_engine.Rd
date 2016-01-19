@@ -9,7 +9,8 @@ test_engine(engine = syberia_engine(), base = "test",
   ignored_tests = ignored_tests_from_config(engine, base, config),
   optional_tests = optional_tests_from_config(engine, base, config),
   required = TRUE, reporter = c("summary", "check", "list", "minimal",
-  "multi", "rstudio", "silent", "stop", "tap", "teamcity")[1L])
+  "multi", "rstudio", "silent", "stop", "tap", "teamcity")[1L],
+  error_on_failure = TRUE)
 }
 \arguments{
 \item{engine}{syberia_engine. The syberia engine to test.
@@ -37,9 +38,14 @@ recommended that all your projects have full test coverage.}
 \item{reporter}{character. The testthat package test reporter to use. The
 options are \code{c("check", "list", "summary", "minimal", "multi", "rstudio",
 "silent", "stop", "tap", "teamcity")}, with the default being \code{"summary"}.}
+
+\item{error_on_failure}{logical. Whether or not to raise an error
+if there are any failures. By default, \code{TRUE}.}
 }
 \value{
-\code{TRUE} if all tests pass or will error otherwise.
+A list of \code{testthat_results} objects giving the details for
+   the tests executed on each tested resource. If \code{error_on_failure}
+   is \code{TRUE}, error instead if there are any failures.
 }
 \description{
 The tests that will be run are all those in the \code{test} subdirectory
