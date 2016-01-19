@@ -416,7 +416,7 @@ parse_engine.github <- function(engine_parameters) {
 
   pre_engine(prefix = file.path("github", repo, version),
     builder = function(filepath) {
-      status <- system2("git", c("clone", sprintf("git@github.com:%s", repo), filepath))
+      status <- system2("git", c("clone", sprintf("https://github.com/%s.git", repo), filepath))
       stopifnot(status == 0)
     })
 }
