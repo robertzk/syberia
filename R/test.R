@@ -117,15 +117,20 @@
 #' @param reporter character. The testthat package test reporter to use. The
 #'    options are \code{c("check", "list", "summary", "minimal", "multi", "rstudio",
 #'    "silent", "stop", "tap", "teamcity")}, with the default being \code{"summary"}.
+#' @param error_on_failure logical. Whether or not to raise an error
+#'    if there are any failures. By default, \code{TRUE}.
 #' @seealso \code{\link{syberia_engine}}
 #' @export
-#' @return \code{TRUE} if all tests pass or will error otherwise.
+#' @return A list of \code{testthat_results} objects giving the details for
+#'    the tests executed on each tested resource. If \code{error_on_failure}
+#'    is \code{TRUE}, error instead if there are any failures.
 test_engine <- function(engine = syberia_engine(), base = "test",
                         config = file.path("config", "environments", "test"),
                         ignored_tests = ignored_tests_from_config(engine, base, config),
                         optional_tests = optional_tests_from_config(engine, base, config),
                         required = TRUE, reporter = c("summary", "check", "list",
-                          "minimal", "multi", "rstudio", "silent", "stop", "tap", "teamcity")[1L]) {
+                          "minimal", "multi", "rstudio", "silent", "stop", "tap", "teamcity")[1L],
+                        error_on_failure = TRUE) {
   if (is.character(engine)) {
     engine <- syberia_engine(engine)
   }
@@ -146,7 +151,15 @@ test_engine <- function(engine = syberia_engine(), base = "test",
     ensure_resources_are_tested(engine, tests, optional_tests, base)
   }
 
-  test_resources(engine, tests$active, config, reporter = reporter)
+  results <- test_resources(engine, tests$active, config, reporter = reporter)
+
+  if (error_on_failure) {
+    if (!all(vapply(results, getFromNamespace("all_passed", "testthat"), logical(1)))) {
+      stop("Test failures", call. = FALSE)
+    }
+  }
+
+  invisible(results)
 }
 
 #' Run the tests on a given set of resources.
