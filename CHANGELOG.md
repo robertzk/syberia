@@ -1,5 +1,6 @@
-# Version 0.6.1.9001
+# Version 0.6.1.9001-4
 
+* Engine cloning uses HTTPS instead of SSH.
 * Mounting of engines are announced to the user.
 
 # Version 0.5.1-0.6.1
