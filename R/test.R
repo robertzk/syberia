@@ -153,7 +153,7 @@ test_engine <- function(engine = syberia_engine(), base = "test",
 
   results <- test_resources(engine, tests$active, config, reporter = reporter)
 
-  if (error_on_failure) {
+  if (isTRUE(error_on_failure)) {
     if (!all(vapply(results, getFromNamespace("all_passed", "testthat"), logical(1)))) {
       stop("Test failures", call. = FALSE)
     }
@@ -336,12 +336,10 @@ find_tests <- function(engine, base, ignored_tests) {
   )
 }
 
-## We don't expect this to change after the project is loaded, so we can memoise
-## the results (store them internally so we don't have to recompute).
 ## By default, we will fetch the test configuration from
 ## `config/environments/test`, but the location of the configuration file
 ## itself is configurable (see the `config` parameter to `test_engine`).
-test_environment_configuration <- memoise::memoise(
+test_environment_configuration <- 
   function(engine, path = file.path("config", "environments", "test")) {
     if (!engine$exists(path, children. = FALSE)) {
       list()
@@ -349,7 +347,6 @@ test_environment_configuration <- memoise::memoise(
       engine$resource(path, children. = FALSE)
     }
   }
-)
 
 ## If the configuration file, usually `config/environments/test.R`,
 ## has a local variable `ignored_tests`, the tests of the 

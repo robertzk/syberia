@@ -1,3 +1,9 @@
+# Version 0.6.1.9006
+
+* Fixed a negative test for `test_engine`.
+* Removed a memoization which keyed off a reference class object (and thus
+  never actually memoized a value).
+
 # Version 0.6.1.9001-5
 
 * `test_engine` errors if there are any test failures.
