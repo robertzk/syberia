@@ -16,14 +16,14 @@ discussion list or [StackOverflow](http://stackoverflow.com/questions/tagged/syb
 
 ## <a name="issue"></a> Found a Bug?
 If you find a bug in the source code or a mistake in the documentation, please [submit an issue](https://github.com/syberia/syberia/issues) to
-our [GitHub Repository][https://github.com/syberia/syberia]. Even better you can submit a Pull Request with a fix! :)
+our [GitHub Repository](https://github.com/syberia/syberia). Even better you can submit a Pull Request with a fix! :)
 
 But please see [Submission Guidelines](#submit) before filing an issue.
 
 
 ## <a name="feature"></a> Want a Feature?
 If you find a bug in the source code or a mistake in the documentation, please [submit an issue](https://github.com/syberia/syberia/issues) to
-our [GitHub Repository][https://github.com/syberia/syberia].
+our [GitHub Repository](https://github.com/syberia/syberia).
 
 But please see [Submission Guidelines](#submit) before filing an issue.
 
