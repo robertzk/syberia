@@ -153,7 +153,7 @@ test_engine <- function(engine = syberia_engine(), base = "test",
 
   results <- test_resources(engine, tests$active, config, reporter = reporter)
 
-  if (error_on_failure) {
+  if (isTRUE(error_on_failure)) {
     if (!all(vapply(results, getFromNamespace("all_passed", "testthat"), logical(1)))) {
       stop("Test failures", call. = FALSE)
     }
