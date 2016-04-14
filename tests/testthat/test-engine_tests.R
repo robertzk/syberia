@@ -33,7 +33,9 @@ describe("failing tests", {
   has_failed_test <- function(test_summary) {
     any(vapply(test_summary, function(summand) {
       any(vapply(summand[[1L]]$results, function(result) {
-        identical(result$passed, FALSE)
+        # The former condition is backwards-compatible with older versions of testthat
+        identical(result$passed, FALSE) ||
+        is(result, "expectation_failure")
       }, logical(1)))
     }, logical(1)))
   }
