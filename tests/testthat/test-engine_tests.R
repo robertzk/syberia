@@ -19,6 +19,12 @@ describe("missing tests", {
   })
 })
 
+describe("missing tests can be overwridden using optional tests", {
+  test_that("it does not fail due to missing tests for the optional_tests project", {
+    testthatsomemore::assert(test_engine("projects/optional_tests"))
+  })
+})
+
 describe("passing tests", {
   test_that("it passes with a simple example test", {
     testthatsomemore::assert(test_engine("projects/test_simple_find"))
