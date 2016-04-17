@@ -27,7 +27,7 @@ package_exists <- function(name) {
 ensure_installed <- function(package_name) {
   ## Using [`requireNamespace`](http://r-pkgs.had.co.nz/src.html)
   ## is the de facto accepted approach here.
-  if (!requireNamespace(package_name, quietly = TRUE)) {
+  if (!package_exists(package_name)) {
     stop("Please install ", crayon::yellow(package_name), ":\n\n",
          crayon::green(paste0("install.packages('", package_name, "')")), "\n", call. = FALSE)
   }
