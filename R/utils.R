@@ -24,6 +24,14 @@ package_exists <- function(name) {
   is.element(name, utils::installed.packages()[, 1])
 }
 
+ensure_installed <- function(package_name) {
+  ## Using [`requireNamespace`](http://r-pkgs.had.co.nz/src.html)
+  ## is the de facto accepted approach here.
+  if (!requireNamespace(package_name, quietly = TRUE)) {
+    stop("Please install ", crayon::yellow(package_name), ".", call. = FALSE)
+  }
+}
+
 as.list.environment <- function(env) {
   out <- base::as.list.environment(env)
   lapply(out, function(x) if (is.environment(x) && !is(x, "R6")) as.list(x) else x)

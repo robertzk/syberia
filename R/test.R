@@ -170,6 +170,9 @@ test_engine <- function(engine = syberia_engine(), base = "test",
 #' @param reporter character. The test reporter to use.
 #' @return The testthat result summary for this one test run.
 test_resources <- function(engine, tests, ..., reporter) {
+  ## We ensure testthat and testthatsomemore are installed.
+  ensure_test_packages()
+
   ## The testthat package does not export `find_reporter`, so we
   ## grab it [with a trick](https://stat.ethz.ch/R-manual/R-devel/library/base/html/ns-reflect.html).
   reporter <- getNamespace("testthat")$find_reporter(reporter)
@@ -196,6 +199,9 @@ test_resources <- function(engine, tests, ..., reporter) {
   invisible(getNamespace("testthat")$testthat_results(results))
 }
 
+ensure_test_packages <- function() {
+  lapply(c("testthat", "testthatsomemore"), ensure_installed)
+}
 
 #' Run the tests for a single resource.
 #'
