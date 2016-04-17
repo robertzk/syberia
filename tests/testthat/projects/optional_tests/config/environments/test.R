@@ -1,1 +1,1 @@
-optional_tests <- c("models")
+optional_tests <- c("example_resource")
