@@ -28,28 +28,8 @@ ensure_installed <- function(package_name) {
   ## Using [`requireNamespace`](http://r-pkgs.had.co.nz/src.html)
   ## is the de facto accepted approach here.
   if (!requireNamespace(package_name, quietly = TRUE)) {
-    stop("Please install ", crayon::yellow(package_name), ":\n\n",
-         crayon::green(paste0("install.packages('", package_name, "')")), "\n", call. = FALSE)
+    stop("Please install ", crayon::yellow(package_name), ".", call. = FALSE)
   }
-}
-
-## [Testthatsomemore](https://github.com/robertzk/testthatsomemore)
-## is an auxiliary package used for some testing utilities.
-ensure_testthatsomemore <- function() {
-  if (package_exists("testthatsomemore")) return()
-  ensure_installed("devtools")
-  message("The package ", crayon::yellow("testthatsomemore"),
-          " is not installed; installing from http://github.com/robertzk/testthatsomemore")
-  withCallingHandlers({
-    ## We install it from GitHub if the user does not have it installed.
-    devtools::install_github("robertzk/testthatsomemore")
-    requireNamespace("testthatsomemore", quietly = TRUE)
-  }, error = function(e) {
-    stop("The ", crayon::red("testthatsomemore"), " package failed to install. ",
-         "Try manually: \n\n",
-         crayon::green('devtools::install_github("robertzk/testthatsomemore")'), "\n\n",
-         "The error was: ", paste(as.character(e), collapse = "\n"), call. = FALSE)
-  })
 }
 
 as.list.environment <- function(env) {

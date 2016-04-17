@@ -1,7 +1,7 @@
 Package: syberia
 Type: Package
 Title: Syberia
-Version: 0.6.1.9006
+Version: 0.6.1.9007
 Description: Syberia is a meta-framework for R that allows for on-the-fly
     creation of concrete frameworks for constructing arbitrary software.
     In its current formulation, the modeling engine provides an opiniated
@@ -11,7 +11,7 @@ Description: Syberia is a meta-framework for R that allows for on-the-fly
     Shiny dashboards, R web apps, and reproducible analysis. In the
     viewpoint of the author, R is syntactic sugar around LISP, which
     enables arbitrary computation; Syberia is an attempt to support this
-    conjecture by allowing the construction of arbitrary software 
+    conjecture by allowing the construction of arbitrary software
     projects within the R programming language, thereby finally outgrowing
     its long-overdue misconception as a statistical tool.
 Author: Robert Krzyzanowski <rkrzyzanowski@gmail.com>
@@ -33,8 +33,12 @@ Suggests:
     devtools,
     knitr,
     testthatsomemore
+Remotes: syberia/director,
+    syberia/stagerunner,
+    robertzk/bettertrace,
+    robertzk/testthatsomemore
 VignetteBuilder: knitr
 License: MIT + file LICENSE
 LazyData: true
 Roxygen: list(wrap = FALSE)
-RoxygenNote: 5.0.1
+RoxygenNote: 5.0.1.9000

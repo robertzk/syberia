@@ -200,8 +200,7 @@ test_resources <- function(engine, tests, ..., reporter) {
 }
 
 ensure_test_packages <- function() {
-  ensure_installed("testthat")
-  ensure_testthatsomemore()
+  lapply(c("testthat", "testthatsomemore"), ensure_installed)
 }
 
 #' Run the tests for a single resource.
