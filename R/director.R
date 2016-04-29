@@ -310,20 +310,20 @@ routes_parser <- function() {
 #' @param resource character
 default_tests_preprocessor <- function(resource_object, director, source_args, source, resource) {
   tested_resource <- gsub("^test\\/", "", resource)
-  if (!director$exists(tested_resource)) {
+  #if (!director$exists(tested_resource)) {
     # TODO: (RK) Figure out how this interacts with virtual resources.
     #warning("You are testing ", sQuote(crayon::yellow(tested_resource)),
     #        " but it does not exist in the project.\n", call. = FALSE, immediate = TRUE)
     #return(NULL)
-  }
+  #}
 
   context(tested_resource)
   tested_resource_object <- director$resource(tested_resource)
-  source_args$local$resource <- function(path) {
+  source_args$local$resource <- function(path, ...) {
     if (missing(path)) {
-      tested_resource_object$value(recompile. = TRUE)
+      tested_resource_object$value(..., recompile. = TRUE)
     } else {
-      director$resource(path)
+      director$resource(path)$value(..., recompile. = TRUE)
     }
   }
   source()

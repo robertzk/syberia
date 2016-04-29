@@ -1,4 +1,4 @@
-# Version 0.4.4.3
+# Version 0.4.4.3-4
 
 * Allow `resource` to be called in tests to fetch other resources.
 
