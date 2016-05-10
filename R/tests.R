@@ -33,17 +33,19 @@ test_project <- function(project = syberia_project(), base = '') {
   test_path <- file.path(project$root(), 'test')
   tests <- project$find(base = paste0('test/', base))
 
-  ignored_tests <- file.path('test', test_environment_config(project)$ignored_tests %||% character(0))
+  test_config <- test_environment_config(project)
+  ignored_tests <- file.path('test', test_config$ignored_tests %||% character(0))
   all_tests <- tests
   tests <- Filter(function(x) !director:::any_is_substring_of(x, ignored_tests), tests)
   ignored_test_paths <- setdiff(all_tests, tests)
 
-  ensure_resources_have_tests(project, tests, ignore = ignored_test_paths)
+  ensure_resources_have_tests(project, tests, ignore = ignored_test_paths,
+                              test_config = test_config)
 
   load_test_packages()
 
   ensure_no_global_variable_pollution(check_options = TRUE, {
-    test_hook(project, type = 'setup')$run() # Run the test setup hook stageRunner
+    test_hook(project, type = 'setup', test_config = test_config)$run() # Run the test setup hook stageRunner
 
     # Run all tests
     old_pboptions <- options('pboptions')
@@ -85,7 +87,14 @@ load_test_packages <- function() {
 #' @param project director or character. The director for the syberia project.
 #' @param tests character. The tests to check. By default, all tests in the project.
 #' @param ignore character. A vector of tests to ignore (and not check for presence).
-ensure_resources_have_tests <- function(project, tests = project$find(base = 'test/'), ignore = character(0)) {
+#' @param test_config environment or list. Test configuration for the project,
+#'   by default the \code{"config/environments/test"} resource.
+ensure_resources_have_tests <- function(project, tests = project$find(base = 'test/'),
+                                        ignore = character(0), test_config) {
+  if (missing(test_config)) {
+    test_config <- test_environment_config(project)
+  }
+
   controllers <- project$find('lib/controllers/')
 
   # Do not consider test controllers -- no meta-tests, heh!
@@ -119,7 +128,7 @@ ensure_resources_have_tests <- function(project, tests = project$find(base = 'te
 
   # Remove system resources from consideration.
   built_in_routes <- c('config', 'etc', 'lib/controllers')
-  exceptions <- c(built_in_routes, test_environment_config(project)$optional_tests)
+  exceptions <- c(built_in_routes, test_config$optional_tests)
   resources <- Filter(
     function(x) !director:::any_is_substring_of(x, exceptions), resources)
 
@@ -146,9 +155,15 @@ ensure_resources_have_tests <- function(project, tests = project$find(base = 'te
 #' @param project director or character. The director for the syberia project.
 #' @param type character. Must be \code{'setup'} or \code{'teardown'}, the former
 #'   being the default.
+#' @param test_config environment or list. Test configuration for the project,
+#'   by default the \code{"config/environments/test"} resource.
 #' @seealso \code{\link{test_project}}
 #' @return a stageRunner that will run the relevant setup or teardown hook(s).
-test_hook <- function(project, type = 'setup') {
+test_hook <- function(project, type = 'setup', test_config) {
+  if (missing(test_config)) {
+    test_config <- test_environment_config(project)
+  }
+
   if (!is.director(project)) {
     stop("To fetch the ", type, " hook for a project, please pass in a director ",
          "object (the director for the syberia project). Instead I got ",
@@ -160,7 +175,7 @@ test_hook <- function(project, type = 'setup') {
     # TODO: (RK) Fix director absolute file paths in $.filename and this hack
     filename <- director:::strip_root(project$root(),
                                       project$.filename(test_environment_path))
-    hooks <- test_environment_config(project)[[type]] %||% list(force)
+    hooks <- test_config[[type]] %||% list(force)
 
     # TODO: (RK) Maybe replace this with a new stageRunner method to check
     # argument validity? In the future, stageRunner could maybe do more!
