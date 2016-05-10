@@ -34,6 +34,7 @@ test_project <- function(project = syberia_project(), base = '') {
   tests <- project$find(base = paste0('test/', base))
 
   test_config <- test_environment_config(project)
+  test_config <- test_config # memoise the value to avoid duplicate calls
   ignored_tests <- file.path('test', test_config$ignored_tests %||% character(0))
   all_tests <- tests
   tests <- Filter(function(x) !director:::any_is_substring_of(x, ignored_tests), tests)
@@ -50,15 +51,15 @@ test_project <- function(project = syberia_project(), base = '') {
     # Run all tests
     old_pboptions <- options('pboptions')
     on.exit(options(old_pboptions), add = TRUE)
-    single_setup <- test_hook(project, type = 'single_setup')
-    single_teardown <- test_hook(project, type = 'single_teardown')
+    single_setup <- test_hook(project, type = 'single_setup', test_config = test_config)
+    single_teardown <- test_hook(project, type = 'single_teardown', test_config = test_config)
     apply_function <-
       if ("pbapply" %in% installed.packages()[,1]) { pbapply::pblapply }
       else { lapply }
 
     # TODO: (RK) Populate teardown stageRunner environment with test info?
     # Could be useful to some people.
-    on.exit(test_hook(project, type = 'teardown')$run(), add = TRUE) # Run the test teardown hook stageRunner
+    on.exit(test_hook(project, type = 'teardown', test_config = test_config)$run(), add = TRUE) # Run the test teardown hook stageRunner
     apply_function(tests, function(t) {
       ensure_no_global_variable_pollution(check_options = TRUE, {
         single_setup$.context$resource <- t
