@@ -1,3 +1,8 @@
+# Version 0.4.4.5
+
+* Prevent `config/environments/test` from being sourced multiple times
+  during test execution.
+
 # Version 0.4.4.3-4
 
 * Allow `resource` to be called in tests to fetch other resources.

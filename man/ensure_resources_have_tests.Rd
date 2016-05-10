@@ -5,7 +5,7 @@
 \title{Check that all mandatory tested resources have tests.}
 \usage{
 ensure_resources_have_tests(project, tests = project$find(base = "test/"),
-  ignore = character(0))
+  ignore = character(0), test_config)
 }
 \arguments{
 \item{project}{director or character. The director for the syberia project.}
@@ -13,6 +13,9 @@ ensure_resources_have_tests(project, tests = project$find(base = "test/"),
 \item{tests}{character. The tests to check. By default, all tests in the project.}
 
 \item{ignore}{character. A vector of tests to ignore (and not check for presence).}
+
+\item{test_config}{environment or list. Test configuration for the project,
+by default the \code{"config/environments/test"} resource.}
 }
 \description{
 Check that all mandatory tested resources have tests.

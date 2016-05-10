@@ -4,13 +4,16 @@
 \alias{test_hook}
 \title{Fetch the test setup or teardown hook, if any exists.}
 \usage{
-test_hook(project, type = "setup")
+test_hook(project, type = "setup", test_config)
 }
 \arguments{
 \item{project}{director or character. The director for the syberia project.}
 
 \item{type}{character. Must be \code{'setup'} or \code{'teardown'}, the former
 being the default.}
+
+\item{test_config}{environment or list. Test configuration for the project,
+by default the \code{"config/environments/test"} resource.}
 }
 \value{
 a stageRunner that will run the relevant setup or teardown hook(s).
