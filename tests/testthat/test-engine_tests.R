@@ -27,6 +27,11 @@ describe("passing tests", {
   test_that("it passes with a calculation of pi", {
     testthatsomemore::assert(test_engine("projects/test_calculation_pi"))
   })
+
+  test_that("tests can call resources other than the tested resource", {
+    testthatsomemore::assert(test_engine("projects/test_resourcing_in_tests"))
+  })
+
 })
 
 describe("failing tests", {
