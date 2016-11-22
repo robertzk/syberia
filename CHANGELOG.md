@@ -1,3 +1,11 @@
+# Version 0.6.1.9008
+
+* Fixed `test_engine` to respect the global teardown hook.
+
+# Version 0.6.1.9007
+
+* Specify GitHub remotes in the DESCRIPTION file.
+
 # Version 0.6.1.9006
 
 * Fixed a negative test for `test_engine`.

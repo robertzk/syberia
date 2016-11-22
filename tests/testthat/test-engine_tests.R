@@ -60,3 +60,9 @@ describe("setup hook", {
   })
 })
 
+describe("teardown hook", {
+  test_that("it fails with a teardown hook failure", {
+    expect_error(test_engine("projects/test_simple_teardown_failure"), "teardown test hook failed")
+  })
+})
+
