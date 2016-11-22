@@ -184,15 +184,18 @@ test_resources <- function(engine, tests, ..., reporter) {
   ## or global variables introduced.
   ## 
   ## Syberia resources should be stateless and not modify global options!
-  ensure_no_global_variable_pollution(check_options = TRUE, {
-    setup_hook <- find_test_hook(engine, type = "setup", ...)
-    if (!is.null(setup_hook)) setup_hook$run()
+  setup_hook <- find_test_hook(engine, type = "setup", ...)
+  if (!is.null(setup_hook)) setup_hook$run()
 
-    single_setup    <- find_test_hook(engine, type = "single_setup", ...)
-    single_teardown <- find_test_hook(engine, type = "single_teardown", ...)
+  single_setup    <- find_test_hook(engine, type = "single_setup", ...)
+  single_teardown <- find_test_hook(engine, type = "single_teardown", ...)
+  ensure_no_global_variable_pollution(check_options = TRUE, {
     results <- lapply(tests, test_resource, engine = engine, reporter = reporter,
                       setup = single_setup, teardown = single_teardown)
   })
+
+  teardown_hook <- find_test_hook(engine, type = "teardown", ...)
+  if (!is.null(teardown_hook)) teardown_hook$run()
 
   reporter$end_reporter()
   ## Again mimicking [testthat](https://github.com/hadley/testthat/blob/6cdd17cab674175297e16e12ac5ed29266534390/R/test-files.r#L50).
