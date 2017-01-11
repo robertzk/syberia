@@ -412,10 +412,11 @@ parse_engine.github <- function(engine_parameters) {
   repo    <- engine_parameters$repo %||% engine_parameters$repository
   # TODO: (RK) Checking for updates?
   version <- engine_parameters$version %||% "master"
-  base_url <- if (nzchar(PAT <- github_pat())) {
-    sprintf("https://%s@github.com/%s.git", PAT, repo)
+  PAT     <- github_pat()
+  if (!is.null(PAT)) {
+    base_url <- sprintf("https://%s@github.com/%s.git", PAT, repo)
   } else {
-    sprintf("https://github.com/%s.git", repo)
+    base_url <- sprintf("https://github.com/%s.git", repo)
   }
   stopifnot(is.simple_string(repo))
 

@@ -23,7 +23,7 @@ is.falsy <- function(x) {
 #' @noRd
 github_pat <- function() {
   pat <- Sys.getenv('GITHUB_PAT')
-  if (identical(pat, "")) { return(NULL) }
+  if (!nzchar(pat)) { return(NULL) }
 
   message("Using github PAT from envvar GITHUB_PAT")
   pat
