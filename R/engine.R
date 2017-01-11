@@ -412,11 +412,16 @@ parse_engine.github <- function(engine_parameters) {
   repo    <- engine_parameters$repo %||% engine_parameters$repository
   # TODO: (RK) Checking for updates?
   version <- engine_parameters$version %||% "master"
+  base_url <- if (nzchar(PAT <- github_pat())) {
+    sprintf("https://%s@github.com/%s.git", PAT, repo)
+  } else {
+    sprintf("https://github.com/%s.git", repo)
+  }
   stopifnot(is.simple_string(repo))
 
   pre_engine(prefix = file.path("github", repo, version),
     builder = function(filepath) {
-      status <- system2("git", c("clone", sprintf("https://github.com/%s.git", repo), filepath))
+      status <- system2("git", c("clone", base_url, filepath, "--branch", version, "--depth", "1"))
       stopifnot(status == 0)
     })
 }
