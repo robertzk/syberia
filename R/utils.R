@@ -15,7 +15,7 @@ is.falsy <- function(x) {
 
 #' Retrieve Github personal access token.
 #'
-#' Borrowed from https://github.com/r-pkgs/remotes/blob/master/R/github.R#L23
+#' Borrowed from \url{https://github.com/r-pkgs/remotes/blob/master/R/github.R#L23}
 #' A github personal access token
 #' Looks in env var \code{GITHUB_PAT}
 #'

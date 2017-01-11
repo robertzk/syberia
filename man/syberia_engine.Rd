@@ -11,7 +11,7 @@ syberia_project(filepath = getwd(), ..., root. = TRUE)
 }
 \arguments{
 \item{filepath}{character. The root directory of the engine.
-If this directory does not define a (relative) \code{"config/application.R"} 
+If this directory does not define a (relative) \code{"config/application.R"}
 file, the parent directories of \code{filepath} will be traversed
 until such a file is found, or the function will error.
 By default, the current directory.}
