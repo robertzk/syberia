@@ -3,6 +3,7 @@ sudo: false
 git:
   submodules: false
 r_github_packages: hadley/devtools
+r_github_packages: hadley/testthat
 # Use sed to replace the SSH URL with the public URL, then initialize submodules
 # http://stackoverflow.com/questions/15674064/github-submodule-access-rights-travis-ci
 before_install:
