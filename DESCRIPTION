@@ -33,6 +33,10 @@ Suggests:
     bettertrace,
     knitr,
     testthatsomemore
+Remotes: syberia/director,
+    syberia/stagerunner,
+    robertzk/bettertrace,
+    robertzk/testthatsomemore
 VignetteBuilder: knitr
 License: MIT + file LICENSE
 LazyData: true
