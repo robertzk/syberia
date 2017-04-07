@@ -2,10 +2,10 @@ language: c
 sudo: false
 git:
   submodules: false
+r_github_packages: hadley/devtools
 # Use sed to replace the SSH URL with the public URL, then initialize submodules
 # http://stackoverflow.com/questions/15674064/github-submodule-access-rights-travis-ci
 before_install:
-r_github_packages: hadley/devtools
 - sed -i 's/git@github.com:/https:\/\/github.com\//' .gitmodules
 - git submodule update --init --recursive
 addons:
