@@ -101,7 +101,7 @@ This will pull in `inst/engines/base.sy` from the [base engine](http://github.co
 
 This project is licensed under the MIT License:
 
-Copyright (c) 2014-2016 Robert Krzyzanowski
+Copyright (c) 2014-2017 Robert Krzyzanowski
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
@@ -126,5 +126,5 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 Syberia was originally created at [Avant](https://github.com/avantcredit)
 by Robert Krzyzanowski, rob@robertzk.com. Additional contributors
-include Ryland Ely, Peter Hurford, Elaine Lee, Tong Lu, and Kirill Sevastyanenko.
+include Peter Hurford, Kirill Sevastyanenko, Tong Lu, Abel Castillo, and others.
 
