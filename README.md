@@ -3,35 +3,27 @@ Syberia [![Build Status](https://travis-ci.org/syberia/syberia.svg?branch=master
 
 Syberia is the development framework for R.
 
-The original formulation, developed at [Avant](https://github.com/avantcredit), is
-[the modeling grammar](http://github.com/syberia/modeling.sy)
-that serves as a machine learning classifier development and deployment
-framework for solving arbitrary academic, research and business problems
-that require use of statistical methods.
+Syberia was developed at [Avant](https://github.com/avantcredit) to
+serve as the framework for developing and deploying machine learning models.
+The goal was to develop a modeling engine capable of solving academic,
+research and business problems that require use of statistical methods.
 
-The modeling engine provides an opinionated unified framework for
-fast iteration on classifier development and deployment. It has 
-modularity and testability built in as a design assumption, is
-founded on convention-over-configuration, and aims to solve the
-problems of classifier-specific data preparation and
+[The modeling grammar](http://github.com/syberia/modeling.sy),
+currently the main significant engine built in Syberia, is a
+framework for building, debugging, testing, and deploying classifiers developed in R.
+It provides an opinionated unified framework for fast iteration on model  
+development and deployment. It has modularity and testability built in
+as a design assumption, is founded on convention-over-configuration,
+and aims to solve the problems of classifier-specific data preparation and
 classifier-specific modeling parameters.
 
-The more general vision for Syberia is still in progress, but aims
-to unify the currently disparate realms of R packages, script codebases,
-Shiny dashboards, R web apps, and reproducible analysis. In the
-viewpoint of [the author](https://github.com/robertzk),
+The more general vision for Syberia is still in progress but aims
+to bring unity to the currently disparate realms of the R development ecosystem.
+In the viewpoint of [the author](https://github.com/robertzk),
 R is syntactic sugar around LISP, which enables arbitrary computation;
 Syberia is an attempt to support this conjecture by allowing the
 construction of arbitrary software projects within the R programming language,
 thereby finally outgrowing its long-overdue misconception as a statistical tool.
-
-The [modeling engine](https://github.com/syberia/modeling.sy),
-currently the main significant engine built in Syberia,
-is a framework for building, debugging, testing, and deploying
-classifiers developed in R. It includes support for importing data,
-preparing data, arbitrary statistical modeling methodologies,
-exporting trained classifiers, validating the results, and
-deploying as a REST service. 
 
 The timeline for future engines and information about how
 to contribute is listed at the [Syberia roadmap](http://syberia.io/roadmap).
