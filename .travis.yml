@@ -1,5 +1,6 @@
 language: c
 sudo: false
+dist: trusty
 git:
   submodules: false
 # Use sed to replace the SSH URL with the public URL, then initialize submodules
