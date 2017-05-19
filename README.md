@@ -82,6 +82,14 @@ in conjunction with Syberia modeling projects include
 [testthatsomemore](https://github.com/robertzk/testthatsomemore), and
 [treeskeleton](https://github.com/robertzk/treeskeleton).
 
+## Engines
+
+Syberia is currently released with the following engines.
+
+| Name | Status |  Description |
+| ---- | Status | -----  |
+|  
+
 ### Development
 
 To run the tests for the Syberia package, you will have to check
@@ -121,6 +129,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ### Authors
 
 Syberia was originally created at [Avant](https://github.com/avantcredit)
-by Robert Krzyzanowski, rob@robertzk.com. Additional contributors
+by Robert Krzyzanowski, rob@syberia.io. Additional contributors
 include Peter Hurford, Kirill Sevastyanenko, Tong Lu, Abel Castillo, and others.
 
