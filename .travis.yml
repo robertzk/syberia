@@ -1,5 +1,4 @@
 language: c
-sudo: false
 dist: trusty
 git:
   submodules: false
