@@ -3,3 +3,4 @@
 .git
 .gitignore
 NEWS.md
+^docs$
