@@ -88,7 +88,7 @@ Syberia is currently released with the following engines.
 
 | Name | Status |  Description |
 | ---- | Status | -----  |
-|  
+| Base | [![Build Status](https://img.shields.io/travis/syberia/base.sy.svg)](https://travis-ci.org/syberia/base.sy) | The base engine that defines routes and controllers. |
 
 ### Development
 
