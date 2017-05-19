@@ -88,7 +88,8 @@ Syberia is currently released with the following engines.
 
 | Name | Status |  Description |
 | ---- | ------ | -----  |
-| Base | [![Build Status](https://img.shields.io/travis/syberia/base.sy.svg)](https://travis-ci.org/syberia/base.sy) | The base engine that defines routes and controllers. |
+| [Base](https://github.com/syberia/base.sy) | [![Build Status](https://img.shields.io/travis/syberia/base.sy.svg)](https://travis-ci.org/syberia/base.sy) | The base engine that defines routes and controllers. |
+| [Base](https://github.com/syberia/modeling.sy) | [![Build Status](https://img.shields.io/travis/syberia/modeling.sy.svg)](https://travis-ci.org/syberia/modeling.sy) | The modeling engine for deploying structured learning problems. |
 
 ### Development
 
