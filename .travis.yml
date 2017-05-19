@@ -25,6 +25,9 @@ after_failure:
 after_success:
   - "Rscript -e 'library(covr);coveralls()'"
 notifications:
+  webhooks:
+    urls:
+       - https://webhooks.gitter.im/e/655fbe5e7a5067377f3f
   email:
     on_success: change
     on_failure: change
