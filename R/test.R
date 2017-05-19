@@ -117,15 +117,20 @@
 #' @param reporter character. The testthat package test reporter to use. The
 #'    options are \code{c("check", "list", "summary", "minimal", "multi", "rstudio",
 #'    "silent", "stop", "tap", "teamcity")}, with the default being \code{"summary"}.
+#' @param error_on_failure logical. Whether or not to raise an error
+#'    if there are any failures. By default, \code{TRUE}.
 #' @seealso \code{\link{syberia_engine}}
 #' @export
-#' @return \code{TRUE} if all tests pass or will error otherwise.
+#' @return A list of \code{testthat_results} objects giving the details for
+#'    the tests executed on each tested resource. If \code{error_on_failure}
+#'    is \code{TRUE}, error instead if there are any failures.
 test_engine <- function(engine = syberia_engine(), base = "test",
                         config = file.path("config", "environments", "test"),
                         ignored_tests = ignored_tests_from_config(engine, base, config),
                         optional_tests = optional_tests_from_config(engine, base, config),
                         required = TRUE, reporter = c("summary", "check", "list",
-                          "minimal", "multi", "rstudio", "silent", "stop", "tap", "teamcity")[1L]) {
+                          "minimal", "multi", "rstudio", "silent", "stop", "tap", "teamcity")[1L],
+                        error_on_failure = TRUE) {
   if (is.character(engine)) {
     engine <- syberia_engine(engine)
   }
@@ -146,7 +151,15 @@ test_engine <- function(engine = syberia_engine(), base = "test",
     ensure_resources_are_tested(engine, tests, optional_tests, base)
   }
 
-  test_resources(engine, tests$active, config, reporter = reporter)
+  results <- test_resources(engine, tests$active, config, reporter = reporter)
+
+  if (isTRUE(error_on_failure)) {
+    if (!all(vapply(results, getFromNamespace("all_passed", "testthat"), logical(1)))) {
+      stop("Test failures", call. = FALSE)
+    }
+  }
+
+  invisible(results)
 }
 
 #' Run the tests on a given set of resources.
@@ -171,15 +184,18 @@ test_resources <- function(engine, tests, ..., reporter) {
   ## or global variables introduced.
   ## 
   ## Syberia resources should be stateless and not modify global options!
-  ensure_no_global_variable_pollution(check_options = TRUE, {
-    setup_hook <- find_test_hook(engine, type = "setup", ...)
-    if (!is.null(setup_hook)) setup_hook$run()
+  setup_hook <- find_test_hook(engine, type = "setup", ...)
+  if (!is.null(setup_hook)) setup_hook$run()
 
-    single_setup    <- find_test_hook(engine, type = "single_setup", ...)
-    single_teardown <- find_test_hook(engine, type = "single_teardown", ...)
+  single_setup    <- find_test_hook(engine, type = "single_setup", ...)
+  single_teardown <- find_test_hook(engine, type = "single_teardown", ...)
+  ensure_no_global_variable_pollution(check_options = TRUE, {
     results <- lapply(tests, test_resource, engine = engine, reporter = reporter,
                       setup = single_setup, teardown = single_teardown)
   })
+
+  teardown_hook <- find_test_hook(engine, type = "teardown", ...)
+  if (!is.null(teardown_hook)) teardown_hook$run()
 
   reporter$end_reporter()
   ## Again mimicking [testthat](https://github.com/hadley/testthat/blob/6cdd17cab674175297e16e12ac5ed29266534390/R/test-files.r#L50).
@@ -297,7 +313,7 @@ ensure_resources_are_tested <- function(engine, tests, optional, base = "test") 
 
   without_optional_resources <- function(resources) {
     ## `optional` resources are actually substring matches!
-    Filter(function(resource) !any_is_substring_of(resources, optional), resources)
+    Filter(function(resource) !any_is_substring_of(resource, optional), resources)
   }
 
   all_resources <- without_optional_resources(without_builtin_resources(engine$find()))
@@ -323,12 +339,10 @@ find_tests <- function(engine, base, ignored_tests) {
   )
 }
 
-## We don't expect this to change after the project is loaded, so we can memoise
-## the results (store them internally so we don't have to recompute).
 ## By default, we will fetch the test configuration from
 ## `config/environments/test`, but the location of the configuration file
 ## itself is configurable (see the `config` parameter to `test_engine`).
-test_environment_configuration <- memoise::memoise(
+test_environment_configuration <- 
   function(engine, path = file.path("config", "environments", "test")) {
     if (!engine$exists(path, children. = FALSE)) {
       list()
@@ -336,7 +350,6 @@ test_environment_configuration <- memoise::memoise(
       engine$resource(path, children. = FALSE)
     }
   }
-)
 
 ## If the configuration file, usually `config/environments/test.R`,
 ## has a local variable `ignored_tests`, the tests of the 
@@ -356,9 +369,7 @@ ignored_tests_from_config <- function(engine, base, config) {
 ##
 ## Use with caution!
 optional_tests_from_config <- function(engine, base, config) {
-  file.path(base, 
-    value_from_config(engine, config, "optional_tests") %||% character(0)
-  )
+  value_from_config(engine, config, "optional_tests") %||% character(0)
 }
 
 value_from_config <- function(engine, config, value) {

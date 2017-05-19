@@ -19,6 +19,12 @@ describe("missing tests", {
   })
 })
 
+describe("missing tests can be overwritten using optional tests", {
+  test_that("it does not fail due to missing tests for the optional_tests project", {
+    testthatsomemore::assert(test_engine("projects/optional_tests"))
+  })
+})
+
 describe("passing tests", {
   test_that("it passes with a simple example test", {
     testthatsomemore::assert(test_engine("projects/test_simple_find"))
@@ -33,7 +39,9 @@ describe("failing tests", {
   has_failed_test <- function(test_summary) {
     any(vapply(test_summary, function(summand) {
       any(vapply(summand[[1L]]$results, function(result) {
-        identical(result$passed, FALSE)
+        # The former condition is backwards-compatible with older versions of testthat
+        identical(result$passed, FALSE) ||
+        is(result, "expectation_failure")
       }, logical(1)))
     }, logical(1)))
   }
@@ -41,13 +49,20 @@ describe("failing tests", {
   test_that("it fails with a simple example test", {
     # TODO: (RK) Prevent test suite reporter mangling.
     sink(tempfile()); on.exit(sink())
-    expect_true(has_failed_test(test_engine("projects/simple_test_failure")))
+    expect_true(has_failed_test(test_engine("projects/simple_test_failure",
+                                            error_on_failure = FALSE)))
   })
 })
 
 describe("setup hook", {
   test_that("it fails with a setup hook failure", {
     expect_error(test_engine("projects/test_simple_setup_failure"), "setup test hook failed")
+  })
+})
+
+describe("teardown hook", {
+  test_that("it fails with a teardown hook failure", {
+    expect_error(test_engine("projects/test_simple_teardown_failure"), "teardown test hook failed")
   })
 })
 

@@ -140,18 +140,6 @@ active_project <- function() {
   .syberia_env$active_project
 }
 
-#' @rdname active_project
-#' @name project
-#' @export
-makeActiveBinding("project", function() active_project(), env = environment())
-
-#' Compile a resource in the active syberia project.
-#'
-#' @seealso \code{\link{active_project}}
-#' @name resource
-#' @export
-makeActiveBinding("resource", function() active_project()$resource, env = environment())
-
 syberia_engine_ <- function(filepath, ...) {
   UseMethod("syberia_engine_", filepath)
 }
@@ -372,6 +360,8 @@ engine_parser <- function(director, preprocessor_output) {
 ## is to make it as easy as possible to pull out your work so others
 ## can re-use it.
 register_engine <- function(director, name, engine, mount = FALSE) {
+  message(crayon::green(paste("...Mounting", name, "engine.")))
+
   # TODO: (RK) Replace with $engines private member after R6ing.
   if (!director$cache_exists("engines")) {
     director$cache_set("engines", new.env(parent = emptyenv()))
@@ -422,11 +412,19 @@ parse_engine.github <- function(engine_parameters) {
   repo    <- engine_parameters$repo %||% engine_parameters$repository
   # TODO: (RK) Checking for updates?
   version <- engine_parameters$version %||% "master"
+  PAT     <- github_pat()
+  if (!is.null(PAT)) {
+    base_url <- sprintf("https://%s@github.com/%s.git", PAT, repo)
+  } else {
+    base_url <- sprintf("https://github.com/%s.git", repo)
+  }
   stopifnot(is.simple_string(repo))
 
   pre_engine(prefix = file.path("github", repo, version),
     builder = function(filepath) {
-      status <- system2("git", c("clone", sprintf("git@github.com:%s", repo), filepath))
+      status <- system2("git",
+        c("clone", base_url, filepath,
+        "--branch", version, "--depth", "1", "--quiet"))
       stopifnot(status == 0)
     })
 }

@@ -7,9 +7,26 @@
 `%||%`   <- function(x, y) if (is.null(x)) y else x
 
 `%|||%`  <- function(x, y) if (is.falsy(x)) y else x
+
 is.falsy <- function(x) {
   identical(x, NULL) || identical(x, FALSE) || identical(x, "") ||
   length(x) == 0 || identical(x, 0)
+}
+
+#' Retrieve Github personal access token.
+#'
+#' Borrowed from \url{https://github.com/r-pkgs/remotes/blob/master/R/github.R#L23}
+#' A github personal access token
+#' Looks in env var \code{GITHUB_PAT}
+#'
+#' @keywords internal
+#' @noRd
+github_pat <- function() {
+  pat <- Sys.getenv('GITHUB_PAT')
+  if (!nzchar(pat)) { return(NULL) }
+
+  message("Using github PAT from envvar GITHUB_PAT")
+  pat
 }
 
 #' Fetch the current Syberia version.
@@ -27,7 +44,7 @@ package_exists <- function(name) {
 ensure_installed <- function(package_name) {
   ## Using [`requireNamespace`](http://r-pkgs.had.co.nz/src.html)
   ## is the de facto accepted approach here.
-  if (!requireNamespace(package_name, quietly = TRUE)) {
+  if (!package_exists(package_name)) {
     stop("Please install ", crayon::yellow(package_name), ":\n\n",
          crayon::green(paste0("install.packages('", package_name, "')")), "\n", call. = FALSE)
   }
@@ -61,9 +78,9 @@ as.list.environment <- function(env) {
 #'
 #' If any global variables are removed or created, it will
 #' give a descriptive error.
-#' 
+#'
 #' @param expr expression. The R expression to evaluate
-#' @param desc character. A string to add to "you modified global 
+#' @param desc character. A string to add to "you modified global
 #' @param check_options logical. Whether to check if any global options were changed.
 #'   variables while [\code{desc} goes here]".
 #' @return the output of the \code{expr}.
@@ -103,7 +120,7 @@ ensure_no_global_variable_pollution <- function(expr, desc, check_options = FALS
 }
 
 #' Perform an action repeatedly on parent directories until success or error.
-#' 
+#'
 #' Given a \code{fn}, we may wish to run it on a \code{filepath}, determine
 #' its success, and try again with the parent directory of \code{filepath},
 #' until we obtain result that is not \code{NULL}. If this does not occur for
@@ -158,4 +175,3 @@ any_is_substring_of <- function(string, set_of_strings) {
   any(vapply(set_of_strings,
              function(x) substring(string, 1, nchar(x)) == x, logical(1)))
 }
-

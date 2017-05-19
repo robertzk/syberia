@@ -1,3 +1,23 @@
+# Version 0.6.1.9008
+
+* Fixed `test_engine` to respect the global teardown hook.
+
+# Version 0.6.1.9007
+
+* Specify GitHub remotes in the DESCRIPTION file.
+
+# Version 0.6.1.9006
+
+* Fixed a negative test for `test_engine`.
+* Removed a memoization which keyed off a reference class object (and thus
+  never actually memoized a value).
+
+# Version 0.6.1.9001-5
+
+* `test_engine` errors if there are any test failures.
+* Engine cloning uses HTTPS instead of SSH.
+* Mounting of engines are announced to the user.
+
 # Version 0.5.1-0.6.1
 
 * A complete re-write of the original Syberia that incorporates
