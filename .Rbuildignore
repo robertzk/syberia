@@ -4,3 +4,4 @@
 .gitignore
 NEWS.md
 ^docs$
+^\.\./syberia\.github\.io/docs/packages/syberia$
