@@ -1,4 +1,4 @@
-Syberia [![Build Status](https://travis-ci.org/syberia/syberia.svg?branch=master)](https://travis-ci.org/syberia/syberia) [![Coverage Status](https://coveralls.io/repos/syberia/syberia/badge.svg)](https://coveralls.io/r/syberia/syberia) [![Documentation](https://img.shields.io/badge/rocco--docs-%E2%9C%93-blue.svg)](http://syberia.github.io/syberia/) [![Join the chat at https://gitter.im/syberia/Lobby](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/syberia/Lobby)
+[Syberia](http://syberia.io) [![Build Status](https://travis-ci.org/syberia/syberia.svg?branch=master)](https://travis-ci.org/syberia/syberia) [![Coverage Status](https://coveralls.io/repos/syberia/syberia/badge.svg)](https://coveralls.io/r/syberia/syberia) [![Documentation](https://img.shields.io/badge/rocco--docs-%E2%9C%93-blue.svg)](http://syberia.github.io/syberia/) [![Join the chat at https://gitter.im/syberia/Lobby](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/syberia/Lobby)
 ===========
 
 *Announcement*: If you're here from the R / Finance 2017 conference, 
@@ -50,7 +50,7 @@ model$predict(iris[1:5, ]) # The first five scores from a trained classifier.
 # [1] 5.005686 4.757667 4.773923 4.890092 5.055138
 ```
 
-For more detailed instructions, see the [installation guide](http://syberia.io/install).
+For more detailed instructions, see the [installation guide](http://syberia.io/docs).
 
 ![Minimal syberia example](inst/images/example_run.png)
 
