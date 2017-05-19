@@ -19,8 +19,7 @@ classifier-specific modeling parameters.
 
 The more general vision for Syberia is still in progress but aims
 to bring unity to the currently disparate realms of the R development ecosystem.
-In the viewpoint of [the author](https://github.com/robertzk),
-R is syntactic sugar around LISP, which enables arbitrary computation;
+In the viewpoint of the author, R is syntactic sugar around LISP, which enables arbitrary computation;
 Syberia is an attempt to support this conjecture by allowing the
 construction of arbitrary software projects within the R programming language,
 thereby finally outgrowing its long-overdue misconception as a statistical tool.
