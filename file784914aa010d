@@ -1,0 +1,29 @@
+Package: usethis
+Title: Automatically Set Up Commonly Used Package and Analysis Components
+Version: 0.0.0.9000
+Authors@R: c(
+    person("Hadley", "Wickham", , "hadley@rstudio.com", role = c("aut", "cre")),
+    person("RStudio", role = "cph")
+  )
+Description: usethis automates the set up of common tools needed during
+    package and analysis development.
+Imports:
+    digest,
+    git2r,
+    rstudioapi,
+    whisker,
+    desc,
+    httr,
+    jsonlite,
+    rmarkdown,
+    gh
+Remotes: r-pkgs/gh
+License: GPL-3
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 5.0.1.9000
+Suggests: 
+    testthat,
+    covr
+Url: https://github.com/r-pkgs/usethis
+BugReports: https://github.com/r-pkgs/usethis/issues

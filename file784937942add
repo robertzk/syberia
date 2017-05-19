@@ -1,0 +1,28 @@
+Package: processx
+Title: Execute and Control System Processes
+Version: 1.0.0.9000
+Author: Gábor Csárdi
+Maintainer: Gábor Csárdi <csardi.gabor@gmail.com>
+Description: Portable tools to run system processes in the background.
+    It can check if a background process is running; wait on a background
+    process to finish; get the exit status of finished processes; kill
+    background processes and their children; restart processes. It can read
+    the standard output and error of the processes, using non-blocking
+    connections. 'processx' is lightweight and contains no compiled code.
+License: MIT + file LICENSE
+LazyData: true
+URL: https://github.com/r-pkgs/processx#readme
+BugReports: https://github.com/r-pkgs/processx/issues
+RoxygenNote: 6.0.1.9000
+Roxygen: list(markdown = TRUE)
+Suggests:
+    covr,
+    testthat,
+    withr
+Imports:
+    assertthat,
+    crayon,
+    debugme,
+    R6,
+    utils
+Encoding: UTF-8
