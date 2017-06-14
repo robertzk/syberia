@@ -1,9 +1,6 @@
 [Syberia](http://syberia.io) [![Build Status](https://travis-ci.org/syberia/syberia.svg?branch=master)](https://travis-ci.org/syberia/syberia) [![Coverage Status](https://coveralls.io/repos/syberia/syberia/badge.svg?branch=master)](https://coveralls.io/r/syberia/syberia) [![Documentation](https://img.shields.io/badge/guide-%E2%9C%93-ff69b4.svg)](http://syberia.io/docs) [![Documentation](https://img.shields.io/badge/docs-%E2%9C%93-900c3f.svg)](http://syberia.io/docs/packages) [![Documentation](https://img.shields.io/badge/rocco-%E2%9C%93-blue.svg)](http://syberia.github.io/syberia/) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/syberia/syberia/blob/master/LICENSE) [![Join the chat at https://gitter.im/syberia/Lobby](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/syberia/Lobby) 
 ===========
 
-*Announcement*: If you're here from the R / Finance 2017 conference, 
-[head over here](https://github.com/robertzk/rfinance17).
-
 Syberia is the development framework for R.
 
 Syberia was developed at [Avant](https://github.com/avantcredit) to
@@ -14,8 +11,7 @@ research and business problems that require use of statistical methods.
 [The modeling grammar](http://github.com/syberia/modeling.sy),
 currently the main significant engine built in Syberia, is a
 framework for building, debugging, testing, and deploying classifiers developed in R.
-It provides an opinionated unified framework for fast iteration on model  
-development and deployment. It has modularity and testability built in
+It provides an opinionated unified framework for fast iteration on model development and deployment. It has modularity and testability built in
 as a design assumption, is founded on convention-over-configuration,
 and aims to solve the problems of classifier-specific data preparation and
 classifier-specific modeling parameters.
