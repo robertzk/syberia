@@ -1,27 +1,25 @@
-language: c
+language: r
+sudo: required
+cache: packages
 dist: trusty
-git:
-  submodules: false
-# Use sed to replace the SSH URL with the public URL, then initialize submodules
-# http://stackoverflow.com/questions/15674064/github-submodule-access-rights-travis-ci
-before_install:
-- sed -i 's/git@github.com:/https:\/\/github.com\//' .gitmodules
-- git submodule update --init --recursive
-- curl -OL http://raw.github.com/craigcitro/r-travis/master/scripts/travis-tool.sh
-- chmod 755 ./travis-tool.sh
-- "./travis-tool.sh bootstrap"
-install:
-- "./travis-tool.sh install_deps"
-- "./travis-tool.sh install_r devtools"
-- "./travis-tool.sh github_package jimhester/covr hadley/purrr"
-- "./travis-tool.sh install_github hadley/testthat"
-- "./travis-tool.sh install_github robertzk/bettertrace"
-- "./travis-tool.sh install_github robertzk/testthatsomemore"
-- "./travis-tool.sh install_github syberia/stagerunner"
-- "./travis-tool.sh install_github syberia/director@documentation_cleanup"
-script: "./travis-tool.sh run_tests"
-after_failure:
-  - "./travis-tool.sh dump_logs"
+r:
+    - oldrel
+    - release
+    - devel
+r_binary_packages:
+    - devtools
+    - testthat
+    - roxygen2
+    - crayon
+    - r6
+r_github_packages:
+    - robertzk/bettertrace
+    - robertzk/testthatsomemore
+    - syberia/stagerunner
+    - syberia/director
+    - kirillseva/covr
+    - hadley/purrr
+
 after_success:
   - "Rscript -e 'library(covr);coveralls()'"
 notifications:
