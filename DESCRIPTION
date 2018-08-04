@@ -14,10 +14,10 @@ Description: Syberia is a meta-framework for R that allows for on-the-fly
     conjecture by allowing the construction of arbitrary software
     projects within the R programming language, thereby finally outgrowing
     its long-overdue misconception as a statistical tool.
-Author: Robert Krzyzanowski <rkrzyzanowski@gmail.com>
-Maintainer: Robert Krzyzanowski <rkrzyzanowski@gmail.com>
+Author: Robert Krzyzanowski <rob@syberia.io>
+Maintainer: Robert Krzyzanowski <rob@syberia.io>
 Authors@R: c(person("Robert", "Krzyzanowski",
-    email = "rob@syberia.com", role = c("aut", "cre")))
+    email = "rob@syberia.io", role = c("aut", "cre")))
 Depends:
     R (>= 3.0.0)
 Imports:
